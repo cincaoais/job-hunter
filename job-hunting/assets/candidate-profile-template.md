@@ -1,0 +1,86 @@
+# Candidate Profile — [Your Name]
+
+> This is the job-hunter's memory file. The agent reads it first and never asks
+> for anything already filled in. Keep it saved in your project (or memory). At
+> the end of a session, ask the agent for the updated version and save it back.
+> Leave a field blank or write "TBD" if you don't know it yet — the agent will
+> help you fill it.
+
+_Last updated: [date]_
+
+## 1. Snapshot
+- **Name:**
+- **Current title / role:**
+- **Years of experience:**
+- **Location:**
+- **Job market / country I'm hunting in:** (drives resume norms, boards, referral weight)
+- **Work authorization / visa status:**
+- **Availability:** (e.g. immediately / 1 month notice)
+- **Search status:** (actively looking / passively open)
+- **Urgency:** (e.g. need something in 2 months)
+
+## 2. Target
+- **Desired role(s):**
+- **Tech sub-domain(s):** (e.g. backend, data engineering, ML, DevOps — see the role map)
+- **Main stack / tools:**
+- **Target seniority:** (junior / mid / senior / staff / lead / manager)
+- **Target industries:**
+- **Dream companies:**
+
+## 3. Preferences & constraints
+- **Work modality:** (remote / hybrid / onsite)
+- **Salary expectation:** (range + currency)
+- **Open to relocation?**
+- **Company size preference:** (startup / scale-up / big tech / enterprise)
+- **Culture / values that matter:**
+- **Dealbreakers (must avoid):**
+
+## 4. Skills
+- **Core / hard skills:**
+- **Languages & frameworks / tools:**
+- **Certifications:**
+- **Spoken languages:**
+- **Soft skills / strengths:**
+
+## 5. Experience
+> For each role, capture quantified achievements, not just duties. Use numbers.
+
+### [Job title] — [Company] — [dates]
+- Achievement (with a number):
+- Achievement (with a number):
+- Tools / context:
+
+### [Job title] — [Company] — [dates]
+- Achievement (with a number):
+- Achievement (with a number):
+
+## 6. Education
+- **Degree / program — institution — year:**
+- **Relevant coursework / projects:**
+
+## 7. Materials
+- **Resume file / version:**
+- **LinkedIn:**
+- **Portfolio / personal site:**
+- **GitHub / other:**
+
+## 8. Positioning
+- **One-line identity:** ("a [X] who does [Y] and delivers [Z]")
+- **Unique selling point:**
+- **Known weak spots to address:**
+
+## 9. Pipeline (applications tracker)
+> Watch the response rate. If lots go out and little comes back, it's time to
+> diagnose targeting → resume → positioning, not just apply more.
+
+- **Applications sent / responses so far:**
+- **Referral vs cold applications:**
+
+| Company | Role | Applied on | Channel (apply/referral) | Stage | Next action | Notes |
+|---------|------|-----------|--------------------------|-------|-------------|-------|
+|         |      |           |                          |       |             |       |
+
+## 10. Notes the agent has learned
+> Preferences, feedback, and context picked up over time (tone I like, roles I
+> ruled out, etc.)
+-
