@@ -5,7 +5,7 @@ tech roles: positioning, finding live openings, resume/cover-letter tailoring,
 networking, interview prep, and pipeline tracking. Built for a Southeast Asia
 job market (JobStreet + LinkedIn first), not US-only conventions.
 
-Capabilities (v5.0):
+Capabilities (v5.1):
 
 - **Criteria-driven job search** — queries built from saved search criteria,
   hard-filtered, returned as a ranked shortlist with fit scores and red flags
@@ -19,10 +19,21 @@ Capabilities (v5.0):
 - **Soft skills coach** (`references/soft-skills-coach.md`) — demand-vs-
   supply gap assessment, small practice plans, evidence turned into bullets
   and STAR stories.
+- **Interview coach** (`references/interview-coach.md`) — mock interviews
+  one question at a time with real-interviewer probing, honest scoring, and
+  a debrief that files STAR stories into the profile.
+- **Funnel review** — periodic sent→response→interview→offer analysis by
+  channel, with one concrete change per review.
+- **SEA market notes** (`references/sea-market-notes.md`) — JobStreet salary
+  field mechanics, probation/notice/13th-month norms, and per-country board
+  guides for MY/SG (+PH/ID/VN).
 - **Interactive by design** — grouped clarifying questions before every
   task; every answer written back to the candidate profile so nothing is
   asked twice. Honesty guardrail throughout: never invents achievements,
   metrics, or titles.
+
+Behavioral tests live in `tests/` (fixtures + scenario checklists, run as
+simulated sessions against the packaged skill — 5/5 pass on v5.1).
 
 ## Layout
 

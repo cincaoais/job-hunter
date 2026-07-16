@@ -75,6 +75,8 @@ applying them:
 - **Referrals vs cold applications** — some markets are overwhelmingly
   referral-driven; weight networking accordingly.
 When unsure of a market's norm, research it rather than defaulting to US rules.
+For Southeast Asia specifics (JobStreet salary field, probation/notice norms,
+13th month/AWS, boards per country), see `references/sea-market-notes.md`.
 
 ## Honesty
 Everything here is about presenting real experience well — never about

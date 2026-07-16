@@ -3,7 +3,7 @@ name: job-hunting
 description: >-
   Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, network, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or discuss offers and salary — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," or when the user shares a job posting or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "5.0"
+  version: "5.1"
   author: user + Claude
 ---
 
