@@ -1,9 +1,9 @@
 ---
 name: job-hunting
 description: >-
-  Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, network, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or discuss offers and salary — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," or when the user shares a job posting or resume. Reads the candidate profile first and only asks for missing information.
+  Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "5.1"
+  version: "5.2"
   author: user + Claude
 ---
 
@@ -15,7 +15,8 @@ role that genuinely fits — not a pile of generic applications.
 
 Supporting documents are bundled under `references/`: the **Tech Role Map**,
 the **Application Guide**, and the workflow guides `resume-builder.md`,
-`jd-match.md`, and `soft-skills-coach.md`. The **Candidate Profile** lives
+`jd-match.md`, `soft-skills-coach.md`, `interview-coach.md`,
+`company-dossier.md`, `profile-optimizer.md`, and `offer-coach.md`. The **Candidate Profile** lives
 with the user — in their Project's files, an upload, or the conversation.
 When this skill runs inside the user's Job Hunting Project, a Project-file
 copy of any of these documents takes precedence over the bundled one.
@@ -164,12 +165,28 @@ companies), draft short, human, personalized messages with a small clear ask,
 and map warm-intro paths. Push for a mix of applications and outreach, never
 applications alone.
 
+### Online profile optimization
+Recruiters search profiles before the user ever applies. When asked to
+improve a LinkedIn or JobStreet presence — or when recruiter inbound is weak
+— follow `references/profile-optimizer.md`: keyword-first truthful headline,
+hook-led About, skills ordered to the profile's target keywords, platform
+settings, and JobStreet's structured fields, delivered as before → after
+edits. Keep profiles consistent with the current resume.
+
 ### Interview prep
 Generate likely questions for the target role, rehearse STAR answers built from
 the user's real achievements, and prepare thoughtful questions for them to ask.
 For live practice, run a mock interview via `references/interview-coach.md`:
 one question at a time, real-interviewer probing, honest per-answer feedback,
 and a debrief that files STAR stories into the profile.
+
+### Company research dossier
+When an interview is on the calendar — or the user asks about a specific
+company — build a one-page brief via `references/company-dossier.md`:
+live-searched, cited product/health/stack/comp intel, likely interview
+themes mapped to the user's evidence, and specific questions to ask. Feed
+its themes into the mock interview and its salary intel into offer
+discussions.
 
 ### Soft skills coaching
 When target postings keep asking for soft skills the profile can't evidence —
@@ -203,6 +220,16 @@ single digits to low teens, referrals convert several times better. If a
 stage is leaking, run the diagnosis order above. Output one short table plus
 one concrete change to make, and record "Last funnel review: [date]" in the
 profile.
+
+### Offers & negotiation
+When an offer lands (or several), follow `references/offer-coach.md`:
+normalize each to true annual comp using the mechanics in
+`references/sea-market-notes.md` (contractual vs discretionary 13th
+month/AWS, EPF/CPF, probation and notice), compare against the profile's
+constraints and live market data, and give an honest accept / negotiate /
+decline read. Coach the negotiation — one specific ask backed by real
+leverage, everything in writing, never accept on the call — and offer a
+mock negotiation. Log offers in the profile's §9 Offers table.
 
 ## Principles
 

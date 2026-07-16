@@ -21,8 +21,10 @@ roles, assessing fit, tailoring my resume and cover letters, outreach,
 interview prep, salary questions, and pipeline tracking. It also covers:
 building a ranked job shortlist from my saved search criteria, generating
 polished resume/cover-letter files (draft inline first), scoring me against a
-pasted job description with truthful resume edits, and coaching the soft
-skills my target postings ask for. Follow its workflow: load memory → ask
+pasted job description with truthful resume edits, coaching the soft skills
+my target postings ask for, briefing me on a company before an interview,
+tuning my LinkedIn/JobStreet profiles for recruiter search, and evaluating,
+comparing, and negotiating offers. Follow its workflow: load memory → ask
 only for gaps → do the work.
 
 **Keep my memory current.** Whenever you learn something new about me —

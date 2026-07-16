@@ -5,7 +5,7 @@ tech roles: positioning, finding live openings, resume/cover-letter tailoring,
 networking, interview prep, and pipeline tracking. Built for a Southeast Asia
 job market (JobStreet + LinkedIn first), not US-only conventions.
 
-Capabilities (v5.1):
+Capabilities (v5.2):
 
 - **Criteria-driven job search** — queries built from saved search criteria,
   hard-filtered, returned as a ranked shortlist with fit scores and red flags
@@ -22,6 +22,15 @@ Capabilities (v5.1):
 - **Interview coach** (`references/interview-coach.md`) — mock interviews
   one question at a time with real-interviewer probing, honest scoring, and
   a debrief that files STAR stories into the profile.
+- **Company dossier** (`references/company-dossier.md`) — one-page
+  pre-interview brief: product, health, stack, comp intel, likely themes,
+  and researched questions to ask — live-searched and cited.
+- **Offer coach** (`references/offer-coach.md`) — true-annual-comp
+  normalization (contractual vs discretionary 13th month/AWS), side-by-side
+  offer comparison, negotiation scripts, and a mock-negotiation loop.
+- **Profile optimizer** (`references/profile-optimizer.md`) —
+  LinkedIn/JobStreet tuning for recruiter search: keyword-first headline,
+  About hook, skills order, and platform settings.
 - **Funnel review** — periodic sent→response→interview→offer analysis by
   channel, with one concrete change per review.
 - **SEA market notes** (`references/sea-market-notes.md`) — JobStreet salary
@@ -33,7 +42,8 @@ Capabilities (v5.1):
   metrics, or titles.
 
 Behavioral tests live in `tests/` (fixtures + scenario checklists, run as
-simulated sessions against the packaged skill — 5/5 pass on v5.1).
+simulated sessions against the packaged skill — 8/8 cumulative: A–E 5/5 on
+v5.1, F–H 3/3 on v5.2).
 
 ## Layout
 

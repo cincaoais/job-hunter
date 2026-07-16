@@ -88,6 +88,14 @@ _Last updated: [date]_
 |---------|------|-----------|--------------------------|-------|-------------|-------|
 |         |      |           |                          |       |             |       |
 
+### Offers
+> Filled by the Offer Coach. "True annual comp" counts contractual 13th
+> month/AWS only; a discretionary bonus goes in as a labeled estimate.
+
+| Company | Role | Base / month | Bonus (contractual?) | True annual comp | Probation / notice | Deadline | Status |
+|---------|------|--------------|----------------------|------------------|--------------------|----------|--------|
+|         |      |              |                      |                  |                    |          |        |
+
 ## 10. Soft skills development
 > Goals from the Soft Skills Coach. Keep 2–3 active at most.
 
