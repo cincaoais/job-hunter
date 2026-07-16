@@ -55,7 +55,8 @@ simulated sessions against the packaged skill — 5/5 pass on v5.1).
 ## Rebuild the package
 
 ```sh
-./build.sh
+./build.sh    # macOS / Linux
+build.cmd     # Windows (uses the tar.exe bundled with Windows 10+)
 ```
 
 Zips `job-hunting/` into `job-hunting.skill`. Always rebuild after editing
