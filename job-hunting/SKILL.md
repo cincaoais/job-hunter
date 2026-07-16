@@ -134,16 +134,15 @@ personal/banking details, off-platform pressure, pay that's too good). A
 suspicious listing either stays off the shortlist or carries its warning in
 the Red flags column — never presented as a clean opportunity.
 
-### Resume / CV tailoring
-Consult the **Application Guide** first, and adapt its norms to the user's
-market. Tailor to each specific posting: mirror its keywords (ATS filters on
-them), lead every bullet with a quantified, truthful result, cut what's
-irrelevant, keep formatting parser-safe.
-
-### Cover letters & outreach
-Consult the **Application Guide** first. Letters follow hook → why-them →
-why-you-with-proof → close, and must be specific enough that they couldn't be
-sent to any other company.
+### Resume / CV & cover letter generation
+To produce an actual document, follow `references/resume-builder.md`: ask the
+gap questions (Step 1.5), draft inline for reaction, and only on approval
+generate the polished ATS-safe file (.docx by default, PDF for human
+readers). The writing rules come from the **Application Guide**, adapted to
+the user's market: resumes mirror the posting's keywords and lead every
+bullet with a quantified, truthful result; letters follow hook → why-them →
+why-you-with-proof → close at ~250–350 words, specific enough that they
+couldn't be sent to any other company.
 
 ### Networking (a primary channel, not an afterthought)
 Many roles are filled through referrals before they're ever posted, so treat
