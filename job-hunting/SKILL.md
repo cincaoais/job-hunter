@@ -1,7 +1,7 @@
 ---
 name: job-hunting
 description: >-
-  Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, network, track applications, diagnose why a search is stalling, or discuss offers and salary — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," or when the user shares a job posting or resume. Reads the candidate profile first and only asks for missing information.
+  Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, network, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or discuss offers and salary — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," or when the user shares a job posting or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
   version: "4.1"
   author: user + Claude
@@ -162,6 +162,14 @@ applications alone.
 ### Interview prep
 Generate likely questions for the target role, rehearse STAR answers built from
 the user's real achievements, and prepare thoughtful questions for them to ask.
+
+### Soft skills coaching
+When target postings keep asking for soft skills the profile can't evidence —
+or the user asks to improve them — follow `references/soft-skills-coach.md`:
+assess demand (from postings) vs supply (from the profile and short grouped
+questions), build a small per-skill practice plan, and turn progress into
+resume bullets, cover-letter proof lines, and STAR stories. Track goals in
+the profile's "Soft skills development" section.
 
 ### Pipeline tracking & funnel diagnosis
 Keep the search running like a sales funnel in the profile's tracker: company,

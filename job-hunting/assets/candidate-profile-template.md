@@ -87,7 +87,14 @@ _Last updated: [date]_
 |---------|------|-----------|--------------------------|-------|-------------|-------|
 |         |      |           |                          |       |             |       |
 
-## 10. Notes the agent has learned
+## 10. Soft skills development
+> Goals from the Soft Skills Coach. Keep 2–3 active at most.
+
+| Skill | Why (which postings ask) | Practice actions | Status | Evidence (STAR story / bullet) |
+|-------|--------------------------|------------------|--------|--------------------------------|
+|       |                          |                  |        |                                |
+
+## 11. Notes the agent has learned
 > Preferences, feedback, and context picked up over time (tone I like, roles I
 > ruled out, etc.)
 -
