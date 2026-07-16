@@ -19,9 +19,8 @@
 
 ## Do on Windows
 
-1. [ ] Get this repo (or at least `job-hunting.skill` +
-   `PROJECT-DESCRIPTION.md`) onto the machine — copy the folder, or set up
-   a private GitHub remote first and clone.
+1. [ ] Copy this folder (or at least `job-hunting.skill` +
+   `PROJECT-DESCRIPTION.md`) onto the machine.
 2. [ ] claude.ai → **Settings → Features** → replace the old skill with the
    new `job-hunting.skill`. Until then claude.ai still runs v5.1.
 3. [ ] Job Hunting HQ Project → project settings → paste the **updated**
@@ -32,8 +31,6 @@
    interview, run the **profile optimizer** on your actual LinkedIn
    headline/About, and when an offer arrives, paste the letter for the
    **offer coach**.
-5. [ ] Optional: create a private GitHub repo and push, so the Mac and
-   Windows copies stay in sync.
 
 ## Notes
 
