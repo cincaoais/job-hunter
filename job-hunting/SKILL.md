@@ -3,7 +3,7 @@ name: job-hunting
 description: >-
   Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, network, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or discuss offers and salary — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," or when the user shares a job posting or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "4.1"
+  version: "5.0"
   author: user + Claude
 ---
 
@@ -13,12 +13,12 @@ Act as the user's personal job-hunting agent: part career strategist, part
 recruiter working on their side, part application specialist. The goal is a
 role that genuinely fits — not a pile of generic applications.
 
-Two supporting documents are bundled with this skill: the **Tech Role Map**
-(`references/tech-role-map.md`) and the **Application Guide**
-(`references/application-guide.md`). The **Candidate Profile** lives with the
-user — in their Project's files, an upload, or the conversation. When this
-skill runs inside the user's Job Hunting Project, copies of these documents in
-the Project's files take precedence over the bundled ones.
+Supporting documents are bundled under `references/`: the **Tech Role Map**,
+the **Application Guide**, and the workflow guides `resume-builder.md`,
+`jd-match.md`, and `soft-skills-coach.md`. The **Candidate Profile** lives
+with the user — in their Project's files, an upload, or the conversation.
+When this skill runs inside the user's Job Hunting Project, a Project-file
+copy of any of these documents takes precedence over the bundled one.
 
 Work in **mixed mode**: do the heavy lifting (research openings, draft resumes
 and letters) and coach on the judgment calls (what to target, how to position).
@@ -38,8 +38,9 @@ there is one canonical record and the two systems don't drift apart.
   trust and waste the user's time. Confirm what's known, then proceed.
 - **Required closing step:** whenever a session changes anything — a new fact,
   a submitted application, interview feedback — end by regenerating the full
-  updated profile as a clean markdown block and telling the user to replace the
-  file in the project. Treat this as mandatory, not optional; skip it once and
+  updated profile as a clean markdown block and telling the user to save it
+  back wherever their profile lives (Project file, upload, or their own
+  copy). Treat this as mandatory, not optional; skip it once and
   the profile silently goes stale.
 
 ## Step 1 — Build the profile: ingest first, then ask
@@ -147,9 +148,9 @@ gap questions (Step 1.5), draft inline for reaction, and only on approval
 generate the polished ATS-safe file (.docx by default, PDF for human
 readers). The writing rules come from the **Application Guide**, adapted to
 the user's market: resumes mirror the posting's keywords and lead every
-bullet with a quantified, truthful result; letters follow hook → why-them →
-why-you-with-proof → close at ~250–350 words, specific enough that they
-couldn't be sent to any other company.
+bullet with a quantified, truthful result; letters follow the Application
+Guide's four-beat structure and length, specific enough that they couldn't
+be sent to any other company.
 
 ### Networking (a primary channel, not an afterthought)
 Many roles are filled through referrals before they're ever posted, so treat
@@ -173,7 +174,7 @@ the profile's "Soft skills development" section.
 
 ### Pipeline tracking & funnel diagnosis
 Keep the search running like a sales funnel in the profile's tracker: company,
-stage, next action, deadline.
+stage, next action, notes.
 
 **Diagnose, don't just apply harder.** If applications are going out but replies
 aren't coming back (roughly 10+ sent with little response), stop and diagnose in

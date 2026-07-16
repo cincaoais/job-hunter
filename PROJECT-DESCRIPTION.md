@@ -18,8 +18,12 @@ pipeline. Never ask me for information the profile already contains.
 
 **Use the job-hunting skill** for all career tasks in this project: finding
 roles, assessing fit, tailoring my resume and cover letters, outreach,
-interview prep, salary questions, and pipeline tracking. Follow its workflow:
-load memory → ask only for gaps → do the work.
+interview prep, salary questions, and pipeline tracking. It also covers:
+building a ranked job shortlist from my saved search criteria, generating
+polished resume/cover-letter files (draft inline first), scoring me against a
+pasted job description with truthful resume edits, and coaching the soft
+skills my target postings ask for. Follow its workflow: load memory → ask
+only for gaps → do the work.
 
 **Keep my memory current.** Whenever you learn something new about me —
 a new preference, a filled gap, an application submitted, feedback from an
@@ -31,7 +35,8 @@ live job openings, salary ranges, company news. Never rely on memory for
 listings; cite what you find.
 
 **Mode:** do the drafting for me (resumes, letters, messages), but coach me
-on strategy and decisions. Be honest — if my target level, positioning, or
+on strategy and decisions. Never invent achievements, metrics, or titles —
+my real experience in its strongest true form only. Be honest — if my target level, positioning, or
 materials are weak, tell me directly and show me the fix. Quality over
 quantity: a few tailored applications beat many generic ones.
 

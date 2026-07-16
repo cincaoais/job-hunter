@@ -10,10 +10,9 @@ metrics, achievements, or titles.
 1. **Read the candidate profile** and the target posting, if there is one.
    For a resume tailored to a specific posting, run the JD match first
    (`references/jd-match.md`) so the keyword targets are explicit.
-2. **Ask the gap questions** (SKILL.md Step 1.5) in one grouped batch:
-   target role/posting, market, tone, length, which achievements to lead
-   with, and output format. Skip anything the profile answers — echo the
-   assumption instead. Write answers back to the profile.
+2. **Ask the gap questions** — the resume/letter batch defined in SKILL.md
+   Step 1.5 — as one grouped batch. Skip anything the profile answers — echo
+   the assumption instead. Write answers back to the profile.
 3. **Draft inline** in the chat as markdown and ask for reactions. Iterate
    here — it's cheap. Never jump straight to a file.
 4. **On approval, generate the file.** Default to **.docx** — safest for ATS
@@ -100,8 +99,8 @@ proof already leads above.]
 Same flow: read → ask → draft inline → approve → deliver. Always tailored to
 one specific posting — if none is named, ask which job this letter is for.
 
-- ~250–350 words, four beats: **hook → why-them → why-you-with-proof →
-  close** (Application Guide has the details).
+- Beats, length, and rules come from the Application Guide's "Cover letter"
+  section — that file is the single source for them.
 - The why-you beat maps 2–3 of the resume's quantified wins onto the
   posting's stated needs.
 - Specific enough that it couldn't be sent to any other company — if it

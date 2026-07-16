@@ -1,7 +1,7 @@
 # Candidate Profile — [Your Name]
 
 > This is the job-hunter's memory file. The agent reads it first and never asks
-> for anything already filled in. Keep it saved in your project (or memory). At
+> for anything already filled in. Keep it saved in your project. At
 > the end of a session, ask the agent for the updated version and save it back.
 > Leave a field blank or write "TBD" if you don't know it yet — the agent will
 > help you fill it.
