@@ -82,6 +82,7 @@ _Last updated: [date]_
 
 - **Applications sent / responses so far:**
 - **Referral vs cold applications:**
+- **Last funnel review:**
 
 | Company | Role | Applied on | Channel (apply/referral) | Stage | Next action | Notes |
 |---------|------|-----------|--------------------------|-------|-------------|-------|
