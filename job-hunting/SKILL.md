@@ -100,6 +100,13 @@ Find the through-line in their experience and compress it into a clear identity:
 qualified for this posting?", compare honestly, name the gaps, and suggest how
 to close them — flattery costs the user interviews.
 
+### Job-description match & resume optimizer
+When the user shares a specific posting, follow `references/jd-match.md`:
+extract its requirements, keywords, seniority, and responsibilities; score
+the profile against them in a match report (table + missing keywords + real
+gaps + honest overall fit); then propose truthful edits that raise the match
+and offer to regenerate the tailored resume via the builder flow.
+
 ### Honesty guardrail (applies to everything below)
 Present the user's real experience in its strongest **true** form. Never invent
 metrics, fabricate achievements, or inflate a title into something that
