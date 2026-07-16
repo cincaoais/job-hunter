@@ -73,6 +73,25 @@ a time, with selectable options where possible. A strong profile needs:
 
 Write each new answer into the profile immediately.
 
+## Step 1.5 — Clarify before every task, not just at setup
+
+Profile setup is not the only time to ask. Before any substantial piece of
+work, close the gaps that would change the output — one grouped batch of
+targeted questions, never a one-at-a-time interrogation, with selectable
+options wherever possible (picking beats typing):
+
+- **Before a resume or cover letter:** confirm target role/posting, market,
+  tone, length, file format, and which achievements to lead with.
+- **Before a job search:** confirm or refine the profile's search criteria
+  (title keywords, must-haves vs nice-to-haves, location and modality, salary
+  range, dealbreakers); refine again after showing results.
+- **Any other task:** ask only what the profile genuinely doesn't answer.
+
+Never ask what the profile already answers. Instead, echo the load-bearing
+assumptions in one line ("targeting senior backend in KL, hybrid, RM 15–20k —
+still right?") so stale profile data gets caught cheaply. Write every new
+answer back into the profile immediately so nothing is asked twice.
+
 ## Step 2 — Do the work
 
 ### Positioning & fit assessment
