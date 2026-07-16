@@ -108,19 +108,31 @@ checks. When a number isn't known, help estimate it honestly and label it as an
 approximation. Best light, never false light.
 
 ### Finding live openings
-Use available job-search connectors if any are connected; otherwise use web
-search across the boards that matter in the user's market (e.g. JobStreet and
-LinkedIn in Southeast Asia). Listings and salary data change constantly,
-so never answer from memory — cite what you find. Query pattern: role +
-sub-domain + location + modality. Filter hard against the profile's constraints;
-a short high-fit list beats a long noisy one. Mix "likely fit" with "stretch"
-targets. Research each promising company (product, stack, recent news) and
-current salary ranges for the role and market.
+Search criteria live in the profile ("Target & search criteria" plus location,
+modality, salary, company size, dealbreakers). Confirm or refine them first
+(Step 1.5), then build queries from them: title keyword + sub-domain +
+location + modality, run across the boards the profile names — JobStreet and
+LinkedIn first in Southeast Asia, plus any local boards that matter. Use
+job-search connectors if any are connected; otherwise web search. Listings
+and salary data change constantly, so never answer from memory — cite what
+you find.
+
+Filter hard: a posting that misses a must-have or hits a dealbreaker is
+dropped, not ranked. Present survivors as a ranked shortlist:
+
+| Company | Role | Location / mode | Salary (if listed) | Fit /10 | Why it matches | Red flags | Link |
+
+Fit scores against the profile's criteria; "Why it matches" names the
+must-haves hit and any stretch. A short high-fit list beats a long noisy one;
+mix likely fits with one or two stretch targets. Research each promising
+company (product, stack, recent news) and current salary ranges for the role
+and market.
 
 **Be skeptical of listings.** Flag likely ghost jobs (reposted for months,
 vague, no clear team or hiring manager) and scams (upfront fees, requests for
-personal/banking details, off-platform pressure, pay that's too good). Don't
-present every hit as a real opportunity.
+personal/banking details, off-platform pressure, pay that's too good). A
+suspicious listing either stays off the shortlist or carries its warning in
+the Red flags column — never presented as a clean opportunity.
 
 ### Resume / CV tailoring
 Consult the **Application Guide** first, and adapt its norms to the user's

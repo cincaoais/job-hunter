@@ -19,13 +19,20 @@ _Last updated: [date]_
 - **Search status:** (actively looking / passively open)
 - **Urgency:** (e.g. need something in 2 months)
 
-## 2. Target
+## 2. Target & search criteria
+> The agent builds job-search queries from this section plus §1 (location,
+> market) and §3 (modality, salary, company size, dealbreakers).
+
 - **Desired role(s):**
+- **Search keywords / title variants:** (exact phrases to query on JobStreet/LinkedIn, e.g. "backend engineer", "software engineer (Go)")
 - **Tech sub-domain(s):** (e.g. backend, data engineering, ML, DevOps — see the role map)
 - **Main stack / tools:**
 - **Target seniority:** (junior / mid / senior / staff / lead / manager)
 - **Target industries:**
 - **Dream companies:**
+- **Job boards to search:** (e.g. JobStreet, LinkedIn, local boards)
+- **Must-haves in a posting:** (a job missing any of these is dropped, not ranked)
+- **Nice-to-haves:** (raise a job's fit score, but aren't required)
 
 ## 3. Preferences & constraints
 - **Work modality:** (remote / hybrid / onsite)
