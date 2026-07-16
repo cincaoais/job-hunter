@@ -36,6 +36,10 @@ there is one canonical record and the two systems don't drift apart.
 
 - Don't re-ask anything the profile already answers; repeated questions erode
   trust and waste the user's time. Confirm what's known, then proceed.
+- If the profile contradicts itself (e.g. stated years of experience vs what
+  the work-history dates sum to), flag it to the user and use the
+  conservative reading until they resolve it — never silently pick the more
+  flattering number.
 - **Required closing step:** whenever a session changes anything — a new fact,
   a submitted application, interview feedback — end by regenerating the full
   updated profile as a clean markdown block and telling the user to save it
@@ -163,6 +167,9 @@ applications alone.
 ### Interview prep
 Generate likely questions for the target role, rehearse STAR answers built from
 the user's real achievements, and prepare thoughtful questions for them to ask.
+For live practice, run a mock interview via `references/interview-coach.md`:
+one question at a time, real-interviewer probing, honest per-answer feedback,
+and a debrief that files STAR stories into the profile.
 
 ### Soft skills coaching
 When target postings keep asking for soft skills the profile can't evidence —
@@ -186,6 +193,16 @@ order before sending more:
 Change the approach based on what you find. Applying harder into a broken funnel
 wastes the user's time — this diagnostic loop is the difference between a
 document generator and a real job hunter.
+
+**Funnel review ritual.** Run a review when the user asks how the search is
+going, when ~10 applications have accumulated since the last review, or when
+the tracker hasn't been touched in two weeks. From the tracker, compute
+sent → responses → interviews → offers, split by channel (cold vs referral),
+and compare against rough norms: cold-application response rates sit in the
+single digits to low teens, referrals convert several times better. If a
+stage is leaking, run the diagnosis order above. Output one short table plus
+one concrete change to make, and record "Last funnel review: [date]" in the
+profile.
 
 ## Principles
 
