@@ -3,7 +3,7 @@ name: job-hunting
 description: >-
   Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "5.2"
+  version: "5.3"
   author: user + Claude
 ---
 
@@ -111,7 +111,10 @@ When the user shares a specific posting, follow `references/jd-match.md`:
 extract its requirements, keywords, seniority, and responsibilities; score
 the profile against them in a match report (table + missing keywords + real
 gaps + honest overall fit); then propose truthful edits that raise the match
-and offer to regenerate the tailored resume via the builder flow.
+and offer to regenerate the tailored resume via the builder flow. When the
+user asks what to *learn* — or the same gaps keep recurring across match
+reports — run that file's cross-posting **upskill review**: aggregate the
+gaps across tracked postings into a heatmap and a prioritized learning plan.
 
 ### Honesty guardrail (applies to everything below)
 Present the user's real experience in its strongest **true** form. Never invent
@@ -146,6 +149,16 @@ vague, no clear team or hiring manager) and scams (upfront fees, requests for
 personal/banking details, off-platform pressure, pay that's too good). A
 suspicious listing either stays off the shortlist or carries its warning in
 the Red flags column — never presented as a clean opportunity.
+
+**Referral paths for the shortlist.** Referrals convert several times better
+than cold applications, so give each high-fit shortlist entry two LinkedIn
+people-search links the user can open themselves:
+`https://www.linkedin.com/search/results/people/?keywords=<Company>%20recruiter`
+(recruiters/TA — the referral ask) and the same URL with
+`<Company>%20<short role keyword>` (likely teammates — the warm-intro path),
+keywords URL-encoded. These are search links, not found contacts: never claim
+a specific person was found, and never fetch the result pages. Offer to draft
+the outreach message (Networking section) for whoever the user finds.
 
 ### Resume / CV & cover letter generation
 To produce an actual document, follow `references/resume-builder.md`: ask the

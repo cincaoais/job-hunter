@@ -5,16 +5,20 @@
 
 ## Where things stand
 
-- **v5.2 shipped.** Three new modules under `job-hunting/references/`:
-  **offer-coach** (true-annual-comp normalization, offer comparison,
-  negotiation scripts, mock negotiation), **company-dossier** (cited
-  pre-interview research brief), **profile-optimizer** (LinkedIn/JobStreet
-  tuning for recruiter search). All wired into SKILL.md; the profile
-  template gained an **Offers table under §9**.
-- **Tests: 8/8 cumulative** — A–E (5/5, v5.1) plus new F–H (3/3, v5.2, one
-  hardening fix to the profile-optimizer intake).
-- **Package rebuilt and committed**: `job-hunting.skill` at commit
-  `410d7ba` (design spec in `d688c85`).
+- **v5.3 shipped (2026-07-17)**, on top of v5.2. Ports from
+  MadsLorentzen/ai-job-search (plan:
+  `docs/superpowers/specs/2026-07-17-v5.3-ai-job-search-port-plan.md`):
+  **referral people-search links** on the job-search shortlist,
+  **reviewer pass** + **ATS text-layer check** in the resume builder, and a
+  cross-posting **upskill review** (gap heatmap + learning plan) in
+  jd-match. v5.2 had added offer-coach, company-dossier, and
+  profile-optimizer.
+- **Tests: 11/11 cumulative** — A–E (5/5, v5.1), F–H (3/3, v5.2), I–K
+  (3/3, v5.3, one hardening fix to jd-match's soft-skill routing).
+- **Package rebuilt and committed**: `job-hunting.skill` (v5.3).
+- A local scrape rig (clone of ai-job-search) also lives at
+  `~/ai-job-search` on the Mac — separate from this repo; run `/setup`
+  there once before using its `/scrape`.
 - **No git remote** — this repo exists only on machines you copy it to.
 
 ## Do on Windows
@@ -22,10 +26,11 @@
 1. [ ] Copy this folder (or at least `job-hunting.skill` +
    `PROJECT-DESCRIPTION.md`) onto the machine.
 2. [ ] claude.ai → **Settings → Features** → replace the old skill with the
-   new `job-hunting.skill`. Until then claude.ai still runs v5.1.
+   new `job-hunting.skill` (now v5.3). Until then claude.ai still runs v5.1.
 3. [ ] Job Hunting HQ Project → project settings → paste the **updated**
    `PROJECT-DESCRIPTION.md` contents into custom instructions (it now
-   mentions dossiers, profile tuning, and offer negotiation).
+   mentions dossiers, profile tuning, offer negotiation, and the upskill
+   learning plan).
 4. [ ] First real run — the tests used a fictional candidate, so validate
    on your real search: ask for a **company dossier** before your next
    interview, run the **profile optimizer** on your actual LinkedIn

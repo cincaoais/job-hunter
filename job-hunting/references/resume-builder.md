@@ -15,11 +15,50 @@ metrics, achievements, or titles.
    the assumption instead. Write answers back to the profile.
 3. **Draft inline** in the chat as markdown and ask for reactions. Iterate
    here — it's cheap. Never jump straight to a file.
-4. **On approval, generate the file.** Default to **.docx** — safest for ATS
-   portals and JobStreet/LinkedIn apply flows; offer **PDF** when the reader
-   is human (email to a person, referral, print). Ask once, record the
-   preference in the profile.
-5. **Run the pre-delivery check** below before handing the file over.
+4. **Reviewer pass** (below) on the approved draft — a fresh critical read
+   before any file exists.
+5. **Generate the file.** Default to **.docx** — safest for ATS portals and
+   JobStreet/LinkedIn apply flows; offer **PDF** when the reader is human
+   (email to a person, referral, print). Ask once, record the preference in
+   the profile.
+6. **ATS text-layer check** (below) on the generated file.
+7. **Run the pre-delivery check** below before handing the file over.
+
+## Reviewer pass (step 4)
+
+After approval, before generating anything, reread the final draft the way a
+skeptical second reviewer would — against the posting, not from memory of
+writing it:
+
+- Posting keywords the profile genuinely supports but the draft doesn't say
+  in the posting's words — free wins still on the table.
+- Phrasing that could be sent to any other company — too generic, rewrite.
+- Bullets that drifted off result-first form, or claims not traceable to the
+  profile.
+- Cover letter ↔ resume consistency (same numbers, same titles), if both
+  exist.
+
+Fix what this finds and tell the user in one line what changed (or that
+nothing did). Only re-open the inline-draft loop if something material moved.
+
+## ATS text-layer check (step 6)
+
+An ATS reads the file's extracted text, not the rendered page — and
+generation can silently produce files whose text layer differs from the
+draft. After generating, re-open the file and extract its raw text (e.g.
+python-docx / pypdf in the analysis sandbox) and verify what a parser
+actually sees:
+
+- Contact details present as literal text; no garbled or missing characters.
+- Reading order is sane — sections in sequence, no interleaved lines.
+- Every must-have keyword from the posting that the user genuinely has
+  appears in the extraction. Report coverage plainly ("9/10 must-have
+  keywords present; 'gRPC' absent — that's a real gap, not a wording fix").
+
+A supported keyword missing from the extraction → fix and regenerate. A real
+gap → stays visible and honest, never keyword-stuffed. If extraction isn't
+possible in this session, fall back to the pre-delivery checklist and say so
+rather than claiming the check ran.
 
 ## Resume rules (enforced, from the Application Guide)
 
@@ -42,6 +81,8 @@ metrics, achievements, or titles.
 - No parser-breaking formatting; headings are standard words.
 - Length, photo, and personal details match the market's norms.
 - Contact details present and current.
+- The ATS text-layer check ran on the generated file — or its fallback was
+  declared to the user.
 
 ## Template A — Reverse-chronological (default)
 

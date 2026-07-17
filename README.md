@@ -5,17 +5,20 @@ tech roles: positioning, finding live openings, resume/cover-letter tailoring,
 networking, interview prep, and pipeline tracking. Built for a Southeast Asia
 job market (JobStreet + LinkedIn first), not US-only conventions.
 
-Capabilities (v5.2):
+Capabilities (v5.3):
 
 - **Criteria-driven job search** — queries built from saved search criteria,
   hard-filtered, returned as a ranked shortlist with fit scores and red flags
-  (ghost-job/scam checks included).
+  (ghost-job/scam checks included), plus LinkedIn people-search referral
+  links per high-fit entry.
 - **Resume & cover-letter builder** (`references/resume-builder.md`) — gap
-  questions → inline draft → approved ATS-safe .docx/PDF, with two bundled
-  resume blueprints.
+  questions → inline draft → reviewer pass → approved ATS-safe .docx/PDF
+  (two bundled blueprints), verified by an ATS text-layer check on the
+  generated file.
 - **JD match & optimizer** (`references/jd-match.md`) — paste a posting, get
   a match report (table, missing keywords, real gaps, honest fit verdict)
-  and truthful resume edits.
+  and truthful resume edits; cross-posting upskill review turns recurring
+  gaps into a heatmap and a prioritized learning plan.
 - **Soft skills coach** (`references/soft-skills-coach.md`) — demand-vs-
   supply gap assessment, small practice plans, evidence turned into bullets
   and STAR stories.
@@ -42,8 +45,8 @@ Capabilities (v5.2):
   metrics, or titles.
 
 Behavioral tests live in `tests/` (fixtures + scenario checklists, run as
-simulated sessions against the packaged skill — 8/8 cumulative: A–E 5/5 on
-v5.1, F–H 3/3 on v5.2).
+simulated sessions against the packaged skill — 11/11 cumulative: A–E 5/5 on
+v5.1, F–H 3/3 on v5.2, I–K 3/3 on v5.3).
 
 ## Layout
 

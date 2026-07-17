@@ -49,3 +49,39 @@ Propose specific resume edits, each traceable to real experience:
 Show the edits as before → after pairs. Then offer to regenerate the
 tailored resume via `references/resume-builder.md`, and record the posting
 and outcome in the profile's pipeline tracker.
+
+## 4. Upskill review — cross-posting mode
+
+Run this when the user asks what to learn ("what should I study to land
+these roles?", career planning between applications) or when the same ✗/~
+keeps recurring across match reports. One posting tells you about that job;
+the pattern across postings tells you what the market is pricing.
+
+1. **Gather requirements** from every posting the user is actually
+   targeting: pipeline entries, recent match reports, current shortlist. If
+   fewer than ~3 postings are on hand, ask the user to paste 2–3
+   representative ones — a heatmap from one JD is just a match report.
+2. **Aggregate into a heatmap** — one row per skill the postings ask for
+   that the profile lacks (✗) or only partially covers (~):
+
+   | Skill | Asked by (n of postings) | Status | Priority |
+
+   Priority weighs how many postings ask for it, ✗ over ~, and how central
+   it is to the target role — a skill every posting requires outranks one
+   nice-to-have mention. Skills the profile already covers stay out; this
+   is a gap map, not an inventory.
+3. **Learning plan for the top 2–4 only** (a ten-item plan is a wish list).
+   Per skill: live-searched resources (course, docs, a build-something
+   project — cited, not from memory), a realistic time estimate at the
+   user's stated pace, and the **provable artifact** that ends the plan — a
+   cert, a shipped repo, production use — because that artifact is what
+   becomes a truthful resume bullet later.
+4. **Route and record.** Soft-skill gaps — mentoring, stakeholder
+   communication, and similar people skills, wherever the posting lists
+   them — go to `references/soft-skills-coach.md`, not this heatmap. Write the chosen
+   goals and artifacts into the profile (§10 table for soft skills, a
+   learning-goals note under §8 for technical ones) and close with the
+   Step 0 profile regeneration.
+
+Honesty rule unchanged: a gap is closed by learning and proof, never by
+wording. The heatmap never becomes resume content until the artifact exists.

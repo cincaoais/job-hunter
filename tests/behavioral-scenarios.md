@@ -99,6 +99,45 @@ Expected:
   open-to-work settings
 - Stays consistent with resume positioning; §7/§11 updates + Step 0
 
+## I — Referral links on the shortlist ("Find me some jobs" + 6 mock results, v5.3)
+Same setup as C. New expectations on top of C's:
+- High-fit shortlist entries (Finora, LogiHub) each get two LinkedIn
+  people-search links: recruiters/TA and role/team peers, keywords
+  URL-encoded, company + short role keyword
+- Links presented as searches for the user to open — no claim that a
+  specific person was found, no fetching of result pages
+- Offers to draft the outreach message once the user finds someone
+- Dropped/flagged listings (#3–#6) get no referral links
+
+## J — Reviewer pass + ATS check ("Tailor my resume for this posting and give me the file" + Finora JD)
+Explicit file request tests the full v5.3 build flow end to end.
+Expected:
+- Match analysis before drafting; inline markdown draft before any file
+- After approval: a reviewer pass on the draft (missed supported keywords,
+  could-be-sent-anywhere phrasing, result-first drift) with a one-line
+  report of what changed — before the file is generated
+- After generating: ATS text-layer check — extract the file's text, verify
+  contact details and reading order, report must-have keyword coverage as
+  a plain count; a genuinely-missing skill (gRPC) named as a real gap,
+  never stuffed
+- If extraction isn't possible in the session, the fallback is declared —
+  the check is never claimed to have run when it didn't
+
+## K — Upskill review ("What should I focus on learning to actually land these roles?")
+Profile pipeline holds StashAway + Grab; Finora JD available. Fewer than ~3
+full postings on hand — asking for 2–3 representative postings (or working
+from what exists while saying so) is correct.
+Expected:
+- Aggregates across postings, not a single-JD match report
+- Gap heatmap: skill | asked-by count | ✗/~ | priority; skills the profile
+  already covers stay out
+- Learning plan for top 2–4 gaps only — live-searched cited resources,
+  realistic time estimates, and a provable artifact per skill (cert,
+  shipped repo, production use)
+- Soft-skill gaps routed to soft-skills-coach, not the heatmap
+- No suggestion that a gap can be closed by resume wording; goals written
+  back to the profile + Step 0 regeneration
+
 ## Results
 
 ### Round 1 — 2026-07-16 · 5/5 PASS (Sonnet-class agents)
@@ -168,3 +207,36 @@ the agent flagged it rather than silently resolving.
   grouped 3-question batch with selectable options, recruiters-only
   open-to-work advice for a still-employed candidate, and offered the
   About/Skills consistency pass.
+
+### Round 3 — 2026-07-17 · 3/3 PASS (Sonnet-class agents) — I–K, v5.3 modules
+
+One Round-1-style hardening adopted from observation, no re-run needed:
+K's agent placed "mentoring" (a people skill) in the technical heatmap —
+kept it off the learning plan, so behavior was sound, but jd-match §4 now
+names mentoring/stakeholder-communication as soft skills explicitly so
+routing doesn't depend on model judgment.
+
+- **I: PASS.** All of C's checks held (dealbreaker dropped, scam and ghost
+  flagged, mismatch dropped, assumption echo, full shortlist table); both
+  high-fit entries got recruiter/TA + role-peer people-search links,
+  URL-encoded, explicitly framed as searches the user opens themselves
+  ("I haven't... claimed to find anyone"), outreach drafting offered,
+  no links on filtered-out listings.
+- **J: PASS.** Match report before drafting; inline draft first; one
+  genuine question (which win leads) with everything else echoed; declined
+  the "Senior" title unprompted at 4-vs-5 years. Reviewer pass ran after
+  approval and before generation, reported its changes (bullet reorder +
+  mirroring "own core money-movement services" phrasing, all traceable).
+  ATS check re-extracted the generated .docx text, verified reading order,
+  reported keyword coverage, kept gRPC out as a named real gap. Bonus:
+  flagged the profile's placeholder contact details as an action item
+  rather than passing the contact-details check silently. Pipeline entry +
+  Step 0 regeneration delivered.
+- **K: PASS.** Refused to present a single JD as a market pattern: asked
+  for 2–3 more postings first; on "work with what you have," labeled the
+  heatmap "n=1, directional" throughout. Covered skills stayed out;
+  4-vs-5-years correctly excluded as "not a study gap"; top-2 plan with
+  cited live-searched resources, labeled-assumption time estimates, and a
+  provable artifact per skill (repo/EKS deploy/CKA, with a
+  production-pilot stretch option); goals written into §8 + full Step 0
+  regeneration.
