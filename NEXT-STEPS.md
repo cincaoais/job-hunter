@@ -19,12 +19,18 @@
 - A local scrape rig (clone of ai-job-search) also lives at
   `~/ai-job-search` on the Mac — separate from this repo; run `/setup`
   there once before using its `/scrape`.
-- **No git remote** — this repo exists only on machines you copy it to.
+- **Remote:** `git@github.com:cincaoais/job-hunter.git` (private). Mac
+  history force-pushed over the stale "Initial Commit" on 2026-07-17 —
+  pull, don't copy folders anymore.
 
 ## Do on Windows
 
-1. [ ] Copy this folder (or at least `job-hunting.skill` +
-   `PROJECT-DESCRIPTION.md`) onto the machine.
+1. [ ] Get the repo: fresh machine →
+   `git clone git@github.com:cincaoais/job-hunter.git`; existing copy →
+   `git fetch origin && git reset --hard origin/main` **once** (the old
+   copy shares no history with the remote; this discards local Windows
+   changes). After that, `git pull --rebase origin main` works normally.
+   Needs an SSH key for the GitHub account on that machine.
 2. [ ] claude.ai → **Settings → Features** → replace the old skill with the
    new `job-hunting.skill` (now v5.3). Until then claude.ai still runs v5.1.
 3. [ ] Job Hunting HQ Project → project settings → paste the **updated**
