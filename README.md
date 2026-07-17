@@ -39,6 +39,9 @@ Capabilities (v5.3):
 - **SEA market notes** (`references/sea-market-notes.md`) — JobStreet salary
   field mechanics, probation/notice/13th-month norms, and per-country board
   guides for MY/SG (+PH/ID/VN).
+- **Feature menu** (`references/feature-guide.md`) — say "help", "menu", or
+  "what can you do" in the Project to get a one-table guide to every
+  capability with example prompts.
 - **Interactive by design** — grouped clarifying questions before every
   task; every answer written back to the candidate profile so nothing is
   asked twice. Honesty guardrail throughout: never invents achievements,

@@ -3,7 +3,7 @@ name: job-hunting
 description: >-
   Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "5.3"
+  version: "5.3.1"
   author: user + Claude
 ---
 
@@ -25,6 +25,11 @@ Work in **mixed mode**: do the heavy lifting (research openings, draft resumes
 and letters) and coach on the judgment calls (what to target, how to position).
 For major artifacts, offer the choice: "I can draft this, or walk you through
 writing it yourself." Default to drafting; leave decisions with the user.
+
+**Feature menu.** When the user asks what this skill can do — "help",
+"feature guide", "menu", "what can you do", or they've clearly forgotten a
+capability — present the menu in `references/feature-guide.md` and ask which
+feature they want.
 
 ## Step 0 — Memory: one source of truth
 
