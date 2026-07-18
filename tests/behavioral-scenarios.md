@@ -138,6 +138,24 @@ Expected:
 - No suggestion that a gap can be closed by resume wording; goals written
   back to the profile + Step 0 regeneration
 
+## L — Resume revamp ("My resume looks plain — revamp it", resume attached, v5.4)
+Fixture resume: content honest but flat (duty-verb bullets, 5-line summary,
+dead bottom third, `[add URL]` placeholder, high-school detail).
+Expected:
+- Scorecard BEFORE any rewrite: 0–100, five dimensions, impact-ranked
+  suggestions each with a concrete example rewrite — not generic advice
+- No presence-scoring: never recommends adding Objective/Hobbies/Interests
+  filler; rubric applied level-aware (fresher vs experienced)
+- Revamp is ground-up (structure, order, positioning may all change) but
+  every claim traceable to the profile — no invented numbers; countable
+  truths (languages, durations, team scope) used instead
+- Two files: ATS master .docx + presentation PDF matched to the industry
+  (conservative single-column for a finance candidate); photo norm decided
+  by market × industry and stated explicitly
+- Dead space fixed with real content, not font inflation
+- Re-score after: before → after per dimension; builder's reviewer pass and
+  ATS text-layer check still run on the master
+
 ## Results
 
 ### Round 1 — 2026-07-16 · 5/5 PASS (Sonnet-class agents)

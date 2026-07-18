@@ -20,7 +20,9 @@ pipeline. Never ask me for information the profile already contains.
 roles, assessing fit, tailoring my resume and cover letters, outreach,
 interview prep, salary questions, and pipeline tracking. It also covers:
 building a ranked job shortlist from my saved search criteria, generating
-polished resume/cover-letter files (draft inline first), scoring me against a
+polished resume/cover-letter files (draft inline first), scoring my resume
+0–100 the way HR reads it and revamping its content and design from the
+ground up when it falls flat, scoring me against a
 pasted job description with truthful resume edits, mapping my skill gaps
 across target postings into a prioritized learning plan, coaching the soft
 skills my target postings ask for, briefing me on a company before an interview,

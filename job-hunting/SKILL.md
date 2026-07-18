@@ -1,9 +1,9 @@
 ---
 name: job-hunting
 description: >-
-  Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
+  Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, revamp or redesign a resume that looks plain, score a resume the way HR would, write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "revamp my resume," "my resume looks boring," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "5.3.1"
+  version: "5.4"
   author: user + Claude
 ---
 
@@ -15,8 +15,9 @@ role that genuinely fits — not a pile of generic applications.
 
 Supporting documents are bundled under `references/`: the **Tech Role Map**,
 the **Application Guide**, and the workflow guides `resume-builder.md`,
-`jd-match.md`, `soft-skills-coach.md`, `interview-coach.md`,
-`company-dossier.md`, `profile-optimizer.md`, and `offer-coach.md`. The **Candidate Profile** lives
+`resume-revamp.md`, `jd-match.md`, `soft-skills-coach.md`,
+`interview-coach.md`, `company-dossier.md`, `profile-optimizer.md`, and
+`offer-coach.md`. The **Candidate Profile** lives
 with the user — in their Project's files, an upload, or the conversation.
 When this skill runs inside the user's Job Hunting Project, a Project-file
 copy of any of these documents takes precedence over the bundled one.
@@ -174,6 +175,17 @@ the user's market: resumes mirror the posting's keywords and lead every
 bullet with a quantified, truthful result; letters follow the Application
 Guide's four-beat structure and length, specific enough that they couldn't
 be sent to any other company.
+
+### Resume revamp & HR-eye score
+When the resume *itself* is the problem — the user says it looks plain,
+unattractive, or "wouldn't pass me if I were HR", asks to redesign or score
+it, or the funnel diagnosis points at the 6-second skim — follow
+`references/resume-revamp.md`: score the current resume 0–100 across five
+HR-eye dimensions with impact-ranked example fixes, then rebuild content and
+design from the ground up rather than patching — an ATS master .docx plus a
+presentation PDF styled to the industry's norms (conservative single-column
+for banking/finance, sidebar tiers for corporate/creative). Photo and
+personal-detail choices follow market × industry norms, stated explicitly.
 
 ### Networking (a primary channel, not an afterthought)
 Many roles are filled through referrals before they're ever posted, so treat
