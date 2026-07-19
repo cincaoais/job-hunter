@@ -55,19 +55,29 @@ Content moves that need no invented numbers:
 - Soft skills are **evidenced, not listed**: a "Soft Skills: communication,
   teamwork" line weakens the page; multilingual client work proves it.
 
-## Step 3 — Design tiers: one content, two files
+## Step 3 — Design: fresh from the gallery, never from the old file
 
 **Master (ATS)** — .docx, single column, parser-safe per
 `resume-builder.md`. Always generated; it's what portals and ATS get.
 
 **Presentation copy** — PDF for human readers (referrals, direct email,
-career fairs, printed copies). Same content, industry-matched design:
+career fairs, printed copies). **Never inherit the incoming resume's
+layout** — a revamp that keeps the old skeleton reproduces exactly what
+scored low. Instead, recommend the two gallery templates that best fit the
+target industry, describe each in one line, and let the user pick.
 
-| Industry | Direction | Specifics |
-|---|---|---|
-| Conservative — banking, finance, law, consulting, government | Refined single column | Black text on white; one muted accent (navy/deep gray) used only structurally; 1pt rules under headings; serif or neutral sans; no photo, icons, or skill bars |
-| Standard corporate / client-facing | Restrained two-column | Light-tint sidebar (25–35% page width) holding skills, certs, languages; main column keeps summary + experience + education |
-| Creative / tech / startup | Expressive two-column | Solid-accent sidebar or margin band, skill tags allowed; still disciplined — one accent, no clutter |
+### Template gallery
+
+| Template | Layout | Signature look | Fits |
+|---|---|---|---|
+| **Chicago** | Single column | Black on white; 1pt rules under headings; one muted accent (navy/deep gray) used only structurally; serif or neutral sans; no icons or skill bars | Banking, finance, law, consulting, government — the conservative default |
+| **Executive** | Single column, generous margins | Name at ~1.85× heading size; thin hairline rules; near-monochrome; whitespace does the talking | Senior/managerial roles in any conservative industry |
+| **Corporate sidebar** | Two-column, light-tint sidebar (25–35% width) | Sidebar holds skills, certs, languages; main column keeps summary + experience + education | Standard corporate, client-facing, HR/ops/sales |
+| **Accent band** | Single column + full-width solid accent header band | Name/title reversed out of the band; skill tags as subtle pills; clean sans | Tech, product, data — modern look without a sidebar |
+| **Creative sidebar** | Two-column, solid-accent sidebar | Saturated sidebar; skill tags; optional small headshot where the photo matrix allows | Design, marketing, media, startup-facing roles |
+
+All five share the typography numbers below — they differ in structure and
+accent placement, so the same content drops into any of them.
 
 Typography numbers that work (any tier):
 
@@ -81,12 +91,23 @@ Typography numbers that work (any tier):
 - Spacing on one rhythm: pick a base gap; item gap = 1×, section gap ≈ 2×.
   A consistent rhythm is most of what reads as "designed".
 
-**Photo:** market norm × industry norm decides, stated explicitly — in MY,
-banks and MNC finance employers expect **no photo on the resume**
-(bias/compliance screening); local agencies and insurers are
-photo-tolerant; LinkedIn/JobStreet **profile** photos are separate and
-recommended. `sea-market-notes.md` holds the per-country details. Never
-put a photo in the ATS master regardless of market.
+### Photo decision matrix
+
+Never a photo in the ATS master, regardless of market. For the presentation
+copy, decide **market norm × industry norm** and state the decision and its
+reason to the user:
+
+| Market norm | Client-facing / local firm (sales, hospitality, reception, insurance, agencies) | Corporate / tech / engineering / finance |
+|---|---|---|
+| **Photo expected** — DE/AT/CH, JP (rirekisho), KR, CN, VN, ID, PH local firms, Middle East | Photo | Photo still conventional locally; skip for Western MNCs |
+| **Mixed** — MY, SG, FR | MY local firms expect it; SG defaults to **no** (MOM fair-hiring guidance) unless a local SME clearly welcomes it | No photo — banks, MNC finance, and Western tech screen it out for bias/compliance |
+| **No photo** — US, CA, UK, AU, NZ | No photo (discrimination-liability rejection risk) | No photo |
+
+Tie-breaker: when unsure, **omit** — a missing photo almost never rejects a
+resume; a present one can. If a photo goes in: recent professional headshot,
+plain background, business attire, small, top corner of page one.
+LinkedIn/JobStreet **profile** photos are a separate matter and always
+recommended. `sea-market-notes.md` holds the per-country SEA detail.
 
 ## Step 4 — Re-score before delivery
 

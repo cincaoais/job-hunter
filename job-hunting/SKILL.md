@@ -3,7 +3,7 @@ name: job-hunting
 description: >-
   Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, revamp or redesign a resume that looks plain, score a resume the way HR would, write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "revamp my resume," "my resume looks boring," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "5.4"
+  version: "5.5"
   author: user + Claude
 ---
 
@@ -183,9 +183,10 @@ it, or the funnel diagnosis points at the 6-second skim — follow
 `references/resume-revamp.md`: score the current resume 0–100 across five
 HR-eye dimensions with impact-ranked example fixes, then rebuild content and
 design from the ground up rather than patching — an ATS master .docx plus a
-presentation PDF styled to the industry's norms (conservative single-column
-for banking/finance, sidebar tiers for corporate/creative). Photo and
-personal-detail choices follow market × industry norms, stated explicitly.
+presentation PDF built from that file's **template gallery** (five named
+layouts matched to industry; never reuse the old resume's layout as the
+base). Photo and personal-detail choices follow that file's market ×
+industry decision matrix, stated explicitly.
 
 ### Networking (a primary channel, not an afterthought)
 Many roles are filled through referrals before they're ever posted, so treat
