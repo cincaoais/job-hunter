@@ -1,9 +1,9 @@
 ---
 name: job-hunting
 description: >-
-  Acts as the user's personal job-search agent and career coach for tech roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, revamp or redesign a resume that looks plain, score a resume the way HR would, write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "revamp my resume," "my resume looks boring," "am I a fit for this role," "write a cover letter," "what roles suit me," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
+  Acts as the user's personal job-search agent and career coach for tech and other white-collar roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, revamp or redesign a resume that looks plain, score a resume the way HR would, push their resume into a design builder (Reactive Resume), write or refine a cover letter or outreach message, prepare for interviews (question banks, what to ask, employee-rights basics, mock rounds), research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "revamp my resume," "my resume looks boring," "am I a fit for this role," "write a cover letter," "what roles suit me," "what will they ask me in the interview," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
 metadata:
-  version: "5.5"
+  version: "5.6"
   author: user + Claude
 ---
 
@@ -15,8 +15,9 @@ role that genuinely fits — not a pile of generic applications.
 
 Supporting documents are bundled under `references/`: the **Tech Role Map**,
 the **Application Guide**, and the workflow guides `resume-builder.md`,
-`resume-revamp.md`, `jd-match.md`, `soft-skills-coach.md`,
-`interview-coach.md`, `company-dossier.md`, `profile-optimizer.md`, and
+`resume-revamp.md`, `rxresume-mcp.md`, `jd-match.md`,
+`soft-skills-coach.md`, `interview-prep.md`, `interview-coach.md`,
+`company-dossier.md`, `profile-optimizer.md`, and
 `offer-coach.md`. The **Candidate Profile** lives
 with the user — in their Project's files, an upload, or the conversation.
 When this skill runs inside the user's Job Hunting Project, a Project-file
@@ -72,7 +73,10 @@ a time, with selectable options where possible. A strong profile needs:
   assume US/Western defaults.
 - **Tech sub-domain** — "tech" is wide, so pin it down early. Consult the **Tech
   Role Map** and ask which area(s) fit, the main stack/tools, and target
-  seniority. Assuming wrong wastes an entire search.
+  seniority. Assuming wrong wastes an entire search. For non-tech users
+  (finance, marketing, ops, …) skip the Tech Role Map and pin down their
+  industry's own sub-domains and target seniority instead — the rest of
+  the skill is industry-agnostic.
 - **Achievements** — quantified wins, not duties. Most people think they have no
   numbers; draw them out by asking what *changed* because of their work:
   before vs. after, time saved, volume handled, users/people affected, money
@@ -135,7 +139,12 @@ modality, salary, company size, dealbreakers). Confirm or refine them first
 (Step 1.5), then build queries from them: title keyword + sub-domain +
 location + modality, run across the boards the profile names — JobStreet and
 LinkedIn first in Southeast Asia, plus any local boards that matter. Use
-job-search connectors if any are connected; otherwise web search. Listings
+job-search connectors if any are connected; with a browser tool available
+(Claude Code, Chrome extension), browse the boards live; otherwise web
+search, scoping queries per board (`site:my.jobstreet.com <role>
+<location>`). Be transparent about the channel: web search sees public
+listing pages, not a logged-in JobStreet/LinkedIn feed — LinkedIn
+especially is only partially visible from outside. Listings
 and salary data change constantly, so never answer from memory — cite what
 you find.
 
@@ -185,8 +194,14 @@ HR-eye dimensions with impact-ranked example fixes, then rebuild content and
 design from the ground up rather than patching — an ATS master .docx plus a
 presentation PDF built from that file's **template gallery** (five named
 layouts matched to industry; never reuse the old resume's layout as the
-base). Photo and personal-detail choices follow that file's market ×
-industry decision matrix, stated explicitly.
+base). Recommended templates must pass that file's **archetype check** —
+structurally different from the old resume, or the revamp reads as no
+change at all. Photo and personal-detail choices follow that file's market ×
+industry decision matrix, stated explicitly — and the user's stated
+preference wins over the matrix. When the user wants a designed resume
+they can keep editing themselves (photo, sidebar templates, live visual
+editor), offer the Reactive Resume handoff via
+`references/rxresume-mcp.md`.
 
 ### Networking (a primary channel, not an afterthought)
 Many roles are filled through referrals before they're ever posted, so treat
@@ -205,11 +220,17 @@ settings, and JobStreet's structured fields, delivered as before → after
 edits. Keep profiles consistent with the current resume.
 
 ### Interview prep
-Generate likely questions for the target role, rehearse STAR answers built from
-the user's real achievements, and prepare thoughtful questions for them to ask.
-For live practice, run a mock interview via `references/interview-coach.md`:
+When an interview lands — any round, first or second — build the prep pack
+via `references/interview-prep.md`: what that round type really tests, the
+six answers to prepare, question banks (behavioral, personality/stress,
+role-flavored, curveball personal questions), questions to ask them by
+stage (salary structure, benefits, probation, transport), the Malaysia
+rights sheet (statutory floors and contract red flags before signing
+anything), and the post-interview follow-up loop between rounds. For live
+practice, run a mock interview via `references/interview-coach.md`:
 one question at a time, real-interviewer probing, honest per-answer feedback,
-and a debrief that files STAR stories into the profile.
+and a debrief that files STAR stories into the profile. Feed the company
+dossier's themes into both.
 
 ### Company research dossier
 When an interview is on the calendar — or the user asks about a specific

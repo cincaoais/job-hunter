@@ -66,6 +66,19 @@ layout** — a revamp that keeps the old skeleton reproduces exactly what
 scored low. Instead, recommend the two gallery templates that best fit the
 target industry, describe each in one line, and let the user pick.
 
+**Archetype check (mandatory before recommending).** Classify the incoming
+resume in one line — column count, header style, accent color and
+placement (e.g. "centered name, navy heading rules, single column ≈
+Chicago"). Both recommended templates must be **structurally different**
+from that archetype: different column structure or accent placement, not
+just new fonts and better words. A rebuild that lands back on the old
+archetype reads as "nothing changed", however much the content improved —
+this is the single most common way a revamp disappoints. When the industry
+default *is* the old archetype (plain single-column finance resume →
+Chicago), say so explicitly and put the nearest structurally distinct
+option (usually Corporate sidebar) first — the user picks the trade-off
+between safest-conventional and visibly-redesigned.
+
 ### Template gallery
 
 | Template | Layout | Signature look | Fits |
@@ -91,20 +104,43 @@ Typography numbers that work (any tier):
 - Spacing on one rhythm: pick a base gap; item gap = 1×, section gap ≈ 2×.
   A consistent rhythm is most of what reads as "designed".
 
+### Presentation-copy build mechanics
+
+The ATS master stays python-docx. But sidebar, accent-band, and photo
+layouts do **not** survive docx generation reliably — build the
+presentation copy as **HTML/CSS rendered to PDF** (one file, print CSS,
+exact page size): multi-column grids, tint blocks, and image placement
+hold precisely there. Content stays word-identical to the master; only
+the shell differs.
+
+**Or hand off to a real builder.** When the Reactive Resume MCP is
+connected — or the user is willing to set it up — offer the handoff in
+`references/rxresume-mcp.md`: 15 professionally designed templates with
+photo support and a live visual editor beat any generated file when the
+user wants to keep tweaking the design themselves.
+
 ### Photo decision matrix
 
 Never a photo in the ATS master, regardless of market. For the presentation
 copy, decide **market norm × industry norm** and state the decision and its
 reason to the user:
 
-| Market norm | Client-facing / local firm (sales, hospitality, reception, insurance, agencies) | Corporate / tech / engineering / finance |
+| Market norm | Client-facing / local firm (sales, hospitality, reception, insurance, agencies; client-facing roles at local banks — bancassurance, wealth, relationship) | Back-office & analyst roles / tech / engineering / Western MNCs |
 |---|---|---|
 | **Photo expected** — DE/AT/CH, JP (rirekisho), KR, CN, VN, ID, PH local firms, Middle East | Photo | Photo still conventional locally; skip for Western MNCs |
-| **Mixed** — MY, SG, FR | MY local firms expect it; SG defaults to **no** (MOM fair-hiring guidance) unless a local SME clearly welcomes it | No photo — banks, MNC finance, and Western tech screen it out for bias/compliance |
+| **Mixed** — MY, SG, FR | MY local firms and client-facing financial services expect or welcome it; SG defaults to **no** (MOM fair-hiring guidance) unless a local SME clearly welcomes it | No photo — MNC finance, analyst tracks, and Western tech screen it out for bias/compliance |
 | **No photo** — US, CA, UK, AU, NZ | No photo (discrimination-liability rejection risk) | No photo |
 
+The split runs on the **role**, not just the employer: a wealth or
+relationship role at a Malaysian bank sits in the client-facing column
+(photo appropriate); an analyst or back-office role at the same bank sits
+in the right column (skip).
+
 Tie-breaker: when unsure, **omit** — a missing photo almost never rejects a
-resume; a present one can. If a photo goes in: recent professional headshot,
+resume; a present one can. **But the user's stated preference wins**: the
+matrix is the default, not a veto. If they want a photo where it says skip
+(or vice versa), state the trade-off in one line and build what they chose.
+If a photo goes in: recent professional headshot,
 plain background, business attire, small, top corner of page one.
 LinkedIn/JobStreet **profile** photos are a separate matter and always
 recommended. `sea-market-notes.md` holds the per-country SEA detail.

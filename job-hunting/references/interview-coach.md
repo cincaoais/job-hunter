@@ -10,8 +10,10 @@ live-practice loop.
 Confirm before starting:
 - **Which interview** — company and posting; reuse the jd-match extraction
   if one exists, otherwise skim the posting for competencies to probe.
-- **Round type** — recruiter screen / behavioral / technical deep-dive /
-  system design / final round. Match real conventions for that type.
+- **Round type** — recruiter screen / behavioral / HR & personality /
+  technical deep-dive / system design / assessment-centre case / final
+  round. Match real conventions for that type (stage map in
+  `interview-prep.md`).
 - **Length** — quick (5 questions) or full (8–10).
 - **Language** — SEA tech interviews usually run in English; practice in the
   language the real interview will use.
@@ -21,8 +23,9 @@ Confirm before starting:
 - Ask **one question at a time** and wait for the answer — never dump a
   question list. Stay in character as the interviewer.
 - Source questions from the posting's responsibilities and required
-  competencies, the classic behavioral themes (conflict, failure,
-  leadership, ambiguity, impact), and the role's technical core loop.
+  competencies, the question banks in `interview-prep.md` (behavioral,
+  personality/stress, role-flavored, curveballs), and the role's
+  technical core loop.
 - **Probe like a real interviewer**: "What was *your* part?", "What was the
   number?", "What would you do differently?" — vague answers get follow-ups,
   not a pass.
