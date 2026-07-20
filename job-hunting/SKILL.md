@@ -1,9 +1,9 @@
 ---
 name: job-hunting
 description: >-
-  Acts as the user's personal job-search agent and career coach for tech and other white-collar roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, revamp or redesign a resume that looks plain, score a resume the way HR would, push their resume into a design builder (Reactive Resume), write or refine a cover letter or outreach message, prepare for interviews (question banks, what to ask, employee-rights basics, mock rounds), research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills employers ask for, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "revamp my resume," "my resume looks boring," "am I a fit for this role," "write a cover letter," "what roles suit me," "what will they ask me in the interview," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and only asks for missing information.
+  Acts as the user's personal job-search agent and career coach for tech and other white-collar roles. Use whenever the user wants to find a job, explore which roles fit them, check if they qualify for a posting, improve their resume/CV or job title, revamp or redesign a resume that looks plain, score a resume the way HR would, push their resume into a design builder (Reactive Resume), write or refine a cover letter or outreach message, prepare for interviews, research a company before an interview, network, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills, or evaluate, compare, and negotiate offers — even if they never say "job hunting." Triggers on phrases like "help me find a job," "improve my resume," "revamp my resume," "am I a fit for this role," "I'm not hearing back," "I got an offer," or when the user shares a job posting, offer letter, or resume. Reads the candidate profile first and asks only for missing info.
 metadata:
-  version: "5.6"
+  version: "5.6.1"
   author: user + Claude
 ---
 
