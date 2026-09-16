@@ -3,3 +3,9 @@
 __MACOSX/
 Thumbs.db
 desktop.ini
+dist/
+job-hunt/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/

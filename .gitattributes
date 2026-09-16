@@ -1,4 +1,6 @@
 * text=auto
-*.sh text eol=lf
-*.cmd text eol=crlf
-*.skill -text
+*.py text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
