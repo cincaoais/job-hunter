@@ -7,7 +7,7 @@
 Works on macOS, Linux and Windows (python build.py).
 """
 from __future__ import annotations
-import argparse, os, re, sys, zipfile
+import argparse, os, re, shutil, sys, zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -41,7 +41,8 @@ def check_skill(skill_dir: Path) -> list[str]:
     p, problems = skill_dir / "SKILL.md", []
     if not p.exists():
         return [f"{skill_dir}: missing SKILL.md"]
-    text = p.read_text(encoding="utf-8")
+    raw = p.read_bytes()
+    text = raw.decode("utf-8")
     fm = parse_frontmatter(text)
     name = fm.get("name", "")
     if name != skill_dir.name or not NAME_RE.match(name) or "claude" in name or "anthropic" in name:
@@ -51,10 +52,10 @@ def check_skill(skill_dir: Path) -> list[str]:
         problems.append(f"{p}: description missing")
     elif len(desc) > MAX_DESC:
         problems.append(f"{p}: description is {len(desc)} chars (max {MAX_DESC})")
-    n = text.count("\n") + 1
+    n = len(text.splitlines())
     if n > MAX_SKILL_LINES:
         problems.append(f"{p}: {n} lines (max {MAX_SKILL_LINES})")
-    if "\r\n" in text:
+    if b"\r\n" in raw:
         problems.append(f"{p}: CRLF line endings")
     return problems
 
@@ -76,7 +77,7 @@ def build_zip(skill_dir: Path, out: Path) -> Path:
             z.writestr(info, data)
     return out
 
-def link_skills() -> list[str]:
+def link_skills(force: bool = False) -> list[str]:
     dest_root, done = Path.home() / ".claude" / "skills", []
     dest_root.mkdir(parents=True, exist_ok=True)
     for d in sorted(SKILLS.iterdir()):
@@ -86,12 +87,15 @@ def link_skills() -> list[str]:
         if dest.is_symlink() or dest.exists():
             if dest.is_symlink() or dest.is_file():
                 dest.unlink()
+            elif force:
+                shutil.rmtree(dest)
             else:
-                import shutil; shutil.rmtree(dest)
+                done.append(f"SKIP {dest}: exists and is not a symlink (use --force to replace)")
+                continue
         try:
             os.symlink(d, dest, target_is_directory=True)
         except OSError:  # Windows without developer mode
-            import shutil; shutil.copytree(d, dest)
+            shutil.copytree(d, dest)
         done.append(f"{dest} -> {d}")
     return done
 
@@ -99,6 +103,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--link", action="store_true")
+    ap.add_argument("--force", action="store_true", help="with --link, replace real (non-symlink) directories")
     a = ap.parse_args(argv)
     problems = [p for d in sorted(SKILLS.iterdir()) if d.is_dir() for p in check_skill(d)]
     for p in problems:
@@ -108,7 +113,7 @@ def main(argv=None) -> int:
     if a.check:
         print(f"OK: {len(list(SKILLS.iterdir()))} skills pass checks"); return 0
     if a.link:
-        print("\n".join(link_skills())); print("Restart Claude Code to pick up the skills."); return 0
+        print("\n".join(link_skills(force=a.force))); print("Restart Claude Code to pick up the skills."); return 0
     out = build_zip(MAIN, DIST / "job-hunting.skill")
     with zipfile.ZipFile(out) as z:
         print(f"Built {out} ({out.stat().st_size} bytes, {len(z.namelist())} files)")

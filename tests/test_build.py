@@ -24,6 +24,43 @@ def test_check_skill_flags_name_mismatch(tmp_path):
     (d / "SKILL.md").write_text("---\nname: bar\ndescription: ok\n---\n", encoding="utf-8")
     assert any("name" in p for p in build.check_skill(d))
 
+def test_check_skill_flags_crlf(tmp_path):
+    d = tmp_path / "foo"; d.mkdir()
+    (d / "SKILL.md").write_bytes(b"---\r\nname: foo\r\ndescription: ok\r\n---\r\n")
+    problems = build.check_skill(d)
+    assert any("CRLF" in p for p in problems)
+
+def _make_skill_with_n_lines(root, name, n):
+    d = root / name; d.mkdir()
+    header = f"---\nname: {name}\ndescription: fine\n---\n"
+    header_lines = len(header.splitlines())
+    body = "\n".join(f"line {i}" for i in range(n - header_lines)) + "\n"
+    (d / "SKILL.md").write_text(header + body, encoding="utf-8")
+    return d
+
+def test_check_skill_line_count_boundary(tmp_path):
+    ok_dir = _make_skill_with_n_lines(tmp_path, "ok", 500)
+    ok_problems = build.check_skill(ok_dir)
+    assert not any("lines" in p for p in ok_problems)
+
+    bad_dir = _make_skill_with_n_lines(tmp_path, "bad", 501)
+    bad_problems = build.check_skill(bad_dir)
+    assert any("lines" in p for p in bad_problems)
+
+def test_link_skills_refuses_real_dir(tmp_path, monkeypatch):
+    monkeypatch.setattr(build.Path, "home", lambda: tmp_path)
+    dest = tmp_path / ".claude" / "skills" / "job-hunting"
+    dest.mkdir(parents=True)
+    marker = dest / "keep-me.txt"
+    marker.write_text("hello", encoding="utf-8")
+
+    build.link_skills()
+    assert marker.exists()
+    assert not dest.is_symlink()
+
+    build.link_skills(force=True)
+    assert dest.is_symlink()
+
 def test_build_zip_is_lf_and_deterministic(tmp_path):
     out1 = build.build_zip(SKILL, tmp_path / "a.skill")
     out2 = build.build_zip(SKILL, tmp_path / "b.skill")
