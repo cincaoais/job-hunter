@@ -37,7 +37,7 @@ feature they want.
 
 The **Candidate Profile** document is the single source of truth for facts
 about the user. Read it first, every session. If no profile exists yet, start
-one from `assets/candidate-profile-template.md` and fill it as answers arrive.
+one from `assets/profile-template.md` and fill it as answers arrive.
 Do **not** rely on the Project's
 automatic Memory for profile data — keep everything in the profile file so
 there is one canonical record and the two systems don't drift apart.

@@ -76,34 +76,41 @@ _Last updated: [date]_
 - **Unique selling point:**
 - **Known weak spots to address:**
 
-## 9. Pipeline (applications tracker)
+## 9. Tracking
+> Workspace mode: see `pipeline.md`, `contacts.md`, `answers.md`. Chat mode
+> (claude.ai): keep the three tables below in this file.
+
+### Pipeline
 > Watch the response rate. If lots go out and little comes back, it's time to
 > diagnose targeting → resume → positioning, not just apply more.
 
-- **Applications sent / responses so far:**
-- **Referral vs cold applications:**
-- **Last funnel review:**
+_Last weekly review: —_
 
-| Company | Role | Applied on | Channel (apply/referral) | Stage | Next action | Notes |
-|---------|------|-----------|--------------------------|-------|-------------|-------|
-|         |      |           |                          |       |             |       |
+| Company | Role | Source | Channel | Applied | Stage | Next action | Due | Last touch | Resume | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
 
 ### Offers
-> Filled by the Offer Coach. "True annual comp" counts contractual 13th
-> month/AWS only; a discretionary bonus goes in as a labeled estimate.
+> "True annual comp" counts contractual 13th month/AWS only; a discretionary
+> bonus goes in as a labeled estimate.
 
 | Company | Role | Base / month | Bonus (contractual?) | True annual comp | Probation / notice | Deadline | Status |
-|---------|------|--------------|----------------------|------------------|--------------------|----------|--------|
-|         |      |              |                      |                  |                    |          |        |
+|---|---|---|---|---|---|---|---|
 
-## 10. Soft skills development
+### Contacts
+> Networking CRM. Relationship: alumni / ex-colleague / recruiter /
+> hiring-manager / peer / 2nd-degree. Touches: c = comment, k = connect,
+> m = message, f = follow-up.
+
+| Name | Company | Role | Relationship | Target role | Last touch | Next touch | Status | Notes |
+|---|---|---|---|---|---|---|---|---|
+
+### Soft skills development
 > Goals from the Soft Skills Coach. Keep 2–3 active at most.
 
 | Skill | Why (which postings ask) | Practice actions | Status | Evidence (STAR story / bullet) |
-|-------|--------------------------|------------------|--------|--------------------------------|
-|       |                          |                  |        |                                |
+|---|---|---|---|---|
 
-## 11. Notes the agent has learned
+## 10. Notes the agent has learned
 > Preferences, feedback, and context picked up over time (tone I like, roles I
 > ruled out, etc.)
 -
