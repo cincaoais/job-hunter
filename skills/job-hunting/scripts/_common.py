@@ -110,30 +110,58 @@ def _is_separator_line(line: str) -> bool:
     return all(ch in "|-: \t" for ch in s)
 
 
+_UNESCAPED_PIPE_RE = re.compile(r"(?<!\\)\|")
+
+
 def _split_row(line: str) -> list[str]:
     s = line.strip()
     if s.startswith("|"):
         s = s[1:]
     if s.endswith("|"):
         s = s[:-1]
-    return [cell.strip() for cell in s.split("|")]
+    return [cell.strip().replace("\\|", "|") for cell in _UNESCAPED_PIPE_RE.split(s)]
+
+
+def _section_bounds(lines: list[str], heading: str | None):
+    """Return (start, end) exclusive-end bounds to search within.
+
+    With no heading, that's the whole document. With a heading, it's the
+    lines strictly between that heading line and the next line starting with
+    `#` (any level) — or the end of the document if there is none. Returns
+    None if `heading` is given but not found anywhere in `lines`.
+    """
+    if heading is None:
+        return 0, len(lines)
+    for i, line in enumerate(lines):
+        if line.strip() == heading:
+            start = i + 1
+            break
+    else:
+        return None
+    end = len(lines)
+    for j in range(start, len(lines)):
+        if lines[j].lstrip().startswith("#"):
+            end = j
+            break
+    return start, end
 
 
 def _find_table(lines: list[str], heading: str | None):
     """Return (start_idx, end_idx_inclusive) of the header row through the
-    last consecutive body row, or None if no matching table is found."""
-    start_search = 0
-    if heading is not None:
-        for i, line in enumerate(lines):
-            if line.strip() == heading:
-                start_search = i + 1
-                break
-        else:
-            return None
-    for i in range(start_search, len(lines) - 1):
+    last consecutive body row, or None if no matching table is found.
+
+    When `heading` is given, the search is bounded to that heading's own
+    section (up to, but not including, the next heading line) so a table
+    under a later heading is never mistaken for the one being looked up.
+    """
+    bounds = _section_bounds(lines, heading)
+    if bounds is None:
+        return None
+    start_search, limit = bounds
+    for i in range(start_search, limit - 1):
         if lines[i].lstrip().startswith("|") and _is_separator_line(lines[i + 1]):
             j = i + 2
-            while j < len(lines) and lines[j].lstrip().startswith("|"):
+            while j < limit and lines[j].lstrip().startswith("|"):
                 j += 1
             return i, j - 1
     return None
@@ -168,8 +196,12 @@ def _render_table(columns: list[str], rows: list[dict]) -> list[str]:
 def write_table(md: str, columns: list[str], rows: list[dict], heading: str | None = None) -> str:
     """Replace the table found by read_table's rules with a rendered one.
 
-    If no such table exists, append it at the end (under a new `## heading`
-    section when `heading` is given).
+    If no such table exists: with a `heading` that is present in `md`, the
+    new table is inserted at the end of that heading's section (before the
+    next heading), separated by blank lines, leaving the rest of the
+    document untouched. With a `heading` not present in `md`, a new
+    `## heading` section is appended at the end. With no `heading`, the
+    table is simply appended at the end.
     """
     lines = md.splitlines()
     found = _find_table(lines, heading)
@@ -181,6 +213,22 @@ def write_table(md: str, columns: list[str], rows: list[dict], heading: str | No
         if md.endswith("\n"):
             out += "\n"
         return out
+
+    bounds = _section_bounds(lines, heading) if heading is not None else None
+    if heading is not None and bounds is not None:
+        start, limit = bounds
+        section = lines[start:limit]
+        while section and section[-1].strip() == "":
+            section.pop()
+        new_section = section + [""] + table_lines
+        new_lines = lines[:start] + new_section
+        tail = lines[limit:]
+        new_lines += ([""] + tail) if tail else tail
+        out = "\n".join(new_lines)
+        if md.endswith("\n"):
+            out += "\n"
+        return out
+
     block = ([f"## {heading}", ""] if heading is not None else []) + table_lines
     out = md.rstrip("\n")
     if out:
