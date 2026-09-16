@@ -59,7 +59,10 @@ def test_link_skills_refuses_real_dir(tmp_path, monkeypatch):
     assert not dest.is_symlink()
 
     build.link_skills(force=True)
-    assert dest.is_symlink()
+    if sys.platform == "win32":
+        assert dest.is_symlink() or (dest.is_dir() and (dest / "SKILL.md").exists())
+    else:
+        assert dest.is_symlink()
 
 def test_build_zip_is_lf_and_deterministic(tmp_path):
     out1 = build.build_zip(SKILL, tmp_path / "a.skill")
