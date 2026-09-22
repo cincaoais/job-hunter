@@ -172,6 +172,15 @@ def test_set_with_nothing_to_change_exits_2(ws, capsys):
     assert "nothing to set" in out.lower()
 
 
+def test_applied_stays_empty_when_a_saved_row_is_closed(ws, capsys):
+    run(capsys, "add", "--company", "Apex", "--role", "BE", "--today", TODAY)
+    run(capsys, "set", "--company", "Apex", "--stage", "cold", "--today", TODAY)
+    row = pipeline_rows(ws)[0]
+    assert (row["Stage"], row["Applied"]) == ("cold", "")
+    run(capsys, "set", "--company", "Apex", "--stage", "screen", "--today", TODAY)
+    assert pipeline_rows(ws)[0]["Applied"] == TODAY  # an open sent stage does back-fill
+
+
 def test_bad_date_exits_2(ws, capsys):
     code, out = run(capsys, "add", "--company", "Apex", "--role", "BE", "--due", "18/09/2026")
     assert code == 2
@@ -197,6 +206,7 @@ def test_today_report_sections_list_the_planted_rows(capsys):
     assert "Apex Digital" in body("Overdue")
     assert "Nimbus Logistics" in body("Due today")
     assert "Selangor Cloud" in body("Interviews within 7 days")
+    assert "**Interviews within 7 days (1)** — due in the next 7 days" in report
     stale = body("Stale")
     assert "Harbour Fintech" in stale and "Pulse Retail" in stale
     assert "Apex Digital" not in stale  # last touch is exactly 7 days old
@@ -265,17 +275,21 @@ def test_funnel_source_counts_match_hand_computed():
     assert (by_source["career page"]["sent"], by_source["career page"]["interviews"]) == (1, 1)
 
 
-def test_funnel_counts_rejected_as_response_only_with_a_reply_note():
-    rows = [
-        {"Company": "A", "Role": "R", "Source": "S", "Channel": "cold",
-         "Stage": "rejected", "Notes": "Rejected by email after the take-home"},
-        {"Company": "B", "Role": "R", "Source": "S", "Channel": "cold",
-         "Stage": "rejected", "Notes": "no word, closed it myself"},
-        {"Company": "C", "Role": "R", "Source": "S", "Channel": "cold",
-         "Stage": "rejected", "Notes": "replied with a template"},
-    ]
+@pytest.mark.parametrize("notes, counts_as_response", [
+    ("Rejected by email after the take-home", True),
+    ("replied with a template", True),
+    ("some response from the recruiter", True),
+    ("no reply after 3 weeks", False),
+    ("never replied", False),
+    ("closed it myself without response", False),
+    ("ghosted", False),
+    ("no word, closed it myself", False),
+])
+def test_funnel_counts_a_rejection_as_a_response_only_when_a_human_answered(notes, counts_as_response):
+    rows = [{"Company": "A", "Role": "R", "Source": "S", "Channel": "cold",
+             "Stage": "rejected", "Notes": notes}]
     total = tracker.funnel(rows)["total"]
-    assert (total["sent"], total["responses"]) == (3, 2)
+    assert (total["sent"], total["responses"]) == (1, int(counts_as_response))
 
 
 def test_funnel_report_has_both_tables_benchmarks_and_leak(filled, capsys):
@@ -311,6 +325,17 @@ def test_diagnose_close_branch():
 def test_diagnose_too_small_branch():
     assert tracker.diagnose(counts(4, 1, 1, 0)) == ("too small", tracker.FIX_TOO_SMALL)
     assert tracker.diagnose(counts(0, 0, 0, 0)) == ("too small", tracker.FIX_TOO_SMALL)
+
+
+def test_diagnose_too_small_wins_below_ten_sent_however_bad_the_ratios():
+    # 9 sent with no offer after 5 interviews would read as `close` at n >= 10.
+    assert tracker.diagnose(counts(9, 9, 5, 0)) == ("too small", tracker.FIX_TOO_SMALL)
+    assert tracker.diagnose(counts(9, 0, 0, 0)) == ("too small", tracker.FIX_TOO_SMALL)
+
+
+def test_diagnose_healthy_branch():
+    assert tracker.diagnose(counts(20, 10, 5, 2)) == ("healthy", tracker.FIX_HEALTHY)
+    assert tracker.diagnose(counts(10, 2, 1, 1)) == ("healthy", tracker.FIX_HEALTHY)
 
 
 def test_diagnose_accepts_a_whole_funnel_dict():
@@ -377,6 +402,30 @@ def test_contact_creates_then_upserts(ws, capsys):
     assert rows[0]["Notes"] == "asked about the team; she will flag my CV"
 
 
+def test_contact_updates_by_name_when_company_is_omitted(ws, capsys):
+    run(capsys, "contact", "--name", "Aisyah Rahman", "--company", "Nimbus Logistics",
+        "--relationship", "ex-colleague", "--today", TODAY)
+    code, out = run(capsys, "contact", "--name", "aisyah rahman", "--status", "referral asked",
+                    "--today", "2026-09-18")
+    assert code == 0, out
+    rows = read_table((ws / "contacts.md").read_text(encoding="utf-8"))[1]
+    assert len(rows) == 1
+    assert rows[0]["Company"] == "Nimbus Logistics"  # company not blanked
+    assert rows[0]["Status"] == "referral asked"
+    assert rows[0]["Last touch"] == "2026-09-18"
+
+
+def test_contact_ambiguous_name_without_company_lists_candidates_and_exits_2(ws, capsys):
+    run(capsys, "contact", "--name", "Sam Tan", "--company", "Apex Digital", "--today", TODAY)
+    run(capsys, "contact", "--name", "Sam Tan", "--company", "Nimbus Logistics", "--today", TODAY)
+    code, out = run(capsys, "contact", "--name", "Sam Tan", "--status", "messaged", "--today", TODAY)
+    assert code == 2
+    assert "Apex Digital" in out and "Nimbus Logistics" in out
+    rows = read_table((ws / "contacts.md").read_text(encoding="utf-8"))[1]
+    assert len(rows) == 2
+    assert all(r["Status"] == "" for r in rows)  # nothing written
+
+
 def test_contact_same_name_different_company_is_a_new_row(ws, capsys):
     run(capsys, "contact", "--name", "Sam Tan", "--company", "Apex Digital", "--today", TODAY)
     run(capsys, "contact", "--name", "Sam Tan", "--company", "Nimbus Logistics", "--today", TODAY)
@@ -398,6 +447,13 @@ def test_no_workspace_prints_hint_and_exits_zero(tmp_path, monkeypatch, capsys, 
     assert code == 0, out
     assert "No workspace found — run: python3" in out
     assert "workspace.py init" in out
+
+
+def test_no_workspace_beats_bad_input(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("JOB_HUNT_DIR", str(tmp_path / "missing"))
+    code, out = run(capsys, "set", "--company", "Apex", "--stage", "ghosted", "--due", "nope")
+    assert code == 0, out
+    assert "No workspace found — run: python3" in out
 
 
 def test_cli_runs_as_a_subprocess(filled):

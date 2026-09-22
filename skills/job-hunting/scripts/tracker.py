@@ -47,9 +47,14 @@ INTERVIEW_DUE_STAGES = frozenset({"screen", "interview", "final"})
 RESPONSE_STAGES = frozenset({"screen", "interview", "final", "offer", "accepted"})
 INTERVIEWED_STAGES = frozenset({"interview", "final", "offer", "accepted"})
 OFFER_STAGES = frozenset({"offer", "accepted"})
+# Stages that mean the application went out and has not been closed — the
+# only ones that back-fill an empty `Applied` cell.
+SENT_OPEN_STAGES = frozenset({"applied", "screen", "interview", "final", "offer"})
 # A `rejected` row only counts as a response when its Notes say a human
-# actually answered (see the funnel --help).
-REPLY_NOTE_RE = re.compile(r"reply|replied|rejected by", re.I)
+# actually answered (see the funnel --help). The lookbehinds keep "no reply",
+# "never replied" and "without response" out of the response count.
+REPLY_NOTE_RE = re.compile(r"(?<!no )(?<!never )(?<!without )(reply|replied|response|rejected by)",
+                           re.I)
 
 PIPELINE_COLUMNS = ["Company", "Role", "Source", "Channel", "Applied", "Stage",
                     "Next action", "Due", "Last touch", "Resume", "Notes"]
@@ -71,18 +76,23 @@ FIX_SCREEN = ("Screens aren't converting: run a mock recruiter screen (interview
 FIX_CLOSE = ("Onsites aren't closing: debrief each final round, run the offer-stage questions, "
              "and rehearse negotiation (offer-coach.md)")
 FIX_TOO_SMALL = "Pipeline too small to diagnose (n<10) — keep logging"
+FIX_HEALTHY = ("No clear leak — hold the cadence: keep 10–20 targeted applications "
+               "and 60/40 outreach per week")
 
 FUNNEL_RULES = """\
 counting rules:
   Sent        every row whose Stage is not `saved`
   Responses   Stage in screen/interview/final/offer/accepted, plus `rejected`
-              rows whose Notes contain "reply", "replied" or "rejected by"
-              (case-insensitive) — a rejection letter is still a response
+              rows whose Notes contain "reply", "replied", "response" or
+              "rejected by" (case-insensitive) — a rejection letter is still a
+              response, while "no reply" / "never replied" / "without
+              response" are not
   Interviews  Stage in interview/final/offer/accepted
   Offers      Stage in offer/accepted
-Leak diagnosis takes the first failing stage: sent >= 10 and response % < 10
--> targeting; responses >= 3 and interviews == 0 -> screen performance;
-interviews >= 3 and offers == 0 -> close; otherwise the pipeline is too small.
+Leak diagnosis: fewer than 10 sent -> too small to diagnose; otherwise the
+first failing stage — response % < 10 -> targeting; responses >= 3 and
+interviews == 0 -> screen performance; interviews >= 3 and offers == 0 ->
+close; nothing failing -> healthy, hold the cadence.
 """
 
 _DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -278,7 +288,7 @@ def today_report(rows: list[dict], contacts_rows: list[dict], date) -> str:
     out += _section("Due today", [line(r, _next_action(r)) for r in data["due_today"]])
     out += _section("Interviews within 7 days", [
         line(r, f"{_cell(r, 'Due')} (in {_days(-_age(r, 'Due', day))}) · {_next_action(r)}")
-        for r in data["interviews"]])
+        for r in data["interviews"]], note=f"due in the next {INTERVIEW_WINDOW_DAYS} days")
     out += _section("Stale", [
         line(r, f"last touch {_cell(r, 'Last touch')} "
                 f"({_days(_age(r, 'Last touch', day))} ago) · {_next_action(r)}")
@@ -345,13 +355,15 @@ def diagnose(f: dict) -> tuple[str, str]:
     sent, responses = int(c.get("sent", 0)), int(c.get("responses", 0))
     interviews, offers = int(c.get("interviews", 0)), int(c.get("offers", 0))
     response_pct = c.get("response_pct", _pct(responses, sent))
-    if sent >= 10 and response_pct < 10:
+    if sent < 10:
+        return "too small", FIX_TOO_SMALL
+    if response_pct < 10:
         return "targeting", FIX_TARGETING
     if responses >= 3 and interviews == 0:
         return "screen performance", FIX_SCREEN
     if interviews >= 3 and offers == 0:
         return "close", FIX_CLOSE
-    return "too small", FIX_TOO_SMALL
+    return "healthy", FIX_HEALTHY
 
 
 def _funnel_table(label: str, buckets: list[dict], total: dict) -> str:
@@ -451,8 +463,9 @@ def _apply_fields(row: dict, args, touch: str, *, creating: bool) -> None:
     for extra in (getattr(args, "note", None), getattr(args, "url", None)):
         if extra:
             row["Notes"] = _append_note(_cell(row, "Notes"), extra)
-    # An applied-or-later row carries the date it went out.
-    if not _cell(row, "Applied") and _stage(row) != "saved":
+    # An open sent row carries the date it went out; a row closed straight
+    # from `saved` (cold, withdrawn) never had one.
+    if not _cell(row, "Applied") and _stage(row) in SENT_OPEN_STAGES:
         row["Applied"] = touch
     row["Last touch"] = touch
 
@@ -506,14 +519,19 @@ def cmd_set(ws: Path, args, touch: str) -> int:
 
 def cmd_contact(ws: Path, args, touch: str) -> int:
     columns, rows = get_contacts(ws)
-    company = args.company or ""
-    existing = [r for r in rows
-                if _is_same(r.get("Name"), args.name) and _is_same(r.get("Company"), company)]
-    if existing:
-        row, created = existing[0], False
+    found = [r for r in rows if _is_same(r.get("Name"), args.name)]
+    if args.company is not None:
+        found = [r for r in found if _is_same(r.get("Company"), args.company)]
+    elif len(found) > 1:
+        print(f"{len(found)} contacts named {args.name!r} — add --company to pick one:")
+        for row in found:
+            print(f"  - {_cell(row, 'Name')} — {_cell(row, 'Company') or '(no company)'}")
+        return 2
+    if found:
+        row, created = found[0], False
     else:
         row, created = dict.fromkeys(columns, ""), True
-        row["Name"], row["Company"] = args.name, company
+        row["Name"], row["Company"] = args.name, args.company or ""
         rows.append(row)
     for flag, column in (("role", "Role"), ("relationship", "Relationship"),
                          ("target", "Target role"), ("next_touch", "Next touch"),
@@ -637,7 +655,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     c = add_sub("contact", "upsert a contact row (matched by name + company)")
     c.add_argument("--name", required=True)
-    c.add_argument("--company")
+    c.add_argument("--company", help="required only when one name appears at two companies")
     c.add_argument("--role")
     c.add_argument("--relationship",
                    help="alumni / ex-colleague / recruiter / hiring-manager / peer / 2nd-degree")
@@ -661,15 +679,15 @@ def main(argv=None) -> int:
         parser.print_help()
         return 2
 
-    problem = _bad_dates(args) or _bad_stage(getattr(args, "stage", None))
-    if problem:
-        print(problem)
-        return 2
-
     ws = workspace_dir()
     if not _has_workspace(ws):
         print(f"No workspace found — run: python3 {SCRIPT_DIR / 'workspace.py'} init")
         return 0
+
+    problem = _bad_dates(args) or _bad_stage(getattr(args, "stage", None))
+    if problem:
+        print(problem)
+        return 2
 
     date = parse_date(args.today_) or datetime.date.fromisoformat(today_iso())
     if args.cmd in WRITERS:
