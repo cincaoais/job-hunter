@@ -38,9 +38,12 @@ company + role:
   email", "replied" or "response" in Notes; "no reply" / "never replied" /
   "without response" are not responses.
 - Every write sets Last touch to today (`--last-touch` overrides).
-- When Gmail or Calendar MCP connectors are present, use them to spot
-  recruiter replies and interview dates and log them — opportunistic, never
-  required.
+- Contacts: `tracker.py contacts` lists touches due (Next touch ≤ today);
+  `tracker.py contact --name … --next-touch …` upserts a row.
+- A Gmail MCP connector, when present, may be used to spot recruiter replies
+  and log them — opportunistic, never required.
+- A Calendar MCP connector, when present, may be used to pick up interview
+  dates into Due — opportunistic, never required.
 
 ## 3. The today view — `tracker.py today`
 
@@ -54,12 +57,12 @@ when non-empty:
 | Interviews within 7 days | Due in the next 7 days, stage screen/interview/final | Start the prep pack (`interview-prep.md`), book a mock |
 | Stale | No touch in over 7 days (`STALE_DAYS = 7`), stage applied…final | Set a concrete next action, or send the one nudge if Due + 7 has passed |
 | Auto-cold candidates | `applied` and silent 21+ days | Confirm, then run the printed `tracker.py set … --stage cold` line |
-| Contacts due | `Next touch` ≤ today | Send the touch from `networking.md`; log with `tracker.py contact --name … --next-touch …` |
+| Contacts due | `Next touch` ≤ today (same list as `tracker.py contacts`) | Send the touch from `networking.md`; log with `tracker.py contact --name … --next-touch …` |
 | Fresh postings | always last | `search_jobs.py --days 2` for postings under 48 hours old |
 
-When every section is empty it prints `Nothing due — run search_jobs.py
---days 2 for fresh postings.` — that is the cue to source and to do
-outreach, not to rest.
+When every section is empty it prints
+`Nothing due — run search_jobs.py --days 2 for fresh postings.`
+— that is the cue to source and to do outreach, not to rest.
 
 Chat mode: compute the same sections from the profile's tables by hand,
 in the same order.
@@ -73,7 +76,8 @@ in the same order.
 2. Read the two tables (by Channel, by Source) and the `Leak:` line.
 3. Apply **one** change this week — the fix the leak names, or the user's
    own refinement of it. One change, so next week's numbers mean something.
-4. Set next week's cap and outreach target in profile §8: 10–20 targeted
+4. Set next week's cap and outreach target in profile §8 on the lines
+   "Weekly application cap:" and "Weekly outreach target:": 10–20 targeted
    applications; 60/40 outreach to applications by time spent.
 5. Check wellbeing (§6) before closing.
 
@@ -106,15 +110,17 @@ at that stage's coach file; a targeting leak goes to `strategy.md`.
 
 ## 6. Cadence and wellbeing
 
-- **Weekly cap** 10–20 targeted applications; past that the interview rate
-  roughly halves. Quality of fit, not volume, moves the funnel.
+- **Weekly cap** 10–20 targeted applications, 60/40 outreach to
+  applications by time spent: 11–20 applications → ~9% interview rate,
+  100+ → ~2.6% (Huntr Q1 2026, 140k applications). Quality of fit, not
+  volume, moves the funnel.
 - **Batch and rest**: source and apply in two or three blocks a week; keep
   one weekday application-free. Interview weeks pause new applications.
 - **Runway-aware urgency**: under 3 months of runway → widen targets one
   notch, add agencies and contract roles (`markets/<cc>.md`), raise the cap
   to 20; over 6 months → hold the bar and the referral-first rule.
-- **Expect 80–110 days** for a median search; say so at the start so week
-  six does not read as failure.
+- **Expect 82–108 days** for a median search (Huntr Q1/Q2 2026); say so
+  at the start so week six does not read as failure.
 - **Rejection reframing** — one line, then move on: a rejection is one
   reader's decision on one day; a form rejection carries no information
   about the user; a rejection after a final round means the profile is

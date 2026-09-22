@@ -10,7 +10,8 @@ worth more than ten week-old ones.
 Work down this ladder and state the rung in the first line of the shortlist
 ("Source: search_jobs.py, 3 boards, --days 2").
 
-1. **`search_jobs.py`** (workspace mode). Reads profile §2/§3, queries
+1. **`search_jobs.py`** (workspace mode). Reads profile §1–§3 (location,
+   market, keywords, boards, salary, must-haves, dealbreakers), queries
    JobStreet MY/SG, MyCareersFuture (SG), LinkedIn guest search, Hiredly
    (MY) — Indeed only when `python-jobspy` is installed and the profile
    lists it — dedupes against `seen-jobs.json`, applies knockouts, and ranks
@@ -33,9 +34,10 @@ Work down this ladder and state the rung in the first line of the shortlist
    `site:linkedin.com/jobs …`. Web search sees public listing pages only,
    never a logged-in feed; say so.
 4. **The user pastes** postings or URLs. Save each with
-   `fetch_posting.py <url> --save` (workspace) so the Qualifier has the full
-   text; `--stdin` accepts pasted text; exit 3 means the page is blocked —
-   ask for the text or suggest `pip install cloakbrowser`.
+   `python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_posting.py <url> --save`
+   (workspace) so the Qualifier has the full text; `--stdin` accepts pasted
+   text; exit 3 means the page is blocked — ask for the text or suggest
+   `pip install cloakbrowser`.
 
 Never answer from memory: listings and salaries change daily.
 
@@ -48,12 +50,16 @@ Never answer from memory: listings and salaries change daily.
   Salary | Link` — fresh first, then by salary, then by board priority
 - `### Needs a look` — rows that matched none of the profile's must-have
   words. The teaser is short, so this list is noisy: skim it, do not skip it.
-- `### Knocked out` — `Company — Role: reason`, where the reason is a
-  dealbreaker word, `salary below floor`, or staleness. Knocked-out rows are
-  not remembered as seen, so they reappear if the criteria change.
-- `Sources: jobstreet 42 · mcf 10 · linkedin 429 at page 2, stopped ·
-  indeed skipped: pip install python-jobspy` — read this line every time; a
-  board that stopped early means the shortlist is partial.
+  The table shows at most 10 rows; `--json` carries the rest.
+- `### Knocked out` — `Company — Role: reason`, where the reason is
+  `dealbreaker: <phrase>`, `salary below floor` or `missing must-have`.
+  Postings older than `--days` are dropped silently before this step and
+  never listed. Knocked-out rows are not remembered as seen, so they
+  reappear if the criteria change.
+- `Sources: jobstreet 42 · mcf 10 · linkedin 12 (HTTP 429 at page 2,
+  stopped) · indeed skipped: pip install python-jobspy` — count first,
+  warnings in parentheses. Read this line every time; a board that stopped
+  early means the shortlist is partial.
 
 ## 3. Freshness and cadence
 
@@ -61,18 +67,20 @@ Never answer from memory: listings and salaries change daily.
   go first; anything older than 30 days is a repost until proven otherwise.
 - Recurring digest: `/loop 1d /job-hunter:search` in Claude Code, or a
   `/schedule` routine; each run only shows what is new since the last one.
-- Weekly cap: 10–20 targeted applications. Past 20 a week the interview
-  rate roughly halves; the freed time goes to outreach (`networking.md`).
+- Weekly cap: 10–20 targeted applications. 11–20 applications → ~9%
+  interview rate, 100+ → ~2.6% (Huntr Q1 2026, 140k applications); the
+  freed time goes to outreach (`networking.md`).
 - One shot per company: never apply twice to the same company in one search
-  cycle; re-applying halves the response rate. Check `pipeline.md` first.
+  cycle; re-applying to the same company halves the response rate (Huntr Q1
+  2026). Check `pipeline.md` first.
 
 ## 4. Route to the direct channel
 
 A board listing is often a mirror of the company's own careers page. Before
 applying, find the direct posting (career page, Greenhouse/Lever/Workday
-link) and apply there: one-click board applies convert at roughly 1–4%,
-direct applications two to three times better. Log `Source` as the place
-the application actually went (`career page`, not `LinkedIn`).
+link) and apply there: Easy Apply 1–4% vs direct 2–3× (Huntr/LinkedIn
+data). Log `Source` as the place the application actually went (`career
+page`, not `LinkedIn`).
 
 Agencies are a real channel in MY/SG: which ones, and how to handle them,
 is in `markets/my.md` and `markets/sg.md`.
@@ -109,7 +117,8 @@ high-fit dozen beats a noisy fifty, with one or two stretch targets:
   person was found and never fetch the result pages.
 - Offer to save chosen rows (`tracker.py add --company X --role Y --source S
   --channel cold --stage saved`) and to fetch the full posting for the
-  Qualifier (`fetch_posting.py <url> --save`).
+  Qualifier (`python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_posting.py <url>
+  --save`).
 
 ## 7. Feed forward
 
@@ -119,5 +128,7 @@ high-fit dozen beats a noisy fifty, with one or two stretch targets:
   the application goes out (`networking.md`).
 - A search that keeps returning the same knockouts or an empty main table is
   a targeting signal — hand it to `strategy.md`, not to more searching.
-- Keep politeness: the script sends one request per second per board and
-  at most three LinkedIn pages; do not raise `--pages` above 3 for LinkedIn.
+- Keep politeness: only LinkedIn is throttled — `PAGE_DELAY = 2.5` seconds
+  between pages and `MAX_PAGES = 3`, so `--pages` above 3 has no effect
+  there; every request identifies itself with the `job-hunter-skill`
+  User-Agent from `_common.py`.
