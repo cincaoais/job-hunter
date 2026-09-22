@@ -8,6 +8,7 @@ it without a virtualenv.
 from __future__ import annotations
 
 import datetime
+import html as html_mod
 import importlib
 import json
 import os
@@ -96,6 +97,77 @@ def http_post_json(url, payload, headers=None, timeout=20) -> tuple[int, bytes]:
         return e.code, e.read()
     except urllib.error.URLError as e:
         return 0, str(e).encode()
+
+
+def default_fetch(url, headers=None, method="GET", payload=None) -> tuple[int, bytes]:
+    """The injectable-fetch shape the board sources use by default."""
+    if method.upper() == "POST":
+        return http_post_json(url, payload or {}, headers=headers)
+    return http_get(url, headers=headers)
+
+
+# --- HTML -> text ------------------------------------------------------------
+
+_DROP_RE = re.compile(r"<(script|style)\b.*?</\1\s*>", re.S | re.I)
+_LI_RE = re.compile(r"<\s*li[^>]*>\s*", re.I)
+_BREAK_RE = re.compile(
+    r"<\s*br\s*/?>"
+    r"|<\s*/\s*(?:p|div|li|ul|ol|tr|table|section|blockquote|h[1-6])\s*>"
+    r"|<\s*(?:p|h[1-6])[^>]*>",
+    re.I,
+)
+_TAG_RE = re.compile(r"<[^>]*>")
+
+
+def html_to_text(html: str) -> str:
+    """Flatten a job-description HTML blob into readable markdown-ish text.
+
+    `<li>` becomes "- ", block ends and `<br>` become newlines, every other
+    tag is dropped, entities are unescaped and runs of blank lines collapse
+    to one.
+    """
+    if not html:
+        return ""
+    s = _DROP_RE.sub("", html)
+    s = _LI_RE.sub("\n- ", s)
+    s = _BREAK_RE.sub("\n", s)
+    s = _TAG_RE.sub("", s)
+    s = html_mod.unescape(s)
+    s = s.replace(" ", " ").replace("\r\n", "\n").replace("\r", "\n")
+    s = "\n".join(re.sub(r"[ \t]+", " ", line).strip() for line in s.split("\n"))
+    return re.sub(r"\n{3,}", "\n\n", s).strip()
+
+
+# --- Normalized records shared by the board sources --------------------------
+
+JOB_KEYS = (
+    "id", "source", "title", "company", "location", "mode",
+    "salary_min", "salary_max", "currency", "salary_label",
+    "posted", "url", "teaser", "applicants", "country",
+)
+DETAIL_KEYS = ("description_md", "title", "company", "url", "screening_questions")
+
+
+def job_record(source: str, country: str, **fields) -> dict:
+    """A normalized job dict with every key present ("" / None when unknown)."""
+    rec = dict.fromkeys(JOB_KEYS, "")
+    rec.update(source=source, country=country, salary_min=None, salary_max=None, applicants=None)
+    unknown = sorted(set(fields) - set(JOB_KEYS))
+    if unknown:
+        raise KeyError(f"unknown job fields: {unknown}")
+    rec.update(fields)
+    return rec
+
+
+def detail_record(**fields) -> dict:
+    """A normalized job-detail dict with every key present."""
+    rec = dict.fromkeys(DETAIL_KEYS, "")
+    rec["screening_questions"] = []
+    unknown = sorted(set(fields) - set(DETAIL_KEYS))
+    if unknown:
+        raise KeyError(f"unknown detail fields: {unknown}")
+    rec.update(fields)
+    return rec
 
 
 # --- Markdown table helpers --------------------------------------------------

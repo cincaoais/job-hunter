@@ -145,3 +145,51 @@ def test_rate_limit_different_hosts_do_not_sleep(monkeypatch):
     c._rate_limit("http://example.com/a")
     c._rate_limit("http://other.com/a")
     assert calls == []
+
+def test_html_to_text_flattens_lists_breaks_and_entities():
+    html = (
+        "<h2>About</h2><p>We build <b>things</b>&nbsp;fast.</p>"
+        "<ul><li>Ship code</li><li>Own outcomes &amp; results</li></ul>"
+        "<div>Line one<br>Line two</div><script>alert('x')</script>"
+    )
+    out = c.html_to_text(html)
+    assert [line for line in out.splitlines() if line] == [
+        "About",
+        "We build things fast.",
+        "- Ship code",
+        "- Own outcomes & results",
+        "Line one",
+        "Line two",
+    ]
+    assert "<" not in out
+
+def test_html_to_text_collapses_blank_runs_and_handles_empty():
+    assert c.html_to_text("<p>a</p><p></p><p></p><p>b</p>") == "a\n\nb"
+    assert c.html_to_text("") == ""
+
+def test_job_record_always_carries_every_key():
+    rec = c.job_record("jobstreet", "MY", title="Dev")
+    assert set(rec) == set(c.JOB_KEYS)
+    assert rec["title"] == "Dev" and rec["source"] == "jobstreet" and rec["country"] == "MY"
+    assert rec["salary_min"] is None and rec["applicants"] is None and rec["teaser"] == ""
+
+def test_job_record_rejects_unknown_fields():
+    try:
+        c.job_record("jobstreet", "MY", salaryMin=1)
+    except KeyError as e:
+        assert "salaryMin" in str(e)
+    else:
+        raise AssertionError("expected KeyError")
+
+def test_detail_record_defaults():
+    rec = c.detail_record(title="Dev")
+    assert set(rec) == set(c.DETAIL_KEYS)
+    assert rec["screening_questions"] == [] and rec["description_md"] == ""
+
+def test_default_fetch_routes_get_and_post(monkeypatch):
+    calls = []
+    monkeypatch.setattr(c, "http_get", lambda url, headers=None: calls.append(("GET", url, headers)) or (200, b"g"))
+    monkeypatch.setattr(c, "http_post_json", lambda url, payload, headers=None: calls.append(("POST", url, payload)) or (200, b"p"))
+    assert c.default_fetch("http://x/1", {"User-Agent": "ua"}) == (200, b"g")
+    assert c.default_fetch("http://x/2", None, "POST", {"a": 1}) == (200, b"p")
+    assert calls == [("GET", "http://x/1", {"User-Agent": "ua"}), ("POST", "http://x/2", {"a": 1})]
