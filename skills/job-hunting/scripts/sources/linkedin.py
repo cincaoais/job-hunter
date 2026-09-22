@@ -46,6 +46,7 @@ _DETAIL_COMPANY_RE = re.compile(r'class="topcard__org-name-link[^"]*"[^>]*>(.*?)
 _DETAIL_URL_RE = re.compile(r'https://[a-z.]*linkedin\.com/jobs/view/[^"?\s]+')
 _MARKUP_RE = re.compile(r'<div class="show-more-less-html__markup[^"]*"[^>]*>', re.S)
 _NUM_RE = re.compile(r"\d[\d,]*")
+_DECIMALS_RE = re.compile(r"\.\d+")
 
 
 def _text(html: str) -> str:
@@ -56,7 +57,8 @@ def _text(html: str) -> str:
 
 def parse_salary(label: str) -> tuple[int | None, int | None]:
     """Guest cards show e.g. "MYR8,000.00 - MYR12,000.00"; no digits -> (None, None)."""
-    nums = [int(n.replace(",", "")) for n in _NUM_RE.findall(label or "")]
+    whole = _DECIMALS_RE.sub("", label or "")
+    nums = [int(n.replace(",", "")) for n in _NUM_RE.findall(whole)]
     if not nums:
         return None, None
     if len(nums) == 1:

@@ -283,6 +283,15 @@ def test_jobstreet_parse_salary(label, expected):
 
 
 @pytest.mark.parametrize("label,expected", [
+    ("MYR8,000.00 - MYR12,000.00", (8000, 12000)),
+    ("SGD5,500.00", (5500, 5500)),
+    ("", (None, None)),
+])
+def test_linkedin_parse_salary_ignores_decimals(label, expected):
+    assert linkedin.parse_salary(label) == expected
+
+
+@pytest.mark.parametrize("label,expected", [
     ("3500 - 4999", (3500, 4999)),
     ("500", (500, 500)),
     ("Undisclosed", (None, None)),
