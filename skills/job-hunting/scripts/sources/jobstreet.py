@@ -146,6 +146,9 @@ def parse_detail(raw: bytes | str, *, country: str) -> dict:
         company=str(dict_at(job, "advertiser").get("name") or "").strip(),
         url=url,
         screening_questions=[],
+        location=str(dict_at(job, "location").get("label") or "").strip(),
+        salary_label=str(dict_at(job, "salary").get("label") or "").strip(),
+        posted=str(dict_at(job, "listedAt").get("dateTimeUtc") or "")[:10],
     )
 
 

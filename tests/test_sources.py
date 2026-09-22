@@ -23,7 +23,8 @@ JOB_KEYS = {
     "salary_min", "salary_max", "currency", "salary_label",
     "posted", "url", "teaser", "applicants", "country",
 }
-DETAIL_KEYS = {"description_md", "title", "company", "url", "screening_questions"}
+DETAIL_KEYS = {"description_md", "title", "company", "url", "screening_questions",
+               "location", "salary_label", "posted"}
 DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -235,6 +236,10 @@ def test_jobstreet_parse_detail():
     assert len(got["description_md"]) > 200
     assert "<" not in got["description_md"]
     assert "- Location: Kuala Lumpur" in got["description_md"]
+    # the GraphQL payload carries these; fetch_posting puts them in frontmatter
+    assert got["location"] == "Kuala Lumpur City Centre, Kuala Lumpur"
+    assert got["posted"] == "2026-09-15"
+    assert got["salary_label"] == ""  # this advertiser published no salary
 
 
 def test_mcf_parse_detail():
@@ -247,6 +252,9 @@ def test_mcf_parse_detail():
     assert len(got["description_md"]) > 200
     assert "<" not in got["description_md"]
     assert "- Develop, maintain and debug embedded firmware" in got["description_md"]
+    assert got["location"] == "D05 Pasir Panjang, Hong Leong Garden, Clementi New Town"
+    assert got["posted"] == "2026-09-16"
+    assert got["salary_label"] == "SGD 4,000 - 6,500 per month"
 
 
 def test_linkedin_parse_detail():
@@ -258,6 +266,9 @@ def test_linkedin_parse_detail():
     assert got["screening_questions"] == []
     assert len(got["description_md"]) > 200
     assert "<" not in got["description_md"]
+    # the guest top card carries the location; it has no date or salary
+    assert got["location"] == "Petaling Jaya, Selangor, Malaysia"
+    assert got["posted"] == "" and got["salary_label"] == ""
 
 
 def test_parse_detail_on_junk_returns_empty_record():
@@ -266,6 +277,8 @@ def test_parse_detail_on_junk_returns_empty_record():
         got = mod.parse_detail(raw, country="MY")
         assert set(got) == DETAIL_KEYS
         assert got["description_md"] == "" and got["screening_questions"] == []
+        for key in ("location", "salary_label", "posted"):
+            assert got[key] == ""
 
 
 # --- salary parsing -----------------------------------------------------------

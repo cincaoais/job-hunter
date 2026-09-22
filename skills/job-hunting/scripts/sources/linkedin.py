@@ -47,6 +47,8 @@ _DETAIL_TITLE_RE = re.compile(r'class="top-card-layout__title[^"]*"[^>]*>(.*?)</
 _DETAIL_COMPANY_RE = re.compile(r'class="topcard__org-name-link[^"]*"[^>]*>(.*?)</a>', re.S)
 _DETAIL_URL_RE = re.compile(r'https://[a-z.]*linkedin\.com/jobs/view/[^"?\s]+')
 _MARKUP_RE = re.compile(r'<div class="show-more-less-html__markup[^"]*"[^>]*>', re.S)
+_DETAIL_FLAVOR_RE = re.compile(
+    r'<span class="([^"]*topcard__flavor--bullet[^"]*)"[^>]*>(.*?)</span>', re.S)
 _DECIMALS_RE = re.compile(r"\.\d+")
 
 
@@ -144,6 +146,17 @@ def search(keywords: str, location: str, *, country: str, days: int | None = Non
     return jobs
 
 
+def _detail_location(html: str) -> str:
+    """The top card's bullet flavor that is not metadata ("47 applicants")."""
+    for classes, inner in _DETAIL_FLAVOR_RE.findall(html):
+        if "metadata" in classes:
+            continue
+        text = _text(inner)
+        if text:
+            return text
+    return ""
+
+
 def parse_detail(raw: bytes | str, *, country: str) -> dict:
     html = _as_text(raw)
     markup = _MARKUP_RE.search(html)
@@ -151,12 +164,17 @@ def parse_detail(raw: bytes | str, *, country: str) -> dict:
     title_match = _DETAIL_TITLE_RE.search(html)
     company_match = _DETAIL_COMPANY_RE.search(html)
     url_match = _DETAIL_URL_RE.search(html)
+    date_match = _DATE_RE.search(html)
+    salary_match = _SALARY_RE.search(html)
     return detail_record(
         description_md=description,
         title=_text(title_match.group(1)) if title_match else "",
         company=_text(company_match.group(1)) if company_match else "",
         url=html_mod.unescape(url_match.group(0)) if url_match else "",
         screening_questions=[],
+        location=_detail_location(html),
+        salary_label=_text(salary_match.group(1)) if salary_match else "",
+        posted=date_match.group(1) if date_match else "",
     )
 
 

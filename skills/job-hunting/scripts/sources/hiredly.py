@@ -122,9 +122,13 @@ def parse_detail(raw: bytes | str, *, country: str) -> dict:
         description_md=html_to_text(
             str(job.get("description") or job.get("jobDescription") or "")),
         title=str(job.get("title") or "").strip(),
-        company=str(dict_at(job, "company").get("name") or "").strip(),
+        company=str(dict_at(job, "company").get("name")
+                    or job.get("aggregatedCompanyName") or "").strip(),
         url=f"{BASE}/jobs/{slug}" if slug else "",
         screening_questions=[],
+        location=str(job.get("stateRegion") or job.get("location") or "").strip(),
+        salary_label=str(job.get("salary") or "").strip(),
+        posted=str(job.get("activeAt") or "")[:10],
     )
 
 

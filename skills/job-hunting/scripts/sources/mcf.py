@@ -50,6 +50,15 @@ def _salary_label(low: int | None, high: int | None) -> str:
     return ""
 
 
+def _location(row: dict) -> str:
+    """The first listed district; every MCF job is in Singapore, so that is
+    the fallback — but an empty payload stays empty rather than claiming one."""
+    districts = rows_of(dict_at(row, "address"), "districts")
+    first = dict_at(districts[0] if districts else None)
+    named = str(first.get("location") or "").strip()
+    return named or ("Singapore" if row else "")
+
+
 def _mode(row: dict) -> str:
     text = " ".join(str(a) for a in rows_of(row, "flexibleWorkArrangements")).lower()
     if "remote" in text or "telecommut" in text or "work from home" in text:
@@ -92,15 +101,12 @@ def parse_search(raw: bytes | str, *, country: str) -> list[dict]:
         meta = dict_at(row, "metadata")
         salary = dict_at(row, "salary")
         low, high = _int(salary.get("minimum")), _int(salary.get("maximum"))
-        districts = rows_of(dict_at(row, "address"), "districts")
-        first_district = dict_at(districts[0] if districts else None)
-        location = str(first_district.get("location") or "") or "Singapore"
         jobs.append(job_record(
             NAME, country,
             id=f"{NAME}:{uuid}",
             title=str(row.get("title") or "").strip(),
             company=str(dict_at(row, "postedCompany").get("name") or "").strip(),
-            location=location.strip(),
+            location=_location(row),
             mode=_mode(row),
             salary_min=low,
             salary_max=high,
@@ -144,12 +150,16 @@ def parse_detail(raw: bytes | str, *, country: str = COUNTRY) -> dict:
     uuid = str(job.get("uuid") or "").strip()
     meta = dict_at(job, "metadata")
     url = str(meta.get("jobDetailsUrl") or "") or (f"{SITE}/job/{uuid}" if uuid else "")
+    salary = dict_at(job, "salary")
     return detail_record(
         description_md=html_to_text(str(job.get("description") or "")),
         title=str(job.get("title") or "").strip(),
         company=str(dict_at(job, "postedCompany").get("name") or "").strip(),
         url=url,
         screening_questions=_screening_questions(job.get("screeningQuestions")),
+        location=_location(job),
+        salary_label=_salary_label(_int(salary.get("minimum")), _int(salary.get("maximum"))),
+        posted=str(meta.get("newPostingDate") or "")[:10],
     )
 
 

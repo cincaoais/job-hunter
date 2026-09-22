@@ -210,7 +210,8 @@ JOB_KEYS = (
     "salary_min", "salary_max", "currency", "salary_label",
     "posted", "url", "teaser", "applicants", "country",
 )
-DETAIL_KEYS = ("description_md", "title", "company", "url", "screening_questions")
+DETAIL_KEYS = ("description_md", "title", "company", "url", "screening_questions",
+               "location", "salary_label", "posted")
 
 
 def job_record(source: str, country: str, **fields) -> dict:
