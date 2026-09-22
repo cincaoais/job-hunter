@@ -6,7 +6,6 @@ Singapore only.
 """
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 
@@ -14,12 +13,16 @@ _SCRIPTS = str(Path(__file__).resolve().parent.parent)
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from _common import default_fetch, detail_record, html_to_text, job_record  # noqa: E402
+from _common import (  # noqa: E402
+    default_fetch, detail_record, dict_at, finish_detail, html_to_text, job_record,
+    loads_or_empty, rows_of,
+)
 
 NAME = "mcf"
 LAST_WARNINGS: list[str] = []
 
 API = "https://api.mycareersfuture.gov.sg/v2"
+SITE = "https://www.mycareersfuture.gov.sg"
 COUNTRY = "SG"
 CURRENCY = "SGD"
 PAGE_SIZE = 20
@@ -30,15 +33,6 @@ def _country(country: str) -> str:
     if c != COUNTRY:
         raise ValueError(f"mcf: unsupported country {country!r} (Singapore only)")
     return c
-
-
-def _loads(raw: bytes | str):
-    if isinstance(raw, bytes):
-        raw = raw.decode("utf-8", "replace")
-    try:
-        return json.loads(raw)
-    except (ValueError, TypeError):
-        return {}
 
 
 def _int(value) -> int | None:
@@ -57,7 +51,7 @@ def _salary_label(low: int | None, high: int | None) -> str:
 
 
 def _mode(row: dict) -> str:
-    text = " ".join(str(a) for a in (row.get("flexibleWorkArrangements") or [])).lower()
+    text = " ".join(str(a) for a in rows_of(row, "flexibleWorkArrangements")).lower()
     if "remote" in text or "telecommut" in text or "work from home" in text:
         return "Remote"
     if "hybrid" in text:
@@ -73,7 +67,7 @@ def _teaser(row: dict) -> str:
 
 def _screening_questions(raw_questions) -> list[str]:
     out = []
-    for q in raw_questions or []:
+    for q in (raw_questions if isinstance(raw_questions, list) else []):
         if isinstance(q, str):
             text = q
         elif isinstance(q, dict):
@@ -88,30 +82,32 @@ def _screening_questions(raw_questions) -> list[str]:
 
 def parse_search(raw: bytes | str, *, country: str) -> list[dict]:
     country = _country(country)
-    data = _loads(raw)
     jobs = []
-    for row in data.get("results") or []:
+    for row in rows_of(loads_or_empty(raw), "results"):
+        if not isinstance(row, dict):
+            continue
         uuid = str(row.get("uuid") or "").strip()
         if not uuid:
             continue
-        meta = row.get("metadata") or {}
-        salary = row.get("salary") or {}
+        meta = dict_at(row, "metadata")
+        salary = dict_at(row, "salary")
         low, high = _int(salary.get("minimum")), _int(salary.get("maximum"))
-        districts = (row.get("address") or {}).get("districts") or []
-        location = (districts[0].get("location") if districts else "") or "Singapore"
+        districts = rows_of(dict_at(row, "address"), "districts")
+        first_district = dict_at(districts[0] if districts else None)
+        location = str(first_district.get("location") or "") or "Singapore"
         jobs.append(job_record(
             NAME, country,
             id=f"{NAME}:{uuid}",
-            title=(row.get("title") or "").strip(),
-            company=((row.get("postedCompany") or {}).get("name") or "").strip(),
+            title=str(row.get("title") or "").strip(),
+            company=str(dict_at(row, "postedCompany").get("name") or "").strip(),
             location=location.strip(),
             mode=_mode(row),
             salary_min=low,
             salary_max=high,
             currency=CURRENCY,
             salary_label=_salary_label(low, high),
-            posted=(meta.get("newPostingDate") or "")[:10],
-            url=(meta.get("jobDetailsUrl") or f"https://www.mycareersfuture.gov.sg/job/{uuid}"),
+            posted=str(meta.get("newPostingDate") or "")[:10],
+            url=str(meta.get("jobDetailsUrl") or "") or f"{SITE}/job/{uuid}",
             teaser=_teaser(row),
             applicants=_int(meta.get("totalNumberJobApplication")),
         ))
@@ -144,15 +140,14 @@ def search(keywords: str, location: str, *, country: str, days: int | None = Non
 
 def parse_detail(raw: bytes | str, *, country: str = COUNTRY) -> dict:
     """Parse a v2 job detail payload. MCF is Singapore-only; `country` is unused."""
-    job = _loads(raw)
+    job = dict_at(loads_or_empty(raw))
     uuid = str(job.get("uuid") or "").strip()
-    meta = job.get("metadata") or {}
-    url = meta.get("jobDetailsUrl") or (
-        f"https://www.mycareersfuture.gov.sg/job/{uuid}" if uuid else "")
+    meta = dict_at(job, "metadata")
+    url = str(meta.get("jobDetailsUrl") or "") or (f"{SITE}/job/{uuid}" if uuid else "")
     return detail_record(
-        description_md=html_to_text(job.get("description") or ""),
-        title=(job.get("title") or "").strip(),
-        company=((job.get("postedCompany") or {}).get("name") or "").strip(),
+        description_md=html_to_text(str(job.get("description") or "")),
+        title=str(job.get("title") or "").strip(),
+        company=str(dict_at(job, "postedCompany").get("name") or "").strip(),
         url=url,
         screening_questions=_screening_questions(job.get("screeningQuestions")),
     )
@@ -160,10 +155,10 @@ def parse_detail(raw: bytes | str, *, country: str = COUNTRY) -> dict:
 
 def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     """`job_id` is the MCF uuid; None when the request or job is missing."""
+    LAST_WARNINGS.clear()
     fetch = fetch or default_fetch
     status, body = fetch(f"{API}/jobs/{job_id}", None, "GET", None)
     if status != 200:
         LAST_WARNINGS.append(f"{NAME}: HTTP {status} for job {job_id}")
         return None
-    got = parse_detail(body, country=COUNTRY)
-    return got if got["description_md"] or got["title"] else None
+    return finish_detail(parse_detail(body, country=COUNTRY))

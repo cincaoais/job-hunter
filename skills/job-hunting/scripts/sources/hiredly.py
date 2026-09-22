@@ -8,7 +8,6 @@ are then keyword-filtered client-side. Malaysia only.
 from __future__ import annotations
 
 import html as html_mod
-import json
 import re
 import sys
 from pathlib import Path
@@ -18,7 +17,10 @@ _SCRIPTS = str(Path(__file__).resolve().parent.parent)
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from _common import default_fetch, detail_record, html_to_text, job_record  # noqa: E402
+from _common import (  # noqa: E402
+    default_fetch, detail_record, dict_at, finish_detail, first_two_ints, html_to_text,
+    job_record, loads_or_empty, rows_of,
+)
 
 NAME = "hiredly"
 LAST_WARNINGS: list[str] = []
@@ -29,32 +31,21 @@ CURRENCY = "MYR"
 
 _NEXT_DATA_RE = re.compile(
     r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', re.S)
-_NUM_RE = re.compile(r"\d[\d,]*")
 
 
 def parse_salary(label: str) -> tuple[int | None, int | None]:
     """"3500 - 4999" -> (3500, 4999); "Undisclosed" -> (None, None)."""
-    nums = [int(n.replace(",", "")) for n in _NUM_RE.findall(label or "")]
-    if not nums:
-        return None, None
-    if len(nums) == 1:
-        return nums[0], nums[0]
-    return nums[0], nums[1]
+    return first_two_ints(label)
 
 
 def _next_data(raw: bytes | str) -> dict:
     text = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else (raw or "")
     m = _NEXT_DATA_RE.search(text)
-    if not m:
-        return {}
-    try:
-        return json.loads(m.group(1))
-    except ValueError:
-        return {}
+    return dict_at(loads_or_empty(m.group(1))) if m else {}
 
 
 def _teaser(row: dict) -> str:
-    summary = html_mod.unescape(row.get("gptSummary") or "").strip()
+    summary = html_mod.unescape(str(row.get("gptSummary") or "")).strip()
     if summary:
         return " ".join(summary.split())
     bits = [str(row.get("careerLevel") or "").strip()]
@@ -66,26 +57,28 @@ def _teaser(row: dict) -> str:
 
 def parse_search(raw: bytes | str, *, country: str) -> list[dict]:
     country = (country or "").upper()
-    props = ((_next_data(raw).get("props") or {}).get("pageProps") or {})
+    props = dict_at(_next_data(raw), "props", "pageProps")
     jobs = []
-    for row in props.get("jobs") or []:
+    for row in rows_of(props, "jobs"):
+        if not isinstance(row, dict):
+            continue
         slug = str(row.get("slug") or "").strip()
         if not slug:
             continue
-        label = (row.get("salary") or "").strip()
+        label = str(row.get("salary") or "").strip()
         low, high = parse_salary(label)
         jobs.append(job_record(
             NAME, country,
             id=f"{NAME}:{slug}",
-            title=(row.get("title") or "").strip(),
-            company=((row.get("company") or {}).get("name")
-                     or row.get("aggregatedCompanyName") or "").strip(),
-            location=(row.get("stateRegion") or row.get("location") or "").strip(),
+            title=str(row.get("title") or "").strip(),
+            company=str(dict_at(row, "company").get("name")
+                        or row.get("aggregatedCompanyName") or "").strip(),
+            location=str(row.get("stateRegion") or row.get("location") or "").strip(),
             salary_min=low,
             salary_max=high,
             currency=CURRENCY,
             salary_label=label,
-            posted=(row.get("activeAt") or "")[:10],
+            posted=str(row.get("activeAt") or "")[:10],
             url=f"{BASE}/jobs/{slug}",
             teaser=_teaser(row),
         ))
@@ -122,13 +115,14 @@ def search(keywords: str, location: str, *, country: str, days: int | None = Non
 
 
 def parse_detail(raw: bytes | str, *, country: str) -> dict:
-    props = ((_next_data(raw).get("props") or {}).get("pageProps") or {})
-    job = props.get("job") or props.get("jobDetail") or {}
+    props = dict_at(_next_data(raw), "props", "pageProps")
+    job = dict_at(props, "job") or dict_at(props, "jobDetail")
     slug = str(job.get("slug") or "").strip()
     return detail_record(
-        description_md=html_to_text(job.get("description") or job.get("jobDescription") or ""),
-        title=(job.get("title") or "").strip(),
-        company=((job.get("company") or {}).get("name") or "").strip(),
+        description_md=html_to_text(
+            str(job.get("description") or job.get("jobDescription") or "")),
+        title=str(job.get("title") or "").strip(),
+        company=str(dict_at(job, "company").get("name") or "").strip(),
         url=f"{BASE}/jobs/{slug}" if slug else "",
         screening_questions=[],
     )
@@ -136,6 +130,7 @@ def parse_detail(raw: bytes | str, *, country: str) -> dict:
 
 def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     """`job_id` is the Hiredly slug; None when the request or job is missing."""
+    LAST_WARNINGS.clear()
     fetch = fetch or default_fetch
     status, body = fetch(f"{BASE}/jobs/{job_id}", None, "GET", None)
     if status != 200:
@@ -144,4 +139,4 @@ def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     got = parse_detail(body, country=COUNTRY)
     if not got["url"]:
         got["url"] = f"{BASE}/jobs/{job_id}"
-    return got if got["description_md"] or got["title"] else None
+    return finish_detail(got)

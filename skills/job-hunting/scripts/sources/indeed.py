@@ -8,7 +8,6 @@ either way.
 """
 from __future__ import annotations
 
-import json
 import re
 import sys
 from pathlib import Path
@@ -18,7 +17,7 @@ if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
 from _common import (  # noqa: E402
-    detail_record, html_to_text, job_record, optional_import, slugify,
+    detail_record, html_to_text, job_record, loads_or_empty, optional_import, slugify,
 )
 
 NAME = "indeed"
@@ -58,13 +57,11 @@ def _rows(raw) -> list[dict]:
     if hasattr(raw, "to_dict"):
         return raw.to_dict("records")
     if isinstance(raw, (bytes, str)):
-        text = raw.decode("utf-8", "replace") if isinstance(raw, bytes) else raw
-        try:
-            raw = json.loads(text)
-        except ValueError:
-            return []
+        raw = loads_or_empty(raw)
     if isinstance(raw, dict):
         raw = raw.get("jobs") or raw.get("results") or []
+    if not isinstance(raw, list):
+        return []
     return [row for row in raw if isinstance(row, dict)]
 
 
@@ -164,5 +161,6 @@ def parse_detail(raw, *, country: str) -> dict:
 
 def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     """jobspy has no per-id endpoint: descriptions arrive with the search rows."""
+    LAST_WARNINGS.clear()
     LAST_WARNINGS.append(f"{NAME}: no detail endpoint, use the search row for {job_id}")
     return None

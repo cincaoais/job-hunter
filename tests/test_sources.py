@@ -347,12 +347,14 @@ def test_linkedin_search_pages_and_stops_on_429():
         calls.append(url)
         return responses[min(len(calls) - 1, len(responses) - 1)]
 
+    naps = []
     jobs = linkedin.search("software engineer", "Kuala Lumpur", country="MY", days=7,
-                           pages=3, fetch=fetch)
+                           pages=3, fetch=fetch, sleep=naps.append)
     assert len(jobs) == 10
     assert len(calls) == 2
     assert "start=0" in calls[0] and "start=25" in calls[1]
     assert "f_TPR=r604800" in calls[0]
+    assert naps == [linkedin.PAGE_DELAY]  # paused before page 2, not before page 1
     assert any("429" in w for w in linkedin.LAST_WARNINGS)
 
 
@@ -411,3 +413,77 @@ def test_fixtures_are_verbatim_recordings():
     assert json.loads(fx("jobstreet_detail.json"))["data"]["jobDetails"]["job"]["id"] == "94655291"
     assert json.loads(fx("mcf_search.json"))["total"] > 0
     assert b"__NEXT_DATA__" in fx("hiredly_kl.html")
+
+
+# --- never-raise guards -------------------------------------------------------
+
+MALFORMED = [b"", b"not json at all", b"[1, 2, 3]", b'"just a string"', b"null"]
+
+
+@pytest.mark.parametrize("mod,country,container", [
+    (jobstreet, "MY", "data"),
+    (mcf, "SG", "results"),
+])
+def test_json_parse_search_survives_malformed_payloads(mod, country, container):
+    for raw in MALFORMED + [json.dumps({container: "oops"}).encode(),
+                            json.dumps({container: [None, 7, "x"]}).encode()]:
+        assert mod.parse_search(raw, country=country) == []
+
+
+def test_hiredly_parse_search_survives_malformed_payloads():
+    embedded = b'<script id="__NEXT_DATA__" type="application/json">%s</script>'
+    for raw in MALFORMED + [embedded % b'{"props": {"pageProps": {"jobs": "oops"}}}',
+                            embedded % b'{"props": "oops"}',
+                            embedded % b'{"props": {"pageProps": {"jobs": [1, null]}}}']:
+        assert hiredly.parse_search(raw, country="MY") == []
+
+
+def test_indeed_parse_search_survives_malformed_payloads():
+    for raw in MALFORMED + [b'{"jobs": "oops"}', None, [None, 3]]:
+        assert indeed.parse_search(raw, country="MY") == []
+
+
+def test_search_survives_malformed_bodies_without_raising():
+    assert jobstreet.search("swe", "KL", country="MY", fetch=fetcher(200, b"not json")) == []
+    assert mcf.search("swe", "SG", country="SG", fetch=fetcher(200, b"not json")) == []
+    assert hiredly.search("swe", "KL", country="MY", fetch=fetcher(200, b"<html>")) == []
+    assert linkedin.search("swe", "KL", country="MY", fetch=fetcher(200, b"<html>"),
+                           sleep=lambda s: None) == []
+
+
+# --- mode mapping -------------------------------------------------------------
+
+@pytest.mark.parametrize("display,expected", [
+    ("On-site", "Onsite"), ("Hybrid", "Hybrid"), ("Remote", "Remote"),
+    ("Something else", ""), (None, ""),
+])
+def test_jobstreet_mode_mapping(display, expected):
+    payload = json.dumps({"data": [{
+        "id": "1", "title": "Dev", "companyName": "Acme",
+        "workArrangements": {"displayText": display},
+    }]})
+    assert jobstreet.parse_search(payload, country="MY")[0]["mode"] == expected
+
+
+@pytest.mark.parametrize("arrangements,expected", [
+    (["Telecommuting"], "Remote"),
+    (["Work from home"], "Remote"),
+    (["Hybrid working"], "Hybrid"),
+    (["Flexi-time"], ""),
+    ([], ""),
+])
+def test_mcf_mode_mapping(arrangements, expected):
+    payload = json.dumps({"results": [{
+        "uuid": "u1", "title": "Dev", "flexibleWorkArrangements": arrangements,
+    }]})
+    assert mcf.parse_search(payload, country="SG")[0]["mode"] == expected
+
+
+# --- warnings hygiene ---------------------------------------------------------
+
+def test_detail_clears_stale_warnings():
+    for mod, country in ((jobstreet, "MY"), (mcf, "SG"), (linkedin, "MY"), (hiredly, "MY"),
+                         (indeed, "MY")):
+        mod.LAST_WARNINGS.append("stale")
+        mod.detail("1", country=country, fetch=fetcher(500, b""))
+        assert "stale" not in mod.LAST_WARNINGS

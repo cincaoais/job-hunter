@@ -8,8 +8,6 @@ fixtures; only `search`/`detail` touch the network, through an injectable
 """
 from __future__ import annotations
 
-import json
-import re
 import sys
 from pathlib import Path
 from urllib.parse import urlencode
@@ -18,7 +16,10 @@ _SCRIPTS = str(Path(__file__).resolve().parent.parent)
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from _common import default_fetch, detail_record, html_to_text, job_record  # noqa: E402
+from _common import (  # noqa: E402
+    default_fetch, detail_record, dict_at, finish_detail, first_two_ints, html_to_text,
+    job_record, loads_or_empty, rows_of,
+)
 
 NAME = "jobstreet"
 LAST_WARNINGS: list[str] = []
@@ -44,17 +45,11 @@ JOB_DETAILS_QUERY = (
 
 _MODES = {"hybrid": "Hybrid", "remote": "Remote", "on-site": "Onsite", "on site": "Onsite",
           "onsite": "Onsite"}
-_NUM_RE = re.compile(r"\d[\d,]*")
 
 
 def parse_salary(label: str) -> tuple[int | None, int | None]:
     """"RM 15,000 - RM 20,000 per month" -> (15000, 20000); no digits -> (None, None)."""
-    nums = [int(n.replace(",", "")) for n in _NUM_RE.findall(label or "")]
-    if not nums:
-        return None, None
-    if len(nums) == 1:
-        return nums[0], nums[0]
-    return nums[0], nums[1]
+    return first_two_ints(label)
 
 
 def _country(country: str) -> str:
@@ -65,46 +60,40 @@ def _country(country: str) -> str:
 
 
 def _mode(job: dict) -> str:
-    text = ((job.get("workArrangements") or {}).get("displayText") or "").strip().lower()
+    text = str(dict_at(job, "workArrangements").get("displayText") or "").strip().lower()
     return _MODES.get(text, "")
-
-
-def _loads(raw: bytes | str):
-    if isinstance(raw, bytes):
-        raw = raw.decode("utf-8", "replace")
-    try:
-        return json.loads(raw)
-    except (ValueError, TypeError):
-        return {}
 
 
 def parse_search(raw: bytes | str, *, country: str) -> list[dict]:
     country = _country(country)
     host = HOSTS[country]
-    data = _loads(raw)
     jobs = []
-    for row in data.get("data") or []:
+    for row in rows_of(loads_or_empty(raw), "data"):
+        if not isinstance(row, dict):
+            continue
         job_id = str(row.get("id") or "").strip()
         if not job_id:
             continue
-        label = row.get("salaryLabel") or ""
+        label = str(row.get("salaryLabel") or "")
         low, high = parse_salary(label)
-        teaser = (row.get("teaser") or "").strip()
+        teaser = str(row.get("teaser") or "").strip()
         if not teaser:
-            teaser = "; ".join(b.strip() for b in (row.get("bulletPoints") or []) if b)
-        locations = row.get("locations") or [{}]
+            bullets = rows_of(row, "bulletPoints")
+            teaser = "; ".join(str(b).strip() for b in bullets if b)
+        locations = rows_of(row, "locations")
+        first_location = dict_at(locations[0] if locations else None)
         jobs.append(job_record(
             NAME, country,
             id=f"{NAME}:{job_id}",
-            title=(row.get("title") or "").strip(),
-            company=(row.get("companyName") or "").strip(),
-            location=(locations[0].get("label") or "").strip(),
+            title=str(row.get("title") or "").strip(),
+            company=str(row.get("companyName") or "").strip(),
+            location=str(first_location.get("label") or "").strip(),
             mode=_mode(row),
             salary_min=low,
             salary_max=high,
             currency=CURRENCIES[country],
             salary_label=label.replace(" ", " ").strip(),
-            posted=(row.get("listingDate") or "")[:10],
+            posted=str(row.get("listingDate") or "")[:10],
             url=f"https://{host}/job/{job_id}",
             teaser=teaser,
         ))
@@ -148,13 +137,13 @@ def search(keywords: str, location: str, *, country: str, days: int | None = Non
 
 def parse_detail(raw: bytes | str, *, country: str) -> dict:
     country = _country(country)
-    job = ((_loads(raw).get("data") or {}).get("jobDetails") or {}).get("job") or {}
+    job = dict_at(loads_or_empty(raw), "data", "jobDetails", "job")
     job_id = str(job.get("id") or "").strip()
     url = f"https://{HOSTS[country]}/job/{job_id}" if job_id else ""
     return detail_record(
-        description_md=html_to_text(job.get("content") or ""),
-        title=(job.get("title") or "").strip(),
-        company=((job.get("advertiser") or {}).get("name") or "").strip(),
+        description_md=html_to_text(str(job.get("content") or "")),
+        title=str(job.get("title") or "").strip(),
+        company=str(dict_at(job, "advertiser").get("name") or "").strip(),
         url=url,
         screening_questions=[],
     )
@@ -162,6 +151,7 @@ def parse_detail(raw: bytes | str, *, country: str) -> dict:
 
 def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     """Fetch one job's full description; None when the request or job is missing."""
+    LAST_WARNINGS.clear()
     country = _country(country)
     fetch = fetch or default_fetch
     payload = {
@@ -178,5 +168,4 @@ def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     if status != 200:
         LAST_WARNINGS.append(f"{NAME}: HTTP {status} for job {job_id}")
         return None
-    got = parse_detail(body, country=country)
-    return got if got["description_md"] or got["title"] else None
+    return finish_detail(parse_detail(body, country=country))

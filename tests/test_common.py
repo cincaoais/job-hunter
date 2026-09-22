@@ -90,13 +90,13 @@ class _FakeResp:
 def test_http_get_returns_status_and_body(monkeypatch):
     monkeypatch.setattr(c.time, "sleep", lambda s: None)
     monkeypatch.setattr(c, "_last_call", {})
-    monkeypatch.setattr(c.urllib.request, "urlopen", lambda req, timeout=None: _FakeResp(200, b"body"))
+    monkeypatch.setattr(c.urllib.request, "urlopen", lambda req, timeout=None, context=None: _FakeResp(200, b"body"))
     assert c.http_get("http://example.com/x") == (200, b"body")
 
 def test_http_get_returns_http_error_code_and_body(monkeypatch):
     monkeypatch.setattr(c.time, "sleep", lambda s: None)
     monkeypatch.setattr(c, "_last_call", {})
-    def raise_it(req, timeout=None):
+    def raise_it(req, timeout=None, context=None):
         raise urllib.error.HTTPError("http://example.com/x", 404, "nf", {}, io.BytesIO(b"missing"))
     monkeypatch.setattr(c.urllib.request, "urlopen", raise_it)
     assert c.http_get("http://example.com/x") == (404, b"missing")
@@ -104,7 +104,7 @@ def test_http_get_returns_http_error_code_and_body(monkeypatch):
 def test_http_get_returns_zero_status_on_url_error(monkeypatch):
     monkeypatch.setattr(c.time, "sleep", lambda s: None)
     monkeypatch.setattr(c, "_last_call", {})
-    def raise_it(req, timeout=None):
+    def raise_it(req, timeout=None, context=None):
         raise urllib.error.URLError("boom")
     monkeypatch.setattr(c.urllib.request, "urlopen", raise_it)
     status, body = c.http_get("http://example.com/x")
@@ -115,7 +115,7 @@ def test_http_post_json_sends_content_type_and_json_body(monkeypatch):
     captured = {}
     monkeypatch.setattr(c.time, "sleep", lambda s: None)
     monkeypatch.setattr(c, "_last_call", {})
-    def fake_urlopen(req, timeout=None):
+    def fake_urlopen(req, timeout=None, context=None):
         captured["req"] = req
         return _FakeResp(200, b"{}")
     monkeypatch.setattr(c.urllib.request, "urlopen", fake_urlopen)
@@ -193,3 +193,52 @@ def test_default_fetch_routes_get_and_post(monkeypatch):
     assert c.default_fetch("http://x/1", {"User-Agent": "ua"}) == (200, b"g")
     assert c.default_fetch("http://x/2", None, "POST", {"a": 1}) == (200, b"p")
     assert calls == [("GET", "http://x/1", {"User-Agent": "ua"}), ("POST", "http://x/2", {"a": 1})]
+
+def test_http_get_turns_a_timeout_into_status_zero(monkeypatch):
+    monkeypatch.setattr(c.time, "sleep", lambda s: None)
+    monkeypatch.setattr(c, "_last_call", {})
+    def raise_timeout(req, timeout=None, context=None):
+        raise TimeoutError("timed out")
+    monkeypatch.setattr(c.urllib.request, "urlopen", raise_timeout)
+    status, body = c.http_get("http://example.com/x")
+    assert status == 0 and b"timed out" in body
+
+def test_http_post_json_turns_a_dropped_connection_into_status_zero(monkeypatch):
+    monkeypatch.setattr(c.time, "sleep", lambda s: None)
+    monkeypatch.setattr(c, "_last_call", {})
+    def raise_disconnected(req, timeout=None, context=None):
+        raise c.http.client.RemoteDisconnected("closed")
+    monkeypatch.setattr(c.urllib.request, "urlopen", raise_disconnected)
+    assert c.http_post_json("http://example.com/x", {})[0] == 0
+
+def test_ssl_context_verifies():
+    ctx = c._ssl_context()
+    assert isinstance(ctx, c.ssl.SSLContext)
+    assert ctx.verify_mode == c.ssl.CERT_REQUIRED and ctx.check_hostname
+
+def test_ssl_context_without_certifi_still_verifies(monkeypatch):
+    monkeypatch.setattr(c, "optional_import", lambda name: None)
+    ctx = c._ssl_context()
+    assert isinstance(ctx, c.ssl.SSLContext) and ctx.verify_mode == c.ssl.CERT_REQUIRED
+
+def test_first_two_ints():
+    assert c.first_two_ints("RM 15,000 - RM 20,000 per month") == (15000, 20000)
+    assert c.first_two_ints("5000") == (5000, 5000)
+    assert c.first_two_ints("Undisclosed") == (None, None)
+    assert c.first_two_ints("") == (None, None)
+
+def test_loads_or_empty_and_shape_guards():
+    assert c.loads_or_empty(b'{"a": 1}') == {"a": 1}
+    assert c.loads_or_empty("not json") == {}
+    assert c.loads_or_empty(b"[1]") == [1]
+    assert c.dict_at({"a": {"b": {"c": 1}}}, "a", "b") == {"c": 1}
+    assert c.dict_at({"a": "oops"}, "a", "b") == {}
+    assert c.dict_at(None) == {}
+    assert c.rows_of({"data": [1, 2]}, "data") == [1, 2]
+    assert c.rows_of({"data": "oops"}, "data") == []
+    assert c.rows_of("oops", "data") == []
+
+def test_finish_detail_drops_empty_records():
+    assert c.finish_detail(c.detail_record()) is None
+    assert c.finish_detail(c.detail_record(title="Dev"))["title"] == "Dev"
+    assert c.finish_detail(c.detail_record(description_md="long text")) is not None

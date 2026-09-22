@@ -9,10 +9,12 @@ from __future__ import annotations
 
 import datetime
 import html as html_mod
+import http.client
 import importlib
 import json
 import os
 import re
+import ssl
 import time
 import urllib.error
 import urllib.request
@@ -68,19 +70,42 @@ def _rate_limit(url: str) -> None:
     _last_call[host] = time.monotonic()
 
 
-def http_get(url, headers=None, timeout=20) -> tuple[int, bytes]:
-    _rate_limit(url)
-    hdrs = {"User-Agent": UA}
-    if headers:
-        hdrs.update(headers)
-    req = urllib.request.Request(url, headers=hdrs)
+def _ssl_context() -> ssl.SSLContext:
+    """A verifying TLS context, using certifi's CA bundle when it is installed.
+
+    python.org builds ship without a system CA bundle, so plain
+    `create_default_context()` fails with CERTIFICATE_VERIFY_FAILED there.
+    Verification is never disabled: without certifi we still return the
+    default verifying context.
+    """
+    certifi = optional_import("certifi")
+    if certifi is not None:
+        return ssl.create_default_context(cafile=certifi.where())
+    return ssl.create_default_context()
+
+
+def _send(req, timeout: int) -> tuple[int, bytes]:
+    """Send `req`, turning every transport failure into (0, message)."""
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
+        with urllib.request.urlopen(req, timeout=timeout, context=_ssl_context()) as resp:
             return resp.status, resp.read()
     except urllib.error.HTTPError as e:
         return e.code, e.read()
     except urllib.error.URLError as e:
         return 0, str(e).encode()
+    except http.client.HTTPException as e:
+        return 0, f"{e.__class__.__name__}: {e}".encode()
+    except OSError as e:
+        # timeouts and dropped connections during getresponse()/read()
+        return 0, f"{e.__class__.__name__}: {e}".encode()
+
+
+def http_get(url, headers=None, timeout=20) -> tuple[int, bytes]:
+    _rate_limit(url)
+    hdrs = {"User-Agent": UA}
+    if headers:
+        hdrs.update(headers)
+    return _send(urllib.request.Request(url, headers=hdrs), timeout)
 
 
 def http_post_json(url, payload, headers=None, timeout=20) -> tuple[int, bytes]:
@@ -89,14 +114,7 @@ def http_post_json(url, payload, headers=None, timeout=20) -> tuple[int, bytes]:
     if headers:
         hdrs.update(headers)
     data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(url, data=data, headers=hdrs, method="POST")
-    try:
-        with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.status, resp.read()
-    except urllib.error.HTTPError as e:
-        return e.code, e.read()
-    except urllib.error.URLError as e:
-        return 0, str(e).encode()
+    return _send(urllib.request.Request(url, data=data, headers=hdrs, method="POST"), timeout)
 
 
 def default_fetch(url, headers=None, method="GET", payload=None) -> tuple[int, bytes]:
@@ -138,6 +156,53 @@ def html_to_text(html: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", s).strip()
 
 
+# --- Parsing helpers shared by the board sources -----------------------------
+
+_FIRST_INTS_RE = re.compile(r"\d[\d,]*")
+
+
+def first_two_ints(label: str) -> tuple[int | None, int | None]:
+    """First two integers in `label` as (min, max).
+
+    One number means both bounds; no digits at all means (None, None). Used
+    for the boards' free-text salary labels.
+    """
+    nums = [int(n.replace(",", "")) for n in _FIRST_INTS_RE.findall(label or "")]
+    if not nums:
+        return None, None
+    if len(nums) == 1:
+        return nums[0], nums[0]
+    return nums[0], nums[1]
+
+
+def loads_or_empty(raw: bytes | str):
+    """Decode JSON from bytes or str, returning {} for anything unparseable."""
+    if isinstance(raw, bytes):
+        raw = raw.decode("utf-8", "replace")
+    try:
+        return json.loads(raw)
+    except (ValueError, TypeError):
+        return {}
+
+
+def dict_at(container, *keys) -> dict:
+    """Walk nested dict keys, returning {} as soon as anything is not a dict."""
+    current = container
+    for key in keys:
+        if not isinstance(current, dict):
+            return {}
+        current = current.get(key)
+    return current if isinstance(current, dict) else {}
+
+
+def rows_of(container, key: str) -> list:
+    """`container[key]` when it is a list, else [] — payload-shape guard."""
+    if not isinstance(container, dict):
+        return []
+    rows = container.get(key)
+    return rows if isinstance(rows, list) else []
+
+
 # --- Normalized records shared by the board sources --------------------------
 
 JOB_KEYS = (
@@ -168,6 +233,11 @@ def detail_record(**fields) -> dict:
         raise KeyError(f"unknown detail fields: {unknown}")
     rec.update(fields)
     return rec
+
+
+def finish_detail(got: dict) -> dict | None:
+    """A parsed detail is only worth returning if it found a description or title."""
+    return got if got["description_md"] or got["title"] else None
 
 
 # --- Markdown table helpers --------------------------------------------------

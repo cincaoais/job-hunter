@@ -18,7 +18,9 @@ _SCRIPTS = str(Path(__file__).resolve().parent.parent)
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
 
-from _common import default_fetch, detail_record, html_to_text, job_record  # noqa: E402
+from _common import (  # noqa: E402
+    default_fetch, detail_record, finish_detail, first_two_ints, html_to_text, job_record,
+)
 
 NAME = "linkedin"
 LAST_WARNINGS: list[str] = []
@@ -45,7 +47,6 @@ _DETAIL_TITLE_RE = re.compile(r'class="top-card-layout__title[^"]*"[^>]*>(.*?)</
 _DETAIL_COMPANY_RE = re.compile(r'class="topcard__org-name-link[^"]*"[^>]*>(.*?)</a>', re.S)
 _DETAIL_URL_RE = re.compile(r'https://[a-z.]*linkedin\.com/jobs/view/[^"?\s]+')
 _MARKUP_RE = re.compile(r'<div class="show-more-less-html__markup[^"]*"[^>]*>', re.S)
-_NUM_RE = re.compile(r"\d[\d,]*")
 _DECIMALS_RE = re.compile(r"\.\d+")
 
 
@@ -57,13 +58,7 @@ def _text(html: str) -> str:
 
 def parse_salary(label: str) -> tuple[int | None, int | None]:
     """Guest cards show e.g. "MYR8,000.00 - MYR12,000.00"; no digits -> (None, None)."""
-    whole = _DECIMALS_RE.sub("", label or "")
-    nums = [int(n.replace(",", "")) for n in _NUM_RE.findall(whole)]
-    if not nums:
-        return None, None
-    if len(nums) == 1:
-        return nums[0], nums[0]
-    return nums[0], nums[1]
+    return first_two_ints(_DECIMALS_RE.sub("", label or ""))
 
 
 def _job_id(url: str) -> str:
@@ -120,17 +115,20 @@ def parse_search(raw: bytes | str, *, country: str) -> list[dict]:
 
 
 def search(keywords: str, location: str, *, country: str, days: int | None = None,
-           salary_min: int | None = None, pages: int = 1, fetch=None) -> list[dict]:
-    """Walk the guest search pages. `salary_min` has no guest filter and is
-    ignored; never raises on HTTP failure (see LAST_WARNINGS)."""
+           salary_min: int | None = None, pages: int = 1, fetch=None,
+           sleep=time.sleep) -> list[dict]:
+    """Walk the guest search pages, pausing PAGE_DELAY seconds between them.
+
+    `salary_min` has no guest filter and is ignored; `sleep` is injectable so
+    tests run instantly. Never raises on HTTP failure (see LAST_WARNINGS).
+    """
     LAST_WARNINGS.clear()
     country = (country or "").upper()
-    live = fetch is None
     fetch = fetch or default_fetch
     jobs: list[dict] = []
     for page in range(min(max(1, pages), MAX_PAGES)):
-        if page and live:
-            time.sleep(PAGE_DELAY)
+        if page:
+            sleep(PAGE_DELAY)
         params = {"keywords": keywords, "location": location, "start": page * PAGE_SIZE}
         url = f"{GUEST_API}/seeMoreJobPostings/search?" + urlencode(params)
         if days:
@@ -164,6 +162,7 @@ def parse_detail(raw: bytes | str, *, country: str) -> dict:
 
 def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     """Fetch the guest jobPosting fragment; None when the request or job is missing."""
+    LAST_WARNINGS.clear()
     fetch = fetch or default_fetch
     status, body = fetch(f"{GUEST_API}/jobPosting/{job_id}", {"User-Agent": BROWSER_UA},
                          "GET", None)
@@ -173,4 +172,4 @@ def detail(job_id: str, *, country: str, fetch=None) -> dict | None:
     got = parse_detail(body, country=country)
     if not got["url"]:
         got["url"] = f"https://www.linkedin.com/jobs/view/{job_id}"
-    return got if got["description_md"] or got["title"] else None
+    return finish_detail(got)
