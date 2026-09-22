@@ -52,13 +52,18 @@ COLUMNS = ["#", "Posted", "Source", "Company", "Role", "Location / mode", "Salar
 _FIELD_RE = re.compile(r"^\s*[-*]\s*\*\*(?P<label>[^*]+?)\*\*\s*:?\s*(?P<value>.*)$")
 _SPLIT_RE = re.compile(r"[,;]")
 _DATE_RE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
-_NUM_RE = re.compile(r"\d[\d,]*")
+_NUM_RE = re.compile(r"(\d[\d,]*)\s*([kK])?")
+_ANNUAL_RE = re.compile(r"per\s*(?:year|annum)|annually|annual|yearly|/\s*yr|\bp\.?\s?a\.?\b")
+_MONTHLY_RE = re.compile(r"per\s*month|monthly|/\s*mo|\bp\.?\s?m\.?\b|a month")
 _WORD_RE = re.compile(r"[a-z0-9+#.]+")
-# Trailing nouns that make a dealbreaker a category rather than a phrase to
-# look for verbatim: "gambling industry" must still catch "gambling platform".
+# Pure category nouns: a dealbreaker that ends in one names a field rather
+# than a phrase to find verbatim, so "gambling industry" must still catch
+# "gambling platform". Only one tail is ever dropped, and only these words —
+# "only", "work", "role(s)" and "job(s)" carry meaning ("commission-only
+# roles" must not decay into bare "commission").
 _CATEGORY_TAILS = {
     "industry", "industries", "sector", "sectors", "company", "companies",
-    "companys", "firms", "firm", "role", "roles", "jobs", "job", "work", "only",
+    "firm", "firms", "business", "businesses", "space", "field",
 }
 # Words carried by must-have phrases that say nothing about a posting.
 _STOPWORDS = {
@@ -110,11 +115,19 @@ def _country_of(value: str) -> str:
 
 
 def _salary_floor(value: str) -> int | None:
-    """First number >= 1000 in a salary expectation ("RM 9,000-12,000" -> 9000)."""
-    for raw in _NUM_RE.findall(value or ""):
-        n = int(raw.replace(",", ""))
+    """Monthly floor from a salary expectation line.
+
+    The first number worth >= 1000 wins, so leading noise ("up to 8 months
+    bonus") is skipped. A `k`/`K` suffix multiplies by 1000 ("RM9k" -> 9000),
+    and a line that says per year / annual / p.a. / yr — and does not also say
+    per month — is divided by 12 ("RM 120,000 per year" -> 10000).
+    """
+    text = (value or "").lower()
+    annual = bool(_ANNUAL_RE.search(text)) and not _MONTHLY_RE.search(text)
+    for raw, suffix in _NUM_RE.findall(text):
+        n = int(raw.replace(",", "")) * (1000 if suffix else 1)
         if n >= 1000:
-            return n
+            return round(n / 12) if annual else n
     return None
 
 
@@ -155,29 +168,44 @@ def read_criteria(profile_md: str) -> dict:
 
 # --- knockouts ---------------------------------------------------------------
 
+def _plural_tolerant(word: str) -> str:
+    """`word` as a pattern that matches its singular and plural form.
+
+    A dealbreaker is written either way ("commission-only roles" against a
+    posting's "commission-only role"), so the last word of a phrase carries an
+    optional "s". Words already ending in "ss" ("business") are left alone.
+    """
+    stem = word[:-1] if len(word) > 3 and word.endswith("s") and not word.endswith("ss") else word
+    if stem.endswith("s"):
+        return re.escape(stem)
+    return re.escape(stem) + "s?"
+
+
 def _phrase_re(phrase: str) -> re.Pattern | None:
     """A word-boundary regex for a dealbreaker phrase, or None if it is empty.
 
     Whitespace and hyphens are interchangeable so "6-day work week" also
-    matches "6 day work week".
+    matches "6 day work week", and the final word matches either number.
     """
     words = _WORD_RE.findall(phrase.lower())
     if not words:
         return None
-    return re.compile(r"\b" + r"[\s\-/]+".join(re.escape(w) for w in words) + r"\b")
+    parts = [re.escape(w) for w in words[:-1]] + [_plural_tolerant(words[-1])]
+    return re.compile(r"\b" + r"[\s\-/]+".join(parts) + r"\b")
 
 
 def _dealbreaker_res(phrase: str) -> list[re.Pattern]:
     """Patterns that count as a hit for one dealbreaker entry.
 
-    The phrase itself, plus the phrase without a trailing category noun, so
-    "gambling industry" also catches "our online gambling platform".
+    The phrase itself, plus — at most once — the phrase without a trailing
+    category noun, so "gambling industry" also catches "our online gambling
+    platform" while "commission-only roles" stays a whole phrase and leaves a
+    posting offering "base salary plus commission" alone.
     """
     words = _WORD_RE.findall(phrase.lower())
     variants = [words]
-    while len(words) > 1 and words[-1] in _CATEGORY_TAILS:
-        words = words[:-1]
-        variants.append(words)
+    if len(words) > 1 and words[-1] in _CATEGORY_TAILS:
+        variants.append(words[:-1])
     out = []
     for variant in variants:
         pattern = _phrase_re(" ".join(variant))
@@ -388,6 +416,9 @@ def run(criteria: dict, *, sources: dict, seen: dict, today: str | None = None,
 
     known = set(seen or {})
     kept_ids = {str(j.get("id") or "") for j in kept}
+    # Only the rows that survived the knockouts are deduped, so a knocked-out
+    # posting is never written to `seen` and is re-evaluated on the next run
+    # once the profile's dealbreakers or salary floor change.
     survivors, updated = dedupe(kept, seen or {}, today=stamp, keep_seen=all_)
     ranked = rank(survivors)
     new = [j for j in ranked if id(j) not in soft_rows]
@@ -591,7 +622,6 @@ def main(argv=None) -> int:
         seen_path.write_text(json.dumps(result["seen"], indent=2, sort_keys=True) + "\n",
                              encoding="utf-8")
     return 0
-
 
 
 if __name__ == "__main__":

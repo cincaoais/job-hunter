@@ -98,6 +98,24 @@ def test_read_criteria_country_and_board_variants():
     assert c["salary_min"] == 7500
 
 
+SALARY_CASES = [
+    ("monthly range", "RM 9,000–12,000 / month", 9000),
+    ("noise first", "up to 8 months bonus, SGD 7,500 / month", 7500),
+    ("k suffix", "RM9k/month", 9000),
+    ("annual", "RM 120,000 per year", 10000),
+    ("annual k", "SGD 96k p.a.", 8000),
+    ("unset", "", None),
+]
+
+
+@pytest.mark.parametrize(
+    "value,floor", [c[1:] for c in SALARY_CASES], ids=[c[0] for c in SALARY_CASES]
+)
+def test_read_criteria_salary_floor(value, floor):
+    c = search_jobs.read_criteria(f"- **Salary expectation:** {value}")
+    assert c["salary_min"] == floor
+
+
 def test_read_criteria_falls_back_to_first_two_letters():
     c = search_jobs.read_criteria("- **Job market / country I'm hunting in:** Indonesia")
     assert c["country"] == "IN"
@@ -133,6 +151,27 @@ KNOCKOUT_CASES = [
 )
 def test_knockout(fields, reason):
     assert search_jobs.knockout(job(**fields), CRITERIA) == reason
+
+
+VARIANT_CASES = [
+    ("commission-only kept", "commission-only roles",
+     "Base salary plus commission on closed deals", None),
+    ("contract work kept", "contract work",
+     "Contract negotiation with vendors, permanent headcount", None),
+    ("gambling category dropped", "gambling industry",
+     "Go backend for our online gambling platform", "dealbreaker: gambling industry"),
+    ("full phrase dropped", "commission-only roles",
+     "This is a commission-only role, no base", "dealbreaker: commission-only roles"),
+]
+
+
+@pytest.mark.parametrize(
+    "phrase,teaser,reason", [c[1:] for c in VARIANT_CASES],
+    ids=[c[0] for c in VARIANT_CASES],
+)
+def test_knockout_dealbreaker_variants(phrase, teaser, reason):
+    criteria = {"dealbreakers": [phrase]}
+    assert search_jobs.knockout(job(teaser=teaser), criteria) == reason
 
 
 def test_knockout_without_criteria_never_knocks_out():
@@ -231,6 +270,15 @@ def test_run_splits_new_knocked_and_needs_look():
     assert out["seen"] == {"fake:1": "2026-09-22", "fake:3": "2026-09-22"}
     assert stub.calls[0]["keywords"] == "backend engineer"
     assert stub.calls[0]["country"] == "MY"
+
+
+def test_run_does_not_mark_knocked_out_postings_as_seen():
+    stub = StubSource("fake", [
+        job(id="fake:1"),
+        job(id="fake:2", company="Royal Gambling Bhd", title="Go Engineer"),
+    ])
+    out = search_jobs.run(BASE, sources={"fake": stub}, seen={}, today="2026-09-22")
+    assert "fake:2" not in out["seen"]
 
 
 def test_run_queries_every_keyword():

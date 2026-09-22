@@ -31,7 +31,7 @@ _Last updated: [date]_
 - **Target industries:**
 - **Dream companies:**
 - **Job boards to search:** (e.g. JobStreet, LinkedIn, local boards)
-- **Must-haves in a posting:** (a job missing any of these is dropped, not ranked)
+- **Must-haves in a posting:** (postings matching none of these go to a 'needs a look' list instead of the main shortlist)
 - **Nice-to-haves:** (raise a job's fit score, but aren't required)
 
 ## 3. Preferences & constraints
