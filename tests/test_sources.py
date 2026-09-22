@@ -451,6 +451,35 @@ def test_search_survives_malformed_bodies_without_raising():
                            sleep=lambda s: None) == []
 
 
+@pytest.mark.parametrize("field,value", [
+    ("positionLevels", "oops"),
+    ("employmentTypes", "oops"),
+    ("positionLevels", [None, 7, "x"]),
+    ("employmentTypes", [{"nope": 1}]),
+    ("flexibleWorkArrangements", "oops"),
+    ("screeningQuestions", "oops"),
+    ("address", "oops"),
+    ("salary", "oops"),
+    ("postedCompany", "oops"),
+    ("metadata", "oops"),
+])
+def test_mcf_parse_search_guards_nested_list_and_dict_fields(field, value):
+    """A string where the API normally sends a list/dict must not raise."""
+    row = {"uuid": "u1", "title": "Dev", field: value}
+    jobs = mcf.parse_search(json.dumps({"results": [row]}), country="SG")
+    assert len(jobs) == 1
+    assert set(jobs[0]) == JOB_KEYS
+    assert jobs[0]["id"] == "mcf:u1" and jobs[0]["title"] == "Dev"
+
+
+def test_mcf_parse_detail_guards_nested_fields():
+    for field, value in (("screeningQuestions", "oops"), ("postedCompany", "oops"),
+                         ("metadata", "oops"), ("screeningQuestions", [None, 3])):
+        got = mcf.parse_detail(json.dumps({"uuid": "u1", "title": "Dev", field: value}),
+                               country="SG")
+        assert set(got) == DETAIL_KEYS and got["screening_questions"] == []
+
+
 # --- mode mapping -------------------------------------------------------------
 
 @pytest.mark.parametrize("display,expected", [

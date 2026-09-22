@@ -60,9 +60,9 @@ def _mode(row: dict) -> str:
 
 
 def _teaser(row: dict) -> str:
-    bits = [p.get("position", "") for p in (row.get("positionLevels") or [])]
-    bits += [e.get("employmentType", "") for e in (row.get("employmentTypes") or [])]
-    return " · ".join(b.strip() for b in bits if b and b.strip())
+    bits = [dict_at(p).get("position", "") for p in rows_of(row, "positionLevels")]
+    bits += [dict_at(e).get("employmentType", "") for e in rows_of(row, "employmentTypes")]
+    return " · ".join(str(b).strip() for b in bits if b and str(b).strip())
 
 
 def _screening_questions(raw_questions) -> list[str]:
@@ -71,9 +71,9 @@ def _screening_questions(raw_questions) -> list[str]:
         if isinstance(q, str):
             text = q
         elif isinstance(q, dict):
-            text = q.get("question") or q.get("text") or q.get("title") or ""
+            text = str(q.get("question") or q.get("text") or q.get("title") or "")
         else:
-            text = str(q)
+            continue  # numbers, nulls: nothing a human would read back
         text = text.strip()
         if text:
             out.append(text)
