@@ -325,9 +325,11 @@ def _heading(line: str) -> tuple[str, str] | None:
     """(heading, rest of line) when `line` reads as a section heading, else None.
 
     `#` headings and bold-only lines always count. An unmarked line counts
-    only with a trailing colon (at most 8 words) or as a section name of at
-    most 4 words, so a requirement sentence that merely contains a section
-    word ("Information security fundamentals matter here") stays content.
+    with a trailing colon (at most 8 words), or when it names a section in at
+    most 4 words, or in at most 8 title-cased words ("What Essential Skills
+    You Will Need"). A sentence-case line that merely contains a section word
+    ("Information security fundamentals matter here", "Strong Python skills
+    preferred for this role") stays content.
     """
     s = line.strip()
     m = _MD_HEADING_RE.match(s)
@@ -346,10 +348,19 @@ def _heading(line: str) -> tuple[str, str] | None:
     n = len(words.split())
     if not words[:1].isupper() or re.search(r"[,;.!?:]", words):
         return None
-    if (plain.endswith(":") and n <= 8) or (
-            n <= 4 and (_section_kind(words) or _SECTION_WORDS_RE.search(words))):
-        return words, ""                       # "Qualifications", "Key Responsibilities", "Perks:"
+    if plain.endswith(":") and n <= 8:
+        return words, ""                       # "Things we would love to see:"
+    if (n <= 4 or (n <= 8 and _is_title_cased(words))) and (
+            _section_kind(words) or _SECTION_WORDS_RE.search(words)):
+        return words, ""                       # "Qualifications", "Skills and Experience We Need"
     return None
+
+
+def _is_title_cased(text: str) -> bool:
+    """At least two words of 4+ letters, and 75% or more of those start uppercase."""
+    long_words = [w for w in text.split() if sum(c.isalpha() for c in w) >= 4]
+    upper = sum(next(c for c in w if c.isalpha()).isupper() for w in long_words)
+    return len(long_words) >= 2 and upper >= 0.75 * len(long_words)
 
 
 def _section_kind(title: str) -> str | None:

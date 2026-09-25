@@ -293,6 +293,28 @@ def test_extract_keywords_reviewer_repro_block():
     assert {"English", "Docker", "Terraform"} <= set(ats.extract_keywords(posting))
 
 
+@pytest.mark.parametrize("lead", ["", SECTION_LEAD], ids=["alone", "after-requirements"])
+@pytest.mark.parametrize("heading", ["What Essential Skills You Will Need",
+                                     "Skills and Experience We Are Looking For"])
+def test_extract_keywords_title_case_requirement_heading_opens_section(lead, heading):
+    posting = (f"{lead}About the role\nYou will own payment services end to end.\n"
+               f"You will mentor two engineers.\n{heading}\n5+ years with Go and PostgreSQL\n"
+               "Kafka and Redis in production\nStrong written and spoken English required\n"
+               "Docker for local development\nTerraform for infrastructure changes\n")
+    assert {"English", "Docker", "Terraform"} <= set(ats.extract_keyword_groups(posting)["must"])
+
+
+@pytest.mark.parametrize("line,group", [
+    ("Strong Python skills preferred for this role", "must"),  # sentence case: content
+    ("Nice To Have Skills", "nice"),                            # title case: switches to nice
+])
+def test_extract_keyword_groups_heading_shape_inside_requirements(line, group):
+    groups = ats.extract_keyword_groups(f"Requirements\nGo, Kafka, Redis and gRPC\n{line}\n"
+                                        "Kubernetes in production\nDocker and Terraform\n")
+    assert {"Kubernetes", "Docker", "Terraform"} <= set(groups[group])
+    assert {"Go", "Kafka", "Redis", "gRPC"} <= set(groups["must"])
+
+
 def test_extract_keyword_groups_split_must_and_nice():
     groups = ats.extract_keyword_groups(SAMPLE_JD.read_text(encoding="utf-8"))
     assert {"Go", "gRPC", "PostgreSQL"} <= set(groups["must"])
