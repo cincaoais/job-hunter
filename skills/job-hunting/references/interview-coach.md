@@ -5,7 +5,7 @@ honestly, and turn the weak spots into drills. General prep rules (STAR,
 question themes, research) live in the Application Guide; this file is the
 live-practice loop.
 
-## Setup (one grouped batch, Step 1.5 style)
+## Setup (one grouped batch — SKILL.md memory rules)
 
 Confirm before starting:
 - **Which interview** — company and posting; reuse the jd-match extraction
@@ -41,11 +41,11 @@ End every mock with:
 1. **Strengths** — what already lands, so it stays.
 2. **Weak areas** — each with one concrete drill (e.g. "rewrite the outage
    story as STAR with the 0.4% number up front; we re-run it next session").
-3. **Profile update** — save polished STAR stories to the evidence bank
-   (profile §10) and weak areas to notes (§11), then the standard Step 0
-   closing (regenerate the profile block).
+3. **Profile update** — save polished STAR stories to `answers.md` "STAR
+   stories" (chat mode: the profile §9 Answers section) and weak areas to
+   profile §10 Notes, then the closing step for the storage mode
+   (SKILL.md).
 4. Offer to re-run just the weak questions.
 
-Honesty guardrail: coach delivery of the user's real experience. Never
-script an answer claiming experience, numbers, or titles they don't have —
-an interview is exactly where invented claims collapse.
+Coach delivery of the user's real experience only — never script
+experience, numbers or titles they lack (`facts-policy.md` §5).

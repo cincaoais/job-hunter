@@ -3,9 +3,10 @@
 For when tailoring edits aren't enough: the resume is technically fine but
 visually forgettable, the user says it looks plain / unattractive / "not
 something I'd shortlist if I were HR", asks to **revamp**, **redesign**, or
-**score** it, or the funnel diagnosis (SKILL.md) points at the 6-second
-skim. Score first, then rebuild content **and** design from the ground up —
-never patch sentence by sentence. The honesty guardrail applies throughout.
+**score** it, or the funnel diagnosis (`pipeline.md` §5) points at the
+6-second skim. Score first, then rebuild content **and** design from the
+ground up — never patch sentence by sentence. Every claim follows
+`facts-policy.md`.
 
 ## Step 1 — HR-eye scorecard (0–100)
 
@@ -38,8 +39,8 @@ with such a score, explain the difference once and move on.
 If the score is below ~70, or the user asked for a revamp: rebuild from the
 profile and the scorecard. Everything is allowed to change — structure,
 section order, positioning, wording, design tier — except the facts.
-Follow the builder flow (`resume-builder.md`): inline draft → reviewer
-pass → files → ATS text-layer check.
+Follow the builder flow (`resume-builder.md`): inline draft → claims
+audit, anti-slop gate and 6-second lint → files → ATS text-layer check.
 
 Content moves that need no invented numbers:
 
@@ -59,6 +60,8 @@ Content moves that need no invented numbers:
 
 **Master (ATS)** — .docx, single column, parser-safe per
 `resume-builder.md`. Always generated; it's what portals and ATS get.
+Workspace mode:
+`python3 ${CLAUDE_SKILL_DIR}/scripts/build_resume.py resumes/<file>.md --docx`.
 
 **Presentation copy** — PDF for human readers (referrals, direct email,
 career fairs, printed copies). **Never inherit the incoming resume's
@@ -81,13 +84,13 @@ between safest-conventional and visibly-redesigned.
 
 ### Template gallery
 
-| Template | Layout | Signature look | Fits |
-|---|---|---|---|
-| **Chicago** | Single column | Black on white; 1pt rules under headings; one muted accent (navy/deep gray) used only structurally; serif or neutral sans; no icons or skill bars | Banking, finance, law, consulting, government — the conservative default |
-| **Executive** | Single column, generous margins | Name at ~1.85× heading size; thin hairline rules; near-monochrome; whitespace does the talking | Senior/managerial roles in any conservative industry |
-| **Corporate sidebar** | Two-column, light-tint sidebar (25–35% width) | Sidebar holds skills, certs, languages; main column keeps summary + experience + education | Standard corporate, client-facing, HR/ops/sales |
-| **Accent band** | Single column + full-width solid accent header band | Name/title reversed out of the band; skill tags as subtle pills; clean sans | Tech, product, data — modern look without a sidebar |
-| **Creative sidebar** | Two-column, solid-accent sidebar | Saturated sidebar; skill tags; optional small headshot where the photo matrix allows | Design, marketing, media, startup-facing roles |
+| Template | File | Layout | Signature look | Fits |
+|---|---|---|---|---|
+| **Chicago** | `assets/templates/chicago.html` | Single column | Black on white; 1pt rules under headings; one muted accent (navy/deep gray) used only structurally; serif or neutral sans; no icons or skill bars | Banking, finance, law, consulting, government — the conservative default |
+| **Executive** | `assets/templates/executive.html` | Single column, generous margins | Name at ~1.85× heading size; thin hairline rules; near-monochrome; whitespace does the talking | Senior/managerial roles in any conservative industry |
+| **Corporate sidebar** | `assets/templates/corporate-sidebar.html` | Two-column, light-tint sidebar (25–35% width) | Sidebar holds skills, certs, languages; main column keeps summary + experience + education | Standard corporate, client-facing, HR/ops/sales |
+| **Accent band** | `assets/templates/accent-band.html` | Single column + full-width solid accent header band | Name/title reversed out of the band; skill tags as subtle pills; clean sans | Tech, product, data — modern look without a sidebar |
+| **Creative sidebar** | `assets/templates/creative-sidebar.html` | Two-column, solid-accent sidebar | Saturated sidebar; skill tags; optional small headshot where the photo matrix allows | Design, marketing, media, startup-facing roles |
 
 All five share the typography numbers below — they differ in structure and
 accent placement, so the same content drops into any of them.
@@ -106,12 +109,21 @@ Typography numbers that work (any tier):
 
 ### Presentation-copy build mechanics
 
-The ATS master stays python-docx. But sidebar, accent-band, and photo
+The ATS master stays .docx. But sidebar, accent-band, and photo
 layouts do **not** survive docx generation reliably — build the
 presentation copy as **HTML/CSS rendered to PDF** (one file, print CSS,
 exact page size): multi-column grids, tint blocks, and image placement
 hold precisely there. Content stays word-identical to the master; only
 the shell differs.
+
+- Workspace mode: one run builds both —
+  `python3 ${CLAUDE_SKILL_DIR}/scripts/build_resume.py resumes/<file>.md --docx --pdf --template <name>`,
+  where `<name>` is the gallery file's name (`chicago`, `executive`,
+  `corporate-sidebar`, `accent-band`, `creative-sidebar`). If the PDF
+  step is skipped because no renderer is installed, follow the line the
+  script prints.
+- Chat mode: fill the chosen gallery file by hand and render it with the
+  pdf skill.
 
 **Or hand off to a real builder.** When the Reactive Resume MCP is
 connected — or the user is willing to set it up — offer the handoff in
@@ -148,7 +160,10 @@ recommended. `markets/<cc>.md` §4 holds the per-country resume detail.
 ## Step 4 — Re-score before delivery
 
 Run the same scorecard on the revamped draft and report **before → after**
-per dimension. Ship only when the presentation copy fills one clean page
-(fresher) and the master passes the ATS text-layer check. If a dimension
-didn't move, say why (usually: a real number only the user can supply —
-name exactly which bullet is waiting for it).
+per dimension, plus the 6-second lint on the master
+(`python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --lint`; chat
+mode: by reading, per `resume-builder.md` step 4.6). Ship only when the
+presentation copy fills one clean page (fresher) and the master passes the
+ATS text-layer check and the lint. If a dimension didn't move, say why
+(usually: a real number only the user can supply — name exactly which
+bullet is waiting for it).

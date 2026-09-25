@@ -36,15 +36,20 @@ above rather than retrying.
 ## Handoff workflow
 
 1. **Content first, as usual.** The approved inline draft from
-   `resume-builder.md` is the input — same words as the ATS master, same
-   honesty guardrail. The handoff changes the shell, never the facts.
+   `resume-builder.md`, after its claims audit, is the input — same words
+   as the ATS master. The handoff changes the shell, never the facts
+   (`facts-policy.md`).
 2. **Read `resume://_meta/schema` once** before writing anything — patches
    must match the schema, and rich-text fields (summary, descriptions)
    take HTML strings, not markdown.
 3. **Create and fill:** `create_resume` (name it
    "<Name> — <Track> <Year>"), then `apply_resume_patch` (RFC 6902)
    section by section; or `import_resume` with one full ResumeData JSON
-   (watch client payload limits on big resumes).
+   (watch client payload limits on big resumes). Workspace mode: export
+   JSON Resume with
+   `python3 ${CLAUDE_SKILL_DIR}/scripts/build_resume.py resumes/<file>.md --json`
+   and pass it to `import_resume`; if the import rejects it, fall back to
+   `create_resume` + `apply_resume_patch`.
 4. **Template and photo:** set `metadata.template` via patch. Designed
    picks that stay credible in conservative industries: **bronzor**
    (two-column, tagged Finance/Consulting), **glalie** (sidebar,

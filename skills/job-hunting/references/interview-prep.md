@@ -50,9 +50,10 @@ round covers — a normal question that removes guesswork.
    my range is around X if that helps") but have the number ready.
 6. **Availability / notice** — exact, no hedging.
 
-Plus **3–5 STAR stories** from the profile's evidence bank covering
-leadership, conflict, failure, pressure, and initiative. One story may
-serve two themes. Rehearsed aloud beats re-read silently.
+Plus **3–5 STAR stories** from `answers.md` "STAR stories" (chat mode:
+the profile §9 Answers section) covering leadership, conflict, failure,
+pressure, and initiative. One story may serve two themes. Rehearsed aloud
+beats re-read silently.
 
 ## Question banks
 
@@ -117,7 +118,8 @@ plus a live search).
    from the debrief.
 5. **Rejected** — brief thanks + ask for feedback (sometimes answered);
    log it in the tracker. Three rejections at the same stage → run the
-   funnel diagnosis (SKILL.md).
+   funnel diagnosis (`pipeline.md` §5).
 6. **Offer** — switch to `offer-coach.md`.
 
-Close every prep session with the standard Step 0 profile regeneration.
+Close every prep session with the closing step for the storage mode
+(SKILL.md).

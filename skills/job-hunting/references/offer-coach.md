@@ -6,14 +6,14 @@ live in `references/markets/<cc>.md` (§6–§8); this file is the decision and
 negotiation loop. Salary data changes constantly — verify market ranges with
 a live search, never from memory.
 
-## 1. Intake (one grouped batch, Step 1.5 style)
+## 1. Intake (one grouped batch — SKILL.md memory rules)
 
 Ask only what the offer letter and profile don't answer:
 
 - **The paper** — have them paste the offer letter/email if they haven't.
 - **Money** — base; bonus and its exact contract wording (guaranteed 13th
   month / AWS vs "discretionary, subject to performance" — the wording
-  decides whether it's real pay, see the market notes); sign-on; equity.
+  decides whether it's real pay, `markets/<cc>.md` §8); sign-on; equity.
 - **Terms** — probation length and notice during/after it, leave, medical,
   learning budget, modality, on-call expectations.
 - **Pressure** — the acceptance deadline, and whether other offers or final
@@ -31,9 +31,9 @@ Employers quote monthly base; offers only compare as annual totals.
 - Statutory employer contributions (EPF/CPF) are real money — include them
   when comparing offers across countries, where rates differ; CPF covers
   Singapore Citizens and PRs only, not EP/S Pass holders.
-- Flag wording traps from the market notes: "13th month (discretionary)" is
-  a bonus, not a 13th month; a long probation changes when notice and
-  confirmation protections kick in.
+- Flag wording traps (`markets/<cc>.md` §7–§8): "13th month
+  (discretionary)" is a bonus, not a 13th month; a long probation changes
+  when notice and confirmation protections kick in.
 
 ## 3. Compare and verdict
 
@@ -63,8 +63,7 @@ Close with an honest verdict — **accept** / **negotiate first** /
   budget, title. Statutory terms and company-wide AWS/13th-month policy
   rarely move; equity bands barely move below senior.
 - **Leverage honestly:** a real competing offer, a market data point, a
-  specific quantified achievement. Never invent a counter-offer or misstate
-  current salary — fabricated leverage collapses exactly when it matters.
+  specific quantified achievement (`facts-policy.md` §6).
 - **The script:** enthusiasm first, then one specific ask with a reason
   ("market data for [role] in [city] centers on X — can we close the gap on
   base?"), then stop talking. Get the final package in writing before
@@ -74,7 +73,7 @@ Close with an honest verdict — **accept** / **negotiate first** /
   tactic; a polite extension request naming the date you can answer by is
   normal and usually granted.
 - **Red flags:** verbal-only offers, refusal to put terms in writing, pay
-  far above market for vague work (scam rules in SKILL.md apply), guilt
+  far above market for vague work (scam signals, `sourcing.md` §5), guilt
   responses to a counter.
 
 ## 5. Mock negotiation (optional)
@@ -86,10 +85,11 @@ tighten, one drill to re-run.
 
 ## 6. Record
 
-Log every offer in the profile's §9 Offers table (company, base, bonus type,
-true annual comp, probation/notice, deadline, status) and run the standard
-Step 0 closing. On acceptance, update the pipeline stage and make the
-notice-period countdown the next action.
+Log every offer in the Offers table — `pipeline.md` `## Offers`
+(workspace) or profile §9 Offers (chat mode): company, base, bonus type,
+true annual comp, probation/notice, deadline, status — and run the closing
+step for the storage mode (SKILL.md). On acceptance, update the pipeline
+stage and make the notice-period countdown the next action
+(`post-offer.md`).
 
-Honesty guardrail: negotiate hard on true facts only — no invented competing
-offers, no inflated current salary, no fictional constraints.
+Negotiate hard on true facts only (`facts-policy.md` §6).

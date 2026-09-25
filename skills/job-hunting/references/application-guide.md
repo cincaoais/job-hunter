@@ -25,7 +25,8 @@ before writing any application material.
 - Length: 1 page for early career, up to 2 for experienced. Cut anything old or irrelevant.
 
 **Quantify everywhere.** Numbers, %, scale, time saved, revenue, users, latency.
-If the user doesn't have exact figures, help them estimate honestly.
+If the user doesn't have exact figures, ask with options rather than
+estimate for them (`facts-policy.md` §2–§3).
 
 ## Cover letter
 
@@ -35,7 +36,9 @@ Only when it adds value or is requested. Keep it to ~250–350 words, four beats
 3. **Why you** — 2–3 concrete proofs mapped to their needs (reuse resume wins).
 4. **Close** — enthusiasm + a light call to action.
 
-Never generic. If it could be sent to any company, rewrite it.
+Never generic. If it could be sent to any company, rewrite it. No letter
+without one user-supplied story and one company-specific fact (the
+anti-slop gate, `resume-builder.md` step 4.5).
 
 ## Outreach & networking messages
 
@@ -80,7 +83,5 @@ For Southeast Asia specifics (JobStreet salary field, probation/notice norms,
 (`my.md`, `sg.md`; `_template.md` for PH/ID/VN and other countries).
 
 ## Honesty
-Everything here is about presenting real experience well — never about
-inventing it. Don't fabricate metrics or inflate titles; estimate unknown
-numbers honestly and label them as estimates. It has to survive an interview
-and a reference check.
+Everything here presents real experience well and never invents it —
+`facts-policy.md` holds the mechanism.

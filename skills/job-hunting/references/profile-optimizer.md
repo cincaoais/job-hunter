@@ -5,9 +5,9 @@ recruiter ever meets them. Run this when the user asks to improve their
 LinkedIn or JobStreet presence, when recruiter inbound is weak, or after a
 resume rebuild (the two must stay consistent). Writing rules come from the
 Application Guide; platform mechanics from `references/markets/<cc>.md`
-§1, §5. The honesty guardrail applies throughout.
+§1, §5. Every claim follows `facts-policy.md`.
 
-## 1. Intake (one grouped batch, Step 1.5 style)
+## 1. Intake (one grouped batch — SKILL.md memory rules)
 
 This batch runs even when the ask is a single element ("just rewrite my
 headline") — draft from the profile if that's enough to be useful, but the
@@ -35,11 +35,12 @@ same response must still ask for the current text and cover the settings in
   more"): the profile's one-line identity plus the strongest quantified
   win. Then two short first-person paragraphs; no buzzword lists.
 - **Experience** — result-first bullets, lighter than the resume's.
-- **Skills** — ordered by §2 target keywords; pin the top three.
+- **Skills** — ordered by §2 target keywords and the literal-term mirror
+  list (`jd-match.md` §3); pin the top three.
 - **Settings** — "Open to work" recruiters-only while employed; the public
   banner only when openness is safe. Fill target titles and locations —
   recruiter filters use them.
-- SEA note (market notes): LinkedIn skews mid-senior, sourcing, and
+- SEA note (`markets/<cc>.md` §1): LinkedIn skews mid-senior, sourcing, and
   referral paths — optimize to be found and vetted; JobStreet stays the
   volume apply channel.
 
@@ -47,10 +48,8 @@ same response must still ask for the current text and cover the settings in
 
 - **Completeness** — the matching engine feeds on structured fields; fill
   role preferences, skills, and location fully.
-- **Expected salary** — the single-number field mechanics from the market
-  notes: set it near the bottom of the true range so band-matching doesn't
-  exclude, add "(negotiable)" where free text allows, or leave blank when
-  optional.
+- **Expected salary** — the single-number field: mechanics in
+  `markets/<cc>.md` §5.
 - **Skills & keywords** — mirror §2 keywords in the exact phrasing target
   postings use; the engine matches strings, not synonyms.
 
@@ -60,8 +59,7 @@ Show every change as before → after pairs (jd-match style) with a one-line
 reason tied to recruiter search. Finish with the findability test: "a
 recruiter searches [top §2 keyword] + [city] — what on this profile
 matches?" Record updates in profile §7 (materials) and new preferences in
-§11, then the standard Step 0 closing.
+profile §10 Notes, then the closing step for the storage mode (SKILL.md).
 
-Honesty guardrail: keyword-rich never means title-inflated — no "Senior"
-headline on a mid-level profile, no listed skill the user couldn't back in
-a screening call. Findable **and** true.
+Keyword-rich never means title-inflated — no unearned "Senior", no skill
+the user couldn't back in a screening call (`facts-policy.md`).

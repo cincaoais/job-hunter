@@ -6,7 +6,7 @@ the search flow's quick company check into a one-page brief readable in ten
 minutes. Everything time-sensitive comes from live web search — never memory
 — and anything unverified is labeled as such.
 
-## 1. Setup (one grouped batch, Step 1.5 style)
+## 1. Setup (one grouped batch — SKILL.md memory rules)
 
 The pipeline tracker usually already holds company, role, round type, and
 date — echo them ("Grab recruiter screen on Friday, payments role — right?")
@@ -27,7 +27,7 @@ Search in order of decision value:
 - **Tech & team** — stack from the posting, engineering blog, and the
   company's other live ads; team size and structure where visible.
 - **Comp intel** — salary data for the role and city (NodeFlair, Glassdoor,
-  posted bands — boards per the market notes).
+  posted bands — sources per `markets/<cc>.md` §3).
 - **Interview process** — round structure and question styles from
   candidate reviews; label as anecdote, not fact.
 - **Culture signals** — employee reviews read skeptically: a pattern across
@@ -63,4 +63,7 @@ Then three short sections:
 - Hand the salary intel to `references/offer-coach.md` when an offer
   follows.
 - Save the dossier's one-line takeaway and any red flags to the pipeline
-  tracker's notes column, then run the standard Step 0 closing.
+  row's Notes — workspace mode: the dossier as `dossiers/<company>.md` and
+  `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" --note "…"`;
+  chat mode: the profile §9 Pipeline row. Then the closing step for the
+  storage mode (SKILL.md).
