@@ -315,6 +315,26 @@ def test_extract_keyword_groups_heading_shape_inside_requirements(line, group):
     assert {"Go", "Kafka", "Redis", "gRPC"} <= set(groups["must"])
 
 
+def test_extract_keywords_title_case_content_line_keeps_section_open():
+    posting = ("Requirements\nGo, Kafka, Redis, gRPC and PostgreSQL\n"
+               "Own The Full Platform Responsibility Here\n"
+               "Docker and Terraform for infra\nEnglish fluency required\n")
+    must = ats.extract_keyword_groups(posting)["must"]
+    assert {"Go", "Kafka", "Redis", "gRPC", "PostgreSQL", "Docker", "Terraform"} <= set(must)
+    assert [k for k in must if k.startswith("English")]      # "English fluency"
+
+
+@pytest.mark.parametrize("line", ["Why You Will Love Working Here",         # no section word
+                                  "About Our Company And Culture Here"])    # section words
+def test_extract_keywords_long_title_case_line_never_ends_section(line):
+    """Trade-off of the heading rule: a title-cased line of 5-8 words without a colon can
+    open or switch a requirements section but never ends one, so a long unmarked
+    section heading of that shape runs on into the requirements list."""
+    kws = ats.extract_keywords(f"{SECTION_LEAD}{line}\nWritten English for client calls\n"
+                               "Docker and Terraform\n")
+    assert {"English", "Docker", "Terraform"} <= set(kws)
+
+
 def test_extract_keyword_groups_split_must_and_nice():
     groups = ats.extract_keyword_groups(SAMPLE_JD.read_text(encoding="utf-8"))
     assert {"Go", "gRPC", "PostgreSQL"} <= set(groups["must"])

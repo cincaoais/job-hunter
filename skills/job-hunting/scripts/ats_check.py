@@ -326,10 +326,14 @@ def _heading(line: str) -> tuple[str, str] | None:
 
     `#` headings and bold-only lines always count. An unmarked line counts
     with a trailing colon (at most 8 words), or when it names a section in at
-    most 4 words, or in at most 8 title-cased words ("What Essential Skills
-    You Will Need"). A sentence-case line that merely contains a section word
-    ("Information security fundamentals matter here", "Strong Python skills
-    preferred for this role") stays content.
+    most 4 words, or when it names a requirement or nice-to-have section in
+    at most 8 title-cased words ("What Essential Skills You Will Need"). A
+    sentence-case line that merely contains a section word ("Information
+    security fundamentals matter here", "Strong Python skills preferred for
+    this role") stays content, and so does a title-cased line of 5-8 words
+    with only a generic section word ("Own The Full Platform Responsibility
+    Here"): such a line may open or switch a requirements section but never
+    ends one.
     """
     s = line.strip()
     m = _MD_HEADING_RE.match(s)
@@ -350,9 +354,10 @@ def _heading(line: str) -> tuple[str, str] | None:
         return None
     if plain.endswith(":") and n <= 8:
         return words, ""                       # "Things we would love to see:"
-    if (n <= 4 or (n <= 8 and _is_title_cased(words))) and (
-            _section_kind(words) or _SECTION_WORDS_RE.search(words)):
-        return words, ""                       # "Qualifications", "Skills and Experience We Need"
+    if n <= 4 and (_section_kind(words) or _SECTION_WORDS_RE.search(words)):
+        return words, ""                       # "Qualifications", "Life at Grab"
+    if n <= 8 and _section_kind(words) and _is_title_cased(words):
+        return words, ""                       # "Skills and Experience We Are Looking For"
     return None
 
 
