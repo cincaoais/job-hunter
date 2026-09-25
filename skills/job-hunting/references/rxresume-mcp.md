@@ -48,8 +48,10 @@ above rather than retrying.
    (watch client payload limits on big resumes). Workspace mode: export
    JSON Resume with
    `python3 ${CLAUDE_SKILL_DIR}/scripts/build_resume.py resumes/<file>.md --json`
-   and pass it to `import_resume`; if the import rejects it, fall back to
-   `create_resume` + `apply_resume_patch`.
+   and pass it to `import_resume`. Whether `import_resume` accepts JSON
+   Resume (rather than ResumeData) is unverified — try it first; if it is
+   rejected, fall back to `create_resume` + `apply_resume_patch` section by
+   section.
 4. **Template and photo:** set `metadata.template` via patch. Designed
    picks that stay credible in conservative industries: **bronzor**
    (two-column, tagged Finance/Consulting), **glalie** (sidebar,

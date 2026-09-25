@@ -15,10 +15,10 @@ Every claim is the strongest **true** form of a profile fact —
    (`facts-policy.md` §2). Skip anything the profile answers — echo
    the assumption instead. Write answers back to the profile.
 3. **Draft inline** in the chat as markdown and ask for reactions. Iterate
-   here — it's cheap. Never jump straight to a file. Once approved,
-   workspace mode saves the draft as `resumes/<company>-<role>-vN.md` (a
-   letter under `letters/`; Versioning below) — the file every gate and the
-   build read.
+   here — it's cheap. Never jump straight to a generated .docx/PDF. Once
+   approved, workspace mode saves the draft as
+   `resumes/<company>-<role>-vN.md` (a letter under `letters/`; Versioning
+   below) — the file every gate and the build read.
 4. **Claims audit** (below) on the approved draft — a fresh critical read
    before any file exists.
    - 4.5 **Anti-slop gate** (below).
@@ -40,9 +40,9 @@ Every claim is the strongest **true** form of a profile fact —
    chat mode, the Resume cell of the profile §9 Pipeline row. Then the
    closing step for the storage mode (SKILL.md).
 
-Gates run in this order and none is skipped: claims audit → anti-slop gate
-→ 6-second lint → file → ATS text-layer check. Chat mode: say which checks
-ran by reading and which script checks could not run.
+Gates run in this order and none that applies is skipped: claims audit →
+anti-slop gate → 6-second lint → file → ATS text-layer check. Chat mode:
+say which checks ran by reading and which script checks could not run.
 
 ## Claims audit (step 4)
 
@@ -71,7 +71,7 @@ nothing did). Only re-open the inline-draft loop if something material moved.
   STAR stories in `answers.md` (chat mode: the profile §9 Answers section) —
   and at least one **company-specific fact** from the saved posting or the
   dossier (`company-dossier.md`). Check both before drafting a letter and
-  confirm them here: no story and no fact → no letter; ask, or build the
+  confirm them here: no story or no fact → no letter; ask, or build the
   dossier.
 - **Every draft** gets the banned-phrase scan: workspace mode
   `python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <draft.md> --slop`; the
@@ -92,9 +92,13 @@ latest role (Huntr/Careerflow). Before any file exists, the draft passes:
 - Progression is visible (title or scope grows across roles).
 - At most 2 pages (market norms: `markets/<cc>.md` §4).
 
-Workspace mode: `python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <draft.md> --lint`
-checks what the text can show; single column and visible progression need
-a read of the layout. Chat mode: all six by reading, and say so.
+Workspace mode:
+`python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <draft.md> --lint --target-title "<target role>"`
+checks contact email and phone as literal text, a date near the top, a
+number in the first experience bullet, length, and the title words in the
+first lines when `--target-title` is given. Single column, dates on every
+role and visible progression are checked by reading. Chat mode: all six by
+reading, and say so.
 
 ## ATS text-layer check (step 6)
 

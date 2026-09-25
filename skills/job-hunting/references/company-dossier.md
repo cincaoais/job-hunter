@@ -1,10 +1,10 @@
 # Company Dossier — pre-interview research brief
 
 Run this when an interview lands on the calendar or the user asks to be
-briefed on a company ("tell me about X", "prep me for Friday"). It deepens
-the search flow's quick company check into a one-page brief readable in ten
-minutes. Everything time-sensitive comes from live web search — never memory
-— and anything unverified is labeled as such.
+briefed on a company ("tell me about X", "prep me for Friday"). It
+produces a one-page brief readable in ten minutes. Everything
+time-sensitive comes from live web search — never memory — and anything
+unverified is labeled as such.
 
 ## 1. Setup (one grouped batch — SKILL.md memory rules)
 
@@ -64,6 +64,6 @@ Then three short sections:
   follows.
 - Save the dossier's one-line takeaway and any red flags to the pipeline
   row's Notes — workspace mode: the dossier as `dossiers/<company>.md` and
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" --note "…"`;
+  `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" [--role "<Y>"] --note "…"`;
   chat mode: the profile §9 Pipeline row. Then the closing step for the
   storage mode (SKILL.md).

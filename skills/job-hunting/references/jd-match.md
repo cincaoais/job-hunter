@@ -2,8 +2,8 @@
 
 Run this when the user shares a job posting (JobStreet, LinkedIn, anywhere)
 and wants to know whether they fit or wants their resume tailored to it.
-Order: fetch → extract → knockout pre-check → score with the legitimacy
-block → optimize → record.
+Order: fetch → extract → knockout pre-check → score → legitimacy block →
+optimize → record.
 
 ## 0. Fetch
 
@@ -56,8 +56,11 @@ Check every hard constraint the posting states against the profile:
 - **Soft fails** — "preferred", "advantage", a stretch on years, a salary
   band that only just reaches the floor — go into the §2 report as
   constraint conflicts.
-- An existing pipeline row at this company in this search cycle is a soft
-  fail too: one shot per company (`sourcing.md` §3).
+- **One shot per company** (`sourcing.md` §3) — ignore this posting's own
+  row (the Scout may have saved it already). Another row at the same
+  company at any stage past `saved` in the current search cycle is a hard
+  fail: "skip (knockout: one shot per company)". Another `saved` row at the
+  company is a soft note: pick one.
 
 ## 2. Score
 
@@ -75,8 +78,7 @@ Then three lists and a verdict:
   the posting's words. These are free wins.
 - **Real gaps** — requirements the user doesn't meet. Say so plainly;
   flattery costs interviews.
-- **Constraint conflicts** — the soft fails from §1.5 (location, visa,
-  salary, notice, years), if any.
+- **Constraint conflicts** — every §1.5 soft fail, if any.
 - **Overall fit: X/10** with an honest verdict, after the cap rule below:
   **apply** / **apply after edits** / **stretch** (apply, but expect the
   gaps to be probed) / **skip**.
@@ -92,10 +94,10 @@ Then three lists and a verdict:
 Salary reliability is practice, not data: an employer's own posted band
 (MyCareersFuture min/max, a JobStreet salary label on a direct ad) is that
 employer's band for the role; an agency's figure is indicative until the
-agency names the client and its band (ask before any submission —
-`networking.md` §6); no figure, or "competitive", means unknown — check
-the sources in `markets/<cc>.md` §3 before the screen. Pay far above
-market for vague work is a scam signal, not a salary.
+agency confirms it is the client's band; no figure, or "competitive",
+means unknown — check the sources in `markets/<cc>.md` §3 before the
+screen. A figure that trips a `sourcing.md` §5 scam signal is a flag, not
+a salary.
 
 **Cap rule:** any legitimacy red flag caps the verdict at **stretch**,
 however high the fit — name the flag that capped it. A scam signal goes
@@ -156,8 +158,8 @@ the pattern across postings tells you what the market is pricing.
    table for soft skills, a learning-goals note under §8 for technical
    ones) and end with the closing step for the storage mode (SKILL.md).
 
-Honesty rule unchanged: a gap is closed by learning and proof, never by
-wording. The heatmap never becomes resume content until the artifact exists.
+A gap closes by learning and proof, never by wording — the heatmap becomes
+resume content only once the artifact exists (`facts-policy.md`).
 
 ## 5. Record
 

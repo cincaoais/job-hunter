@@ -3,10 +3,10 @@
 For when tailoring edits aren't enough: the resume is technically fine but
 visually forgettable, the user says it looks plain / unattractive / "not
 something I'd shortlist if I were HR", asks to **revamp**, **redesign**, or
-**score** it, or the funnel diagnosis (`pipeline.md` §5) points at the
-6-second skim. Score first, then rebuild content **and** design from the
-ground up — never patch sentence by sentence. Every claim follows
-`facts-policy.md`.
+**score** it, or the funnel diagnosis (`pipeline.md` §5) names a
+targeting or screen leak with the resume as the likely cause. Score first,
+then rebuild content **and** design from the ground up — never patch
+sentence by sentence. Every claim follows `facts-policy.md`.
 
 ## Step 1 — HR-eye scorecard (0–100)
 

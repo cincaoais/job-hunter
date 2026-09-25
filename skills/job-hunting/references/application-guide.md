@@ -36,9 +36,8 @@ Only when it adds value or is requested. Keep it to ~250–350 words, four beats
 3. **Why you** — 2–3 concrete proofs mapped to their needs (reuse resume wins).
 4. **Close** — enthusiasm + a light call to action.
 
-Never generic. If it could be sent to any company, rewrite it. No letter
-without one user-supplied story and one company-specific fact (the
-anti-slop gate, `resume-builder.md` step 4.5).
+Never generic. If it could be sent to any company, rewrite it. Inputs a
+letter needs first: `resume-builder.md` step 4.5.
 
 ## Outreach & networking messages
 
