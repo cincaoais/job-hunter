@@ -98,7 +98,8 @@ promised verbally goes into the written offer before accepting
 ## Market rights sheet — before signing
 
 Before signing, check the market's statutory floors and contract red flags:
-`markets/my.md`, `markets/sg.md`.
+`markets/my.md`, `markets/sg.md` (other countries: `markets/_template.md`
+plus a live search).
 
 ## After each interview
 

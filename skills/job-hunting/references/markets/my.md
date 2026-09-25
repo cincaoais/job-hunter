@@ -18,16 +18,16 @@ suggest a qualified professional (SKILL.md).
 | MYFutureJobs | government | Government job portal — not in the compiled notes (unverified) | — |
 | MauKerja, JobStore | skip | Lowyat forum users rate them poorly | — |
 
-- **JobStreet vs LinkedIn**: JobStreet is the default apply channel across
-  levels; LinkedIn skews mid-to-senior and is used more for networking,
-  vetting and recruiter sourcing than for applying — SEA differs from US
-  norms here. For junior or local IC roles keep JobStreet primary and use
-  LinkedIn for the referral paths in `networking.md`.
+- **JobStreet vs LinkedIn**: JobStreet is the apply channel at every level;
+  LinkedIn skews mid-to-senior and serves networking, vetting and recruiter
+  sourcing more than applying — unlike US norms. For junior or local IC
+  roles keep JobStreet primary; use LinkedIn for referrals (`networking.md`).
 - **seekAI ranking**: JobStreet's seekAI ranks applicants on resume + JD +
   the employer's past behaviour, awards a "Top Applicant" badge, and runs
   a "predictive approachability" signal driven by profile completeness and
-  activity (SEEK, 2026). Profile completeness is a ranking input — fill
-  every structured field and stay active (`profile-optimizer.md` §3).
+  activity (2026-09 notes — verify). Profile completeness is a ranking
+  input — fill every structured field and stay active
+  (`profile-optimizer.md` §3).
 - SEEK unified the JobStreet/JobsDB platforms in Feb 2024; one matching
   engine sits behind the MY, SG, PH and ID brands.
 
@@ -46,14 +46,13 @@ suggest a qualified professional (SKILL.md).
 - **Agency salary guides**: Hays Asia Salary Guide 2026, Robert Walters
   Salary Survey 2026, Michael Page Salary Guide 2026 — read the Malaysia
   tables for the role and level.
-- **JobStreet salary labels** on postings — the employer's posted band
-  for that exact role; the single-number field is matched against posted
-  bands (§5).
+- **JobStreet salary labels** on postings — the employer's posted band for
+  that role; the single-number field is matched against it (§5).
 - **Benchmarks**: fresh-graduate median ~RM3,085, Kuala Lumpur ~RM3,435;
   unemployment 2.9%, skills-related underemployment 35.2% (Malay Mail,
   Aug 2026).
-- Search live for the role, level and city and cite what is found; never
-  quote a range from memory (`offer-coach.md` §3).
+- Search live for role, level and city and cite it; never quote a range
+  from memory (`offer-coach.md` §3).
 
 ## 4. Resume conventions
 
@@ -101,12 +100,15 @@ Employment Act covers all employees since the 2022 amendments.
 | Public holidays | 11 gazetted minimum |
 | Maternity / paternity | 98 days / 7 days (married fathers) |
 | Written contract | Required for employment beyond one month |
-| Statutory deductions | EPF: employee 11%, employer 12–13%; SOCSO + EIS mandatory from day one — "no EPF during probation" is illegal |
-| EPF for foreign workers | Employee 2%, employer 2%, from October 2025 wages (EPF) |
 
-**Gig work**: the Gig Workers Act is in force from 31 Mar 2026. A gig,
-platform or freelance arrangement is not an employment contract — check
-which law covers it before comparing it with an employment offer.
+| Contributions (EPF Act 1991; SOCSO and EIS under their own Acts) | Rate |
+|---|---|
+| EPF, SOCSO, EIS | EPF: employee 11%, employer 12–13%; SOCSO + EIS mandatory from day one — "no EPF during probation" is illegal |
+| EPF for foreign workers | Employee 2%, employer 2%, from October 2025 wages (2026-09 notes — verify) |
+
+**Gig work**: the Gig Workers Act is in force from 31 Mar 2026 (2026-09
+notes — verify). A gig, platform or freelance arrangement is not an
+employment contract — check which law covers it before comparing offers.
 
 **Contract red flags** — employer keeps original certificates or passport
 (never hand over originals); training bond with a disproportionate
@@ -119,10 +121,9 @@ contract offered; EPF/SOCSO missing from the payslip.
 - **Probation**: no statutory length; 3–6 months typical — 3 for most
   roles, 6 for senior or specialized ones. It must be stated in the
   contract.
-- **Confirmation** is documented by a confirmation letter — it is not
-  automatic. Ask for the criteria at offer stage (`post-offer.md` §1);
-  no letter once probation ends → ask HR for it in writing
-  (`post-offer.md` §8).
+- **Confirmation** is documented by a confirmation letter — not automatic.
+  Ask for the criteria at offer stage (`post-offer.md` §1); no letter once
+  probation ends → ask HR for it in writing (`post-offer.md` §8).
 
 | Situation | Notice |
 |---|---|
@@ -130,8 +131,7 @@ contract offered; EPF/SOCSO missing from the payslip.
 | During probation — typical contract | Often 1–2 weeks; if the contract is silent, the s.12 default still applies |
 | Confirmed — typical contract | ~1 month junior; 2–3 months senior or lead; 1–3 months common for professional and managerial roles |
 
-- The contract governs. Buyout, unused leave, garden leave and handover:
-  `post-offer.md` §3.
+- The contract governs; buyout, leave and handover: `post-offer.md` §3.
 
 ## 8. 13th month / bonus wording
 
@@ -141,6 +141,9 @@ contract offered; EPF/SOCSO missing from the payslip.
   labelled estimate in true annual comp (`offer-coach.md` §2).
 - Tech MNCs and startups often pay a performance bonus instead — worth
   asking at offer stage.
+- EPF applies to bonuses and the 13th month — they count as wages (2026-09
+  notes — verify). Rates on bonus pay are not compiled here; check KWSP's
+  current table before computing true annual comp.
 
 ## 9. Work authorization signals
 
@@ -148,20 +151,19 @@ contract offered; EPF/SOCSO missing from the payslip.
   "Permanent resident", or "[pass type] holder, valid until [date]" —
   never the IC number (§4).
 - Non-citizens: a role that needs a work pass is a knockout unless the
-  employer sponsors it — confirm before investing (`answer-bank.md` §4).
-  Pass rules are not compiled here; search the current rules live and
-  label them.
-- Targeting Singapore as well: `markets/sg.md` §9 (Employment Pass and
-  COMPASS).
+  employer sponsors it (`answer-bank.md` §4). Pass rules are not compiled
+  here — search them live and label them.
+- Targeting Singapore as well: `markets/sg.md` §9 (EP and COMPASS).
 
 ## 10. Interview curveballs & rights
 
 - Age, marital status, family plans, race and religion still get asked at
-  local firms; no law bars them in Malaysian private-sector hiring. The
-  right here is to decline gracefully, not to complain — and an
-  interviewer who pushes hard is data about the employer.
-- The one-line answer-and-pivot frame: `interview-prep.md` (Question
-  banks, curveballs).
+  local firms; no law bars them in Malaysian private-sector hiring. At
+  the interview stage the right is to decline gracefully, not to
+  complain — and an interviewer who pushes hard is data about the
+  employer. Once employed, EA s.69F gives JTK a route for discrimination
+  disputes (2026-09 notes — verify).
+- Answer-and-pivot frame: `interview-prep.md` (Question banks, curveballs).
 - What does carry legal weight before signing: the §6 floors and
   contract red flags — EPF from day one, pay at or above the minimum
   wage, a written contract.
@@ -171,6 +173,6 @@ contract offered; EPF/SOCSO missing from the payslip.
 - Wage and Employment Act violations: Jabatan Tenaga Kerja (Labour
   Department, e-Aduan portal).
 - Unfair dismissal: Industrial Relations Department.
-- Knowing these exist is usually enough leverage; for a real dispute,
-  give general information and suggest a qualified professional
-  (SKILL.md).
+- Discrimination once employed: JTK under EA s.69F (§10).
+- Knowing these exist is usually enough leverage; for a real dispute, give
+  general information and suggest a qualified professional (SKILL.md).

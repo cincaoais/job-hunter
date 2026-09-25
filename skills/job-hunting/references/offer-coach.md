@@ -29,7 +29,8 @@ Employers quote monthly base; offers only compare as annual totals.
   contractual*, plus discretionary bonus as a labeled estimate (not a
   promise), plus sign-on amortized over its first year.
 - Statutory employer contributions (EPF/CPF) are real money — include them
-  when comparing offers across countries, where rates differ.
+  when comparing offers across countries, where rates differ; CPF covers
+  Singapore Citizens and PRs only, not EP/S Pass holders.
 - Flag wording traps from the market notes: "13th month (discretionary)" is
   a bonus, not a 13th month; a long probation changes when notice and
   confirmation protections kick in.
