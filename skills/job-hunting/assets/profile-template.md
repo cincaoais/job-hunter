@@ -25,7 +25,7 @@ _Last updated: [date]_
 
 - **Desired role(s):**
 - **Search keywords / title variants:** (exact phrases to query on JobStreet/LinkedIn, e.g. "backend engineer", "software engineer (Go)")
-- **Tech sub-domain(s):** (e.g. backend, data engineering, ML, DevOps — see the role map)
+- **Tech sub-domain(s):** (e.g. backend, data engineering, ML, DevOps — see the career map in strategy.md)
 - **Main stack / tools:**
 - **Target seniority:** (junior / mid / senior / staff / lead / manager)
 - **Target industries:**
@@ -75,6 +75,8 @@ _Last updated: [date]_
 - **One-line identity:** ("a [X] who does [Y] and delivers [Z]")
 - **Unique selling point:**
 - **Known weak spots to address:**
+- **Weekly application cap:** (10–20 targeted; see strategy.md)
+- **Weekly outreach target:** (e.g. 6 touches; 60/40 outreach to applications)
 
 ## 9. Tracking
 > Workspace mode: see `pipeline.md`, `contacts.md`, `answers.md`. Chat mode
