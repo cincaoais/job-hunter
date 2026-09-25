@@ -1,3 +1,5 @@
+> **Work in progress — v6 revamp on branch `v6-revamp`.** Paused after Task 15 of 17 on 2026-09-25. To resume on any machine, read [`docs/handoff/HANDOFF.md`](docs/handoff/HANDOFF.md) first. This banner is removed when v6 merges.
+
 # job-hunter
 
 A Claude skill that acts as a personal job-search agent and career coach for
