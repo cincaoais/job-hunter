@@ -33,7 +33,7 @@ Every claim is the strongest **true** form of a profile fact —
    - Chat mode: the Anthropic docx / pdf skills, from the same approved
      markdown.
 6. **ATS text-layer check** (below) on the generated file:
-   `python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --posting postings/<slug>.md`.
+   `python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --posting postings/<slug>.md --lint --text`.
 7. **Run the pre-delivery check** below before handing the file over.
 8. **Record the version** sent: workspace mode
    `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" --role "<Y>" --resume resumes/<company>-<role>-vN.md`;
@@ -106,7 +106,7 @@ An ATS reads the file's extracted text, not the rendered page — and
 generation can silently produce files whose text layer differs from the
 draft. After generating, extract the file's raw text and verify what a
 parser actually sees. Workspace mode:
-`python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file.docx|file.pdf> --posting postings/<slug>.md`
+`python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --posting postings/<slug>.md --lint --text`
 (no saved posting: `--keywords "a,b"` with the `jd-match.md` §3 mirror
 list). Chat mode: extract it in the analysis sandbox (e.g. python-docx /
 pypdf) where one exists.

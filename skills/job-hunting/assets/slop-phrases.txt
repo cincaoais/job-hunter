@@ -2,13 +2,15 @@
 # One phrase per line; blank lines and lines starting with "#" are ignored.
 # `ats_check.py <draft.md> --slop` matches case-insensitively on word
 # boundaries (curly quotes fold to straight ones; a hyphen also matches a
-# space). Replace each hit with a specific (a number, a named system, a
-# result), never with a synonym.
+# space); overlapping hits count once, for the longest phrase. Replace
+# each hit with a specific (a number, a named system, a result), never
+# with a synonym.
 
 # Cover-letter openers and closers
 I am writing to express my interest
 as a highly motivated
 I am confident that
+I'm confident that
 excited about the opportunity
 I believe I would be a great fit
 aligns perfectly
@@ -47,16 +49,22 @@ synergies
 delve
 delves
 delving
+delved
 tapestry
 testament to
 seamlessly
 cutting-edge
 state-of-the-art
 robust
+spearhead
 spearheaded
+spearheading
 utilize
+utilizes
 utilized
 utilizing
 utilise
+utilised
+utilising
 furthermore
 moreover

@@ -14,14 +14,19 @@ With no PDF extractor the declared fallback line is printed and the exit is 2.
 
 Checks (they combine):
   --posting FILE    keyword coverage against keywords taken from a saved posting
-                    (requirement-style sections plus tech tokens, at most 25)
+                    (requirement-style sections plus tech tokens, at most 25), reported
+                    as must-have and nice-to-have when the posting has both
   --keywords LIST   comma-separated keywords to check instead (the jd-match mirror list)
+                    Matching ignores case except for ALL-CAPS and 1-2 letter keywords
+                    (REST, Go), and a plural "s" is optional both ways.
   --lint            6-second lint: email and phone as literal text, a year in the first
-                    15 lines, a number in the first Experience bullet, at most 900 words
+                    15 lines, a number in the first Experience bullet, at most 900 words;
+                    on a PDF the date and first-bullet checks print "skip"
   --target-title T  also check that T's words (3+ letters) appear in the first 5 lines;
                     implies --lint
   --slop            banned-phrase scan against assets/slop-phrases.txt
-  --text            print the extracted text as well (the default when no check is asked)
+  --text            print the extracted text after the report (the reading-order
+                    evidence; the default when no check is asked)
   --json            the same report as one JSON object
 
 Exit codes: 0 whenever text was extracted, FAIL lines included; 2 for bad
@@ -117,8 +122,8 @@ def _pdf_text(path: Path) -> tuple[str, str]:
         except (OSError, subprocess.SubprocessError) as e:
             raise ValueError(f"pdftotext failed: {e}") from None
         if proc.returncode != 0:
-            msg = proc.stderr.decode("utf-8", "replace").strip() or f"exit status {proc.returncode}"
-            raise ValueError(f"pdftotext could not read it: {msg}")
+            err = [ln.strip() for ln in proc.stderr.decode("utf-8", "replace").splitlines() if ln.strip()]
+            raise ValueError(f"pdftotext could not read it: {err[-1] if err else proc.returncode}")
         text = proc.stdout.decode("utf-8", "replace").replace("\r\n", "\n").replace("\f", "\n")
         return text, "pdftotext-raw"
     if problem:
@@ -156,13 +161,40 @@ def extract_text(path) -> tuple[str, str]:
 
 # --- keyword coverage -------------------------------------------------------------------
 
+_ALPHA_WORD_RE = re.compile(r"[A-Za-z]+(?:-[A-Za-z]+)*")
+
+
 def _keyword_regex(keyword: str) -> re.Pattern:
-    """Case-insensitive, whitespace-tolerant, and literal about C++, C#, .NET, Node.js."""
+    """How a keyword is found in extracted text.
+
+    Case-insensitive, except ALL-CAPS keywords and those with at most two
+    letters (REST is not "rest", Go is not "go"). Word-bounded: "-" or "&"
+    joined to a following letter continues the word (Go-to-market, R&D,
+    C-suite), and a keyword starting with "." needs a non-word, non-dot char
+    before it (.NET is not in tm.net.my). Whitespace inside a keyword matches
+    any whitespace; C++, C#, .NET and Node.js stay literal. A purely
+    alphabetic last word matches with or without a plural "s" (Payments ~
+    payment, API ~ APIs).
+    """
     k = _fold(keyword)
-    body = r"\s+".join(re.escape(part) for part in k.split())
-    left = r"(?<!\w)" if k[0].isalnum() else ""
-    right = r"(?![\w+#])" if k[-1].isalnum() else ""
-    return re.compile(left + body + right, re.I)
+    letters = sum(c.isalpha() for c in k)
+    exact_case = k.isupper() or letters <= 2
+    parts = k.split()
+    last, plural = parts[-1], ""
+    if letters > 2 and _ALPHA_WORD_RE.fullmatch(last):
+        if k.isupper():
+            plural = "" if last.endswith("S") else "s?"           # API ~ APIs, never AWS ~ AW
+        elif last.endswith("s") and not last.endswith("ss") and len(last) >= 4:
+            parts[-1], plural = last[:-1], "s?"                   # Payments ~ payment
+        elif not last.endswith("s"):
+            plural = "s?"                                         # payment ~ Payments
+    body = r"\s+".join(re.escape(part) for part in parts) + plural
+    if k.startswith("."):
+        left = r"(?<![\w.])"
+    else:
+        left = r"(?<!\w)" if k[0].isalnum() else ""
+    right = r"(?![\w+#]|[-&][^\W\d_])" if k[-1].isalnum() else ""
+    return re.compile(left + body + right, 0 if exact_case else re.I)
 
 
 def keyword_coverage(text: str, keywords) -> dict:
@@ -188,6 +220,16 @@ def keyword_coverage(text: str, keywords) -> dict:
 _REQ_HEADING_RE = re.compile(
     r"requirement|qualification|skill|must[\s-]*haves?|nice[\s-]*to[\s-]*haves?"
     r"|what you(?:'ll| will)? need|what you bring|about you|who you are|tech stack", re.I)
+_NICE_HEADING_RE = re.compile(
+    r"nice[\s-]*to[\s-]*haves?|good[\s-]*to[\s-]*haves?|bonus|preferred|desirable|pluses", re.I)
+# Other section names: an unmarked short line reads as a heading only with one of these
+# (or a trailing colon), so plain requirement lines stay content.
+_SECTION_WORDS_RE = re.compile(
+    r"\b(?:responsibilit\w*|benefits?|what we offer|perks?|about|role|company|description"
+    r"|information|culture|life at|why join|opportunit\w*|stand for|how to apply|compensation"
+    r"|welfare|package|duties|what you(?:'ll| will) do|day[\s-]to[\s-]day|the team|our team"
+    r"|who we are)\b", re.I)
+_BOLD_LINE_RE = re.compile(r"(\*\*|__)(.+?)\1\s*:?")
 _DESCRIPTION_RE = re.compile(r"^##\s+Description\s*$", re.M | re.I)
 _FRONTMATTER_RE = re.compile(r"\A---\n.*?\n---[ \t]*(?:\n|\Z)", re.S)
 _ANY_BULLET_RE = re.compile(r"^\s*(?:[-*+•●▪◦‣]|\d{1,2}[.)])\s+")
@@ -288,13 +330,24 @@ def _heading(line: str) -> tuple[str, str] | None:
     if not s or _ANY_BULLET_RE.match(s):
         return None
     m = _INLINE_HEADING_RE.match(s)          # "Skills: Go, Python", "**Must have:** Kafka"
-    if m and _REQ_HEADING_RE.search(m.group(1)):
+    if m and _section_kind(m.group(1)):
         return m.group(1).strip(), m.group(2).strip()
-    plain = _strip_md(s).strip().rstrip(":").strip()
-    if (plain[:1].isupper() and len(plain.split()) <= 8
-            and not re.search(r"[,;.!?:]", plain)):
-        return plain, ""                       # "Requirements", "**Nice to have**", "What we offer"
+    m = _BOLD_LINE_RE.fullmatch(s)           # "**Requirements**", "**What we offer**"
+    if m:
+        return m.group(2).strip().rstrip(":").strip(), ""
+    plain = _strip_md(s).strip()
+    words = plain.rstrip(":").strip()
+    if (words[:1].isupper() and len(words.split()) <= 8 and not re.search(r"[,;.!?:]", words)
+            and (plain.endswith(":") or _section_kind(words) or _SECTION_WORDS_RE.search(words))):
+        return words, ""                       # "Qualifications", "Key Responsibilities", "Perks:"
     return None
+
+
+def _section_kind(title: str) -> str | None:
+    """"nice", "must", or None for a heading that is no requirement section."""
+    if _NICE_HEADING_RE.search(title):
+        return "nice"
+    return "must" if _REQ_HEADING_RE.search(title) else None
 
 
 def _segments(line: str) -> list[list[str]]:
@@ -337,39 +390,55 @@ def _chunks(words: list[str]) -> list[str]:
     return found
 
 
-def extract_keywords(posting_md: str) -> list[str]:
-    """Up to 25 keywords from a saved posting, in the posting's own spelling.
+def _dedupe(items: list[str], seen: set | None = None) -> list[str]:
+    seen = set() if seen is None else seen
+    out = []
+    for item in items:
+        if item.lower() not in seen:
+            seen.add(item.lower())
+            out.append(item)
+    return out
+
+
+def extract_keyword_groups(posting_md: str) -> dict:
+    """{"must": [...], "nice": [...]}: a saved posting's keywords, at most 25 in all.
 
     Reads the body after `## Description` when there is one. Under
     requirement-style headings (Requirements, Qualifications, Skills, Must
-    have, What you'll need, Nice to have…) every comma/semicolon/"and"-separated
-    item becomes a candidate: tech tokens (Go, PostgreSQL, gRPC, AWS, C++…)
-    on their own, other runs trimmed of generic words (experience, strong,
-    team…). A posting without such headings yields its tech tokens only.
-    Deduped case-insensitively.
+    have, What you'll need…) every comma/semicolon/"and"-separated item
+    becomes a candidate: tech tokens (Go, PostgreSQL, gRPC, AWS, C++…) on
+    their own, other runs trimmed of generic words (experience, strong,
+    team…). Nice-to-have/preferred/bonus sections fill "nice". When the
+    sections give fewer than 5 keywords, the posting's tech tokens are added
+    to "must". Deduped case-insensitively, in the posting's own spelling.
     """
     lines = _posting_body(posting_md).split("\n")
-    section_items, in_req = [], False
+    found = {"must": [], "nice": []}
+    section = None
     for line in lines:
         head = _heading(line)
         if head is not None:
             title, rest = head
-            in_req = bool(_REQ_HEADING_RE.search(title))
-            if not (in_req and rest):
+            section = _section_kind(title)
+            if not (section and rest):
                 continue
             line = rest
-        if in_req:
-            for words in _segments(line):
-                section_items += _chunks(words)
-    if not section_items:
-        section_items = [w for line in lines for words in _segments(line) for w in words
-                         if w.lower() not in _STOP and _is_tech(w)]
-    keywords, seen = [], set()
-    for item in section_items:
-        if item.lower() not in seen:
-            seen.add(item.lower())
-            keywords.append(item)
-    return keywords[:MAX_KEYWORDS]
+        if section:
+            found[section] += [c for words in _segments(line) for c in _chunks(words)]
+    seen: set = set()
+    must = _dedupe(found["must"], seen)
+    nice = _dedupe(found["nice"], seen)
+    if len(must) + len(nice) < 5:
+        must += _dedupe([w for line in lines for words in _segments(line) for w in words
+                         if w.lower() not in _STOP and _is_tech(w)], seen)
+    must = must[:MAX_KEYWORDS]
+    return {"must": must, "nice": nice[:MAX_KEYWORDS - len(must)]}
+
+
+def extract_keywords(posting_md: str) -> list[str]:
+    """Up to 25 keywords from a saved posting: must-haves first, then nice-to-haves."""
+    groups = extract_keyword_groups(posting_md)
+    return groups["must"] + groups["nice"]
 
 
 # --- 6-second lint ------------------------------------------------------------------------
@@ -380,17 +449,37 @@ _DATE_RANGE_RE = re.compile(
     r"(?:\d{1,2}[./-])?(?:19|20)\d\d[ \t]*[-.][ \t]*(?:\d{1,2}[./-])?(?:19|20)\d\d")
 _URL_RE = re.compile(r"(?:https?://|www\.)\S+", re.I)
 _YEAR_RE = re.compile(r"(?<!\d)(?:19|20)\d\d(?!\d)")
-_EXPERIENCE_RE = re.compile(r"experience|employment|work history|career history", re.I)
+_PAREN_YEAR_RE = re.compile(r"\([^()\n]*?(?<!\d)(?:19|20)\d\d(?!\d)[^()\n]*\)")
+_CURRENCY_BEFORE_RE = re.compile(
+    r"(?:\b(?:RM|Rp|IDR|SGD|USD|MYR|PHP|THB|VND|EUR|GBP|INR|AUD|HKD|CNY|JPY)|[$€£¥₹])[ \t]?$")
+_EXPERIENCE_HEADING_RE = re.compile(
+    r"(?:work |professional )?(?:experience|employment(?: history)?|work history|career history):?",
+    re.I)
+PDF_METHODS = frozenset({"pypdf", "pdftotext-raw"})
+SKIP_DATE = ("skip date: a PDF's text order follows its columns, not the page; "
+             "lint the .md draft or .docx master")
+SKIP_FIRST_BULLET = ("skip first-bullet: a PDF text layer carries no list markers; "
+                     "lint the .md draft or .docx master")
 _LINT_BULLET_RE = re.compile(r"^\s*[-•*●▪◦‣]\s+")
 _TITLE_SKIP = frozenset({"and", "of", "the"})
 
 
+def _blank(m: re.Match) -> str:
+    return " " * len(m.group())
+
+
 def _phones(text: str) -> list[str]:
-    """Phone-like runs of 7–15 digits, leaving out year ranges such as 2019 - 2021."""
+    """Phone-like runs of 7–15 digits.
+
+    Year ranges ("2019 - 2021"), parenthesised years ("(2017 - 2021)") and
+    amounts after a currency ("IDR 10.000.000") do not count.
+    """
+    cleaned = _DATE_RANGE_RE.sub(_blank, _PAREN_YEAR_RE.sub(_blank, text))
     out = []
-    for m in _PHONE_RE.finditer(text):
+    for m in _PHONE_RE.finditer(cleaned):
         s = m.group().strip()
-        if 7 <= len(re.sub(r"\D", "", s)) <= 15 and not _DATE_RANGE_RE.fullmatch(s):
+        if (7 <= len(re.sub(r"\D", "", s)) <= 15
+                and not _CURRENCY_BEFORE_RE.search(cleaned[max(0, m.start() - 5):m.start()])):
             out.append(s)
     return out
 
@@ -398,7 +487,7 @@ def _phones(text: str) -> list[str]:
 def _first_experience_bullet(lines: list[str]) -> tuple[bool, str | None]:
     """(found an Experience heading, text of the first bullet after it or None)."""
     for i, line in enumerate(lines):
-        if _EXPERIENCE_RE.search(line) and len(line.split()) <= 6:
+        if _EXPERIENCE_HEADING_RE.fullmatch(line.strip()):
             for later in lines[i + 1:]:
                 m = _LINT_BULLET_RE.match(later)
                 if m:
@@ -407,15 +496,18 @@ def _first_experience_bullet(lines: list[str]) -> tuple[bool, str | None]:
     return False, None
 
 
-def lint_six_second(text: str, target_title: str | None = None) -> list[str]:
-    """The recruiter's-skim lint: one "ok <check>" or "FAIL <check>: <why>" per check.
+def lint_six_second(text: str, target_title: str | None = None, method: str | None = None) -> list[str]:
+    """The recruiter's-skim lint: "ok <check>", "FAIL <check>: <why>" or "skip <check>: <why>".
 
     Checks: contact (email and a 7+ digit phone as literal text), date (a
     19xx/20xx year in the first 15 lines), first-bullet (a digit or % in the
-    first bullet after the Experience heading), length (at most 900 words,
+    first bullet under an Experience heading), length (at most 900 words,
     about two pages) and, with `target_title`, title (every 3+ letter word of
-    it, bar and/of/the, in the first 5 lines).
+    it, bar and/of/the, in the first 5 lines; "-" and space alike). With a PDF
+    `method` ("pypdf", "pdftotext-raw") date and first-bullet are skipped: a
+    PDF's text follows its columns and carries no list markers.
     """
+    pdf = method in PDF_METHODS
     text = _fold(text)
     lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
     findings = []
@@ -433,19 +525,22 @@ def lint_six_second(text: str, target_title: str | None = None) -> list[str]:
         top = pattern.sub(" ", top)
     for phone in _phones(top):
         top = top.replace(phone, " ")
-    if _YEAR_RE.search(top):
+    if pdf:
+        findings.append(SKIP_DATE)
+    elif _YEAR_RE.search(top):
         findings.append("ok date")
     else:
         findings.append(f"FAIL date: no year (19xx/20xx) in the first {TOP_LINES_DATE} lines")
 
     has_heading, bullet = _first_experience_bullet(lines)
-    if bullet is not None and re.search(r"[\d%]", bullet):
+    if pdf:
+        findings.append(SKIP_FIRST_BULLET)
+    elif bullet is not None and re.search(r"[\d%]", bullet):
         findings.append("ok first-bullet")
     elif bullet is not None:
         findings.append(f'FAIL first-bullet: no number in "{_one_line(bullet)}"')
     elif has_heading:
-        findings.append('FAIL first-bullet: no "- " or "• " bullet under the Experience heading '
-                        "(a PDF text layer often drops list markers; lint the .md draft or .docx master)")
+        findings.append('FAIL first-bullet: no "- " or "• " bullet under the Experience heading')
     else:
         findings.append("FAIL first-bullet: no Experience heading found")
 
@@ -463,7 +558,9 @@ def lint_six_second(text: str, target_title: str | None = None) -> list[str]:
                 seen.add(w.lower())
                 wanted.append(w)
         head = "\n".join(lines[:TOP_LINES_TITLE])
-        absent = [w for w in wanted if not re.search(rf"(?<!\w){re.escape(w)}(?!\w)", head, re.I)]
+        absent = [w for w in wanted
+                  if not re.search(r"(?<!\w)" + re.escape(w).replace(r"\-", r"[-\s]") + r"(?!\w)",
+                                   head, re.I)]
         if not wanted:
             findings.append(f'FAIL title: "{target_title}" has no word of 3+ letters to check')
         elif absent:
@@ -491,21 +588,41 @@ def _phrase_regex(phrase: str) -> re.Pattern:
 
 
 def slop_scan(text: str, phrases=None) -> list[tuple[str, int]]:
-    """[(phrase, count)] for every banned phrase in `text`, most frequent first."""
+    """[(phrase, count)] for every banned phrase in `text`, most frequent first.
+
+    Overlapping hits count once, for the longest phrase ("dynamic team
+    player" is not also a "team player"); ties keep the list's order.
+    """
     if phrases is None:
         phrases = get_slop_phrases()
     folded = _fold(text)
-    hits = []
-    for phrase in phrases:
-        if phrase.strip():
-            n = len(_phrase_regex(phrase).findall(folded))
-            if n:
-                hits.append((phrase.strip(), n))
-    hits.sort(key=lambda hit: -hit[1])
-    return hits
+    order = {}
+    spans = []
+    for phrase in (p.strip() for p in phrases):
+        if phrase and phrase not in order:
+            order[phrase] = len(order)
+            spans += [(m.start(), m.end(), phrase) for m in _phrase_regex(phrase).finditer(folded)]
+    spans.sort(key=lambda sp: (sp[0] - sp[1], sp[0]))          # longest first, then leftmost
+    taken, counts = [], {}
+    for start, end, phrase in spans:
+        if not any(start < t_end and t_start < end for t_start, t_end in taken):
+            taken.append((start, end))
+            counts[phrase] = counts.get(phrase, 0) + 1
+    return sorted(counts.items(), key=lambda hit: (-hit[1], order[hit[0]]))
 
 
 # --- report -------------------------------------------------------------------------------
+
+def _coverage_lines(label: str, cov: dict) -> list[str]:
+    total = len(cov["present"]) + len(cov["missing"])
+    if not total:
+        return [f'**{label}:** none found in the posting; pass --keywords "a,b" '
+                "(the jd-match mirror list)"]
+    line = f"**{label}:** {len(cov['present'])}/{total} present"
+    if cov["missing"]:
+        line += " — missing: " + ", ".join(cov["missing"])
+    return [line] + (["present: " + ", ".join(cov["present"])] if cov["present"] else [])
+
 
 def render_report(result: dict) -> str:
     out = [f"**Method:** {result['method']} ({result['file']})"]
@@ -513,17 +630,11 @@ def render_report(result: dict) -> str:
         out.append("**Text layer:** empty, so an ATS would read nothing (image-only or flattened file)")
     if "keywords" in result:
         kw = result["keywords"]
-        total = len(kw["present"]) + len(kw["missing"])
-        if not total:
-            out.append('**Keywords:** none found in the posting; pass --keywords "a,b" '
-                       "(the jd-match mirror list)")
+        if "must_have" in kw:
+            out += _coverage_lines("Keywords (must-have)", kw["must_have"])
+            out += _coverage_lines("Keywords (nice-to-have)", kw["nice_to_have"])
         else:
-            line = f"**Keywords:** {len(kw['present'])}/{total} present"
-            if kw["missing"]:
-                line += " — missing: " + ", ".join(kw["missing"])
-            out.append(line)
-            if kw["present"]:
-                out.append("present: " + ", ".join(kw["present"]))
+            out += _coverage_lines("Keywords", kw)
     if "lint" in result:
         out.append("**Lint:**")
         out += result["lint"]
@@ -559,22 +670,25 @@ def main(argv=None) -> int:
     ap.add_argument("--json", action="store_true", help="print the report as JSON")
     a = ap.parse_args(argv)
 
-    keywords = None
+    keywords, groups = None, None
     if a.keywords is not None:
         keywords = [k.strip() for k in re.split(r"[,;\n]", a.keywords) if k.strip()]
         if not keywords:
             return _fail("--keywords is empty: pass a comma-separated list")
     elif a.posting is not None:
         try:
-            keywords = extract_keywords(a.posting.read_text(encoding="utf-8-sig", errors="replace"))
+            groups = extract_keyword_groups(a.posting.read_text(encoding="utf-8-sig", errors="replace"))
         except OSError as e:
             return _fail(f"cannot read the posting {a.posting}: {e.strerror or e}")
+        keywords = groups["must"] + groups["nice"]
     phrases = None
     if a.slop:
         try:
             phrases = get_slop_phrases()
         except OSError as e:
             return _fail(f"cannot read the phrase list {SLOP_FILE}: {e.strerror or e}")
+        except UnicodeDecodeError:
+            return _fail(f"cannot read the phrase list {SLOP_FILE}: it is not UTF-8 text")
 
     try:
         text, method = extract_text(a.file)
@@ -590,8 +704,11 @@ def main(argv=None) -> int:
     result = {"file": str(a.file), "method": method, "empty": not text.strip()}
     if keywords is not None:
         result["keywords"] = keyword_coverage(text, keywords)
+        if groups and groups["nice"]:
+            result["keywords"]["must_have"] = keyword_coverage(text, groups["must"])
+            result["keywords"]["nice_to_have"] = keyword_coverage(text, groups["nice"])
     if lint:
-        result["lint"] = lint_six_second(text, target_title=a.target_title or None)
+        result["lint"] = lint_six_second(text, target_title=a.target_title or None, method=method)
     if phrases is not None:
         result["slop"] = [{"phrase": p, "count": n} for p, n in slop_scan(text, phrases)]
     if a.text or not (keywords is not None or lint or phrases is not None):

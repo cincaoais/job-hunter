@@ -125,9 +125,11 @@ def test_extract_text_pdftotext_failure_raises_valueerror(tmp_path, monkeypatch)
     monkeypatch.setattr(ats, "optional_import", lambda name: None)
     monkeypatch.setattr(ats.shutil, "which", lambda name: "/opt/bin/pdftotext")
     monkeypatch.setattr(ats.subprocess, "run", lambda args, **kw: subprocess.CompletedProcess(
-        args, 1, stdout=b"", stderr=b"Syntax Error: Couldn't find trailer dictionary"))
-    with pytest.raises(ValueError, match="trailer"):
+        args, 1, stdout=b"", stderr=b"Syntax Warning: May not be a PDF file (continuing anyway)\n"
+                                    b"Syntax Error: Couldn't find trailer dictionary\n\n"))
+    with pytest.raises(ValueError, match="trailer") as e:
         ats.extract_text(pdf)
+    assert "Warning" not in str(e.value)  # only the last non-empty stderr line
 
 
 def test_extract_text_pdf_unavailable(tmp_path, monkeypatch):
@@ -184,11 +186,29 @@ def test_keyword_coverage_on_sample_docx(docx_text):
 
 
 def test_keyword_coverage_word_boundaries_and_literal_symbols():
-    text = "Shipped C++ and Node.js services on ASP.NET; JavaScript at Google; postgresql tuning; on-call"
+    text = "Shipped C++ and Node.js services on .NET; JavaScript at Google; postgresql tuning; on-call"
     cov = ats.keyword_coverage(text, ["C++", "Node.js", ".NET", "C#", "C", "Java", "Go", "PostgreSQL",
                                       "on-call", "SQL"])
     assert cov["present"] == ["C++", "Node.js", ".NET", "PostgreSQL", "on-call"]
     assert cov["missing"] == ["C#", "C", "Java", "Go", "SQL"]
+
+
+@pytest.mark.parametrize("text,keyword,found", [
+    ("We go live on Monday", "Go", False),                # 1-2 letter keywords match case-sensitively
+    ("Owned the Go-to-market plan", "Go", False),         # "-" + letter continues the word
+    ("Email me at arif@tm.net.my", ".NET", False),        # "." before a dotted keyword is no boundary
+    ("Ran the R&D budget", "R", False),
+    ("Presented to the C-suite", "C", False),
+    ("Handled the rest of the backlog", "REST", False),   # ALL-CAPS keywords match case-sensitively
+    ("Built payment services in Go.", "Go", True),
+    ("Moved C# services to .NET 8", ".NET", True),
+    ("Designed REST APIs", "API", True),                  # plural tolerance, both ways
+    ("Owned payment reconciliation", "Payments", True),
+    ("Settled Payments daily", "payment", True),
+])
+def test_keyword_coverage_lookalikes_and_true_positives(text, keyword, found):
+    cov = ats.keyword_coverage(text, [keyword])
+    assert cov["present" if found else "missing"] == [keyword]
 
 
 def test_keyword_coverage_phrase_spans_whitespace_and_dedupes():
@@ -233,6 +253,26 @@ def test_extract_keywords_without_requirement_headings_uses_tech_tokens():
     assert kws[:4] == ["Go", "PostgreSQL", "gRPC", "C++"]
 
 
+def test_extract_keywords_survives_unmarked_requirement_lines():
+    stripped = re.sub(r"(?m)^- ", "", SAMPLE_JD.read_text(encoding="utf-8"))
+    kws = ats.extract_keywords(stripped)
+    for want in ("Go", "gRPC", "Kubernetes", "PostgreSQL"):
+        assert want in kws
+
+
+def test_extract_keywords_merges_tech_tokens_when_sections_are_thin():
+    posting = "Requirements\nFintech domain\n\nAbout the team\nWe run Go and Kafka on AWS.\n"
+    assert ats.extract_keywords(posting) == ["Fintech", "Go", "Kafka", "AWS"]
+
+
+def test_extract_keyword_groups_split_must_and_nice():
+    groups = ats.extract_keyword_groups(SAMPLE_JD.read_text(encoding="utf-8"))
+    assert {"Go", "gRPC", "PostgreSQL"} <= set(groups["must"])
+    assert {"Payments", "AWS", "mentoring"} <= set(groups["nice"])
+    assert not set(groups["must"]) & set(groups["nice"])
+    assert ats.extract_keyword_groups("Requirements:\n- Go, Kafka\n")["nice"] == []
+
+
 def test_extract_keywords_caps_at_25():
     items = ", ".join(f"Tool{i}X" for i in range(40))
     assert len(ats.extract_keywords(f"**Skills**\n{items}\n")) == 25
@@ -254,6 +294,8 @@ def test_lint_passes_on_sample_docx(docx_text):
 @pytest.mark.parametrize("contact_line,missing", [
     ("Data Analyst · +65 9123 4567", "email"),       # the brief's case: no email
     ("jane@example.com · 2019 - 2021", "phone"),     # a year range is not a phone number
+    ("jane@example.com · Universiti Malaya (2017 - 2021)", "phone"),
+    ("jane@example.com · expected IDR 10.000.000", "phone"),  # currency is not a phone number
 ])
 def test_lint_flags_missing_contact(contact_line, missing):
     text = f"Jane Tan\n{contact_line}\nExperience\nAnalyst — Acme · 2022 – Present\n- Cut report time 40%\n"
@@ -278,7 +320,30 @@ def test_lint_first_bullet_accepts_round_bullet_and_needs_experience_line():
     missing = ats.lint_six_second("a@b.co 555 1234 567 2024\nProjects\n- Built a thing\n")
     assert "FAIL first-bullet: no Experience heading found" in missing
     markerless = ats.lint_six_second("a@b.co 555 1234 567\nEXPERIENCE\nEngineer 2023\nCut costs 40%\n")
-    assert any(f.startswith("FAIL first-bullet:") and ".docx master" in f for f in markerless)
+    assert 'FAIL first-bullet: no "- " or "• " bullet under the Experience heading' in markerless
+    job_title = ats.lint_six_second("a@b.co 555 1234 567 2024\nUser Experience Designer\n- Led design\n")
+    assert "FAIL first-bullet: no Experience heading found" in job_title
+    labelled = ats.lint_six_second("a@b.co 555 1234 567 2024\nProfessional Experience:\n- Grew 3x\n")
+    assert "ok first-bullet" in labelled
+
+
+def test_lint_parenthesised_year_range_counts_as_a_date():
+    findings = ats.lint_six_second("Jane Tan\njane@example.com +65 9123 4567\nAcme (2019 - 2021)\n")
+    assert "ok date" in findings and "ok contact" in findings
+
+
+PDF_SKIPS = ("skip date: a PDF's text order follows its columns, not the page; "
+             "lint the .md draft or .docx master",
+             "skip first-bullet: a PDF text layer carries no list markers; "
+             "lint the .md draft or .docx master")
+
+
+@pytest.mark.parametrize("method", ["pypdf", "pdftotext-raw"])
+def test_lint_skips_date_and_first_bullet_on_pdf_text(method):
+    text = "Jane Tan\nSKILLS\nGo\nEXPERIENCE\nEngineer\nOwned things\njane@example.com +65 9123 4567\n"
+    findings = ats.lint_six_second(text, target_title="Engineer", method=method)
+    assert findings[:3] == ["ok contact", *PDF_SKIPS]
+    assert findings[3].startswith("ok length:") and findings[4] == "ok title"  # the rest still run
 
 
 def test_lint_target_title_pass_and_fail(docx_text):
@@ -287,6 +352,14 @@ def test_lint_target_title_pass_and_fail(docx_text):
     assert len(fails) == 1 and fails[0].startswith("FAIL title:")
     assert "head" in fails[0].lower() and "frontend" in fails[0].lower()
     assert '"of"' not in fails[0]
+
+
+@pytest.mark.parametrize("target,title_line", [
+    ("Full-Stack Engineer", "Full Stack Engineer"),
+    ("Full Stack Engineer", "Full-Stack Engineer"),
+])
+def test_lint_title_treats_hyphen_and_space_alike(target, title_line):
+    assert "ok title" in ats.lint_six_second(f"Jane Tan\n{title_line}\n", target_title=target)
 
 
 # --- slop_scan -------------------------------------------------------------------------
@@ -298,6 +371,11 @@ def test_slop_scan_finds_phrase():
 def test_slop_scan_counts_case_insensitive_word_bounded_sorted():
     text = "Robust design. A ROBUST queue; robustness is not a hit. I’m Passionate About Go. Leveraged."
     assert ats.slop_scan(text) == [("robust", 2), ("passionate about", 1)]
+
+
+def test_slop_scan_longest_match_wins():
+    assert ats.slop_scan("A dynamic team player, and a team player.") == [
+        ("dynamic team player", 1), ("team player", 1)]
 
 
 def test_slop_scan_apostrophes_and_custom_list():
@@ -314,7 +392,9 @@ def test_slop_phrase_file():
     assert len({p.lower() for p in phrases}) == len(phrases)
     for want in ("passionate about", "proven track record", "results-driven",
                  "I am writing to express my interest", "in today's fast-paced", "delve",
-                 "responsible for", "I believe I would be a great fit", "moreover"):
+                 "responsible for", "I believe I would be a great fit", "moreover",
+                 "utilizes", "utilised", "utilising", "spearhead", "spearheading", "delved",
+                 "I'm confident that"):
         assert want in phrases
     assert not any(p.startswith("#") or not p.strip() for p in phrases)
 
@@ -338,12 +418,30 @@ def test_cli_docx_keywords_lint_slop(sample_docx, capsys):
     assert "**Slop:** none found" in lines
 
 
-def test_cli_posting(sample_docx, capsys):
+def test_cli_posting_splits_must_and_nice_to_have(sample_docx, capsys):
     assert ats.main([str(sample_docx), "--posting", str(SAMPLE_JD)]) == 0
     out = capsys.readouterr().out
-    m = re.search(r"\*\*Keywords:\*\* (\d+)/(\d+) present — missing: (.+)", out)
-    assert m and "gRPC" in m.group(3) and "Go" not in m.group(3).split(", ")
-    assert "**Lint:**" not in out and "**Slop:**" not in out
+    must = re.search(r"^\*\*Keywords \(must-have\):\*\* (\d+)/(\d+) present — missing: (.+)$", out, re.M)
+    nice = re.search(r"^\*\*Keywords \(nice-to-have\):\*\* (\d+)/(\d+) present", out, re.M)
+    assert must and "gRPC" in must.group(3) and "Go" not in must.group(3).split(", ")
+    assert nice and must.start() < nice.start()
+    assert "**Lint:**" not in out and "**Slop:**" not in out and "**Text layer:**" not in out
+
+
+def test_cli_posting_lint_text_prints_all_three_parts(sample_docx, capsys):
+    assert ats.main([str(sample_docx), "--posting", str(SAMPLE_JD), "--lint", "--text"]) == 0
+    out = capsys.readouterr().out
+    assert out.index("**Keywords (must-have):**") < out.index("**Lint:**") < out.index("**Text layer:**")
+    assert "arif.rahman@example.com" in out.split("**Text layer:**")[1]
+
+
+def test_step6_invocations_ask_for_lint_and_text():
+    invocation = ("python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --posting "
+                  "postings/<slug>.md --lint --text")
+    builder = (ROOT / "skills" / "job-hunting" / "references" / "resume-builder.md").read_text(encoding="utf-8")
+    assert builder.count(invocation) == 2
+    resume_skill = (ROOT / "skills" / "resume" / "SKILL.md").read_text(encoding="utf-8")
+    assert re.search(r"ats_check\.py <file> --posting postings/<slug>\.md[^`]*--text", resume_skill)
 
 
 def test_cli_markdown_lint_target_title_and_slop_hits(tmp_path, capsys):
@@ -399,6 +497,10 @@ def test_cli_pdf_via_pdftotext(tmp_path, monkeypatch, capsys):
     assert ats.main([str(pdf), "--keywords", "Go,gRPC"]) == 0
     out = capsys.readouterr().out
     assert "**Method:** pdftotext-raw" in out and "**Keywords:** 1/2 present — missing: gRPC" in out
+    assert ats.main([str(pdf), "--lint", "--json"]) == 0
+    lint = json.loads(capsys.readouterr().out)["lint"]
+    assert [line.split(":")[0] for line in lint] == ["FAIL contact", "skip date", "skip first-bullet",
+                                                     "ok length"]
 
 
 def test_cli_empty_text_layer_is_reported(tmp_path, monkeypatch, capsys):
@@ -421,7 +523,14 @@ def test_cli_bad_inputs_exit_2(sample_docx, capsys, argv_tail, needle):
     assert needle in capsys.readouterr().err
 
 
-def test_cli_unreadable_files_exit_2(tmp_path, capsys):
+def test_cli_unreadable_files_exit_2(tmp_path, monkeypatch, capsys):
+    bad_list = tmp_path / "slop.txt"
+    bad_list.write_bytes(b"synergy\n\xff\xfe broken\n")
+    monkeypatch.setattr(ats, "SLOP_FILE", bad_list)
+    md = tmp_path / "draft.md"
+    md.write_text("fine", encoding="utf-8")
+    assert ats.main([str(md), "--slop"]) == 2
+    assert "slop.txt" in capsys.readouterr().err
     bad = tmp_path / "bad.docx"
     bad.write_bytes(b"not a zip")
     assert ats.main([str(bad), "--lint"]) == 2
