@@ -1,0 +1,62 @@
+# Banned phrases for the anti-slop gate (resume-builder.md step 4.5).
+# One phrase per line; blank lines and lines starting with "#" are ignored.
+# `ats_check.py <draft.md> --slop` matches case-insensitively on word
+# boundaries (curly quotes fold to straight ones; a hyphen also matches a
+# space). Replace each hit with a specific (a number, a named system, a
+# result), never with a synonym.
+
+# Cover-letter openers and closers
+I am writing to express my interest
+as a highly motivated
+I am confident that
+excited about the opportunity
+I believe I would be a great fit
+aligns perfectly
+thank you for considering
+in conclusion
+
+# Self-description with no evidence
+passionate about
+proven track record
+results-driven
+dynamic team player
+team player
+go-getter
+self-starter
+hardworking
+hard-working
+detail-oriented
+fast learner
+excellent communication skills
+unique blend
+hit the ground running
+think outside the box
+leverage my skills
+
+# Duty-listing instead of results
+responsible for
+assisted with
+duties included
+helped with
+various tasks
+
+# Machine-written tells
+in today's fast-paced
+synergy
+synergies
+delve
+delves
+delving
+tapestry
+testament to
+seamlessly
+cutting-edge
+state-of-the-art
+robust
+spearheaded
+utilize
+utilized
+utilizing
+utilise
+furthermore
+moreover

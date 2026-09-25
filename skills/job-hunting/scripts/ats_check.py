@@ -1,0 +1,604 @@
+#!/usr/bin/env python3
+"""ATS text-layer check: what a parser actually reads from a resume file.
+
+  python3 ats_check.py <file.docx|file.pdf|file.md|file.txt>
+                       [--posting postings/<slug>.md | --keywords "a,b,c"]
+                       [--lint] [--target-title "<target role>"] [--slop] [--text] [--json]
+
+Extraction (the **Method:** line):
+  docx-xml        a .docx text layer from word/document.xml (list paragraphs read "- ")
+  pypdf           a .pdf through pypdf, when it is installed
+  pdftotext-raw   a .pdf through `pdftotext -raw` (content-stream order), when on PATH
+  markdown, text  a draft read as text; markdown loses #, ** and link syntax
+With no PDF extractor the declared fallback line is printed and the exit is 2.
+
+Checks (they combine):
+  --posting FILE    keyword coverage against keywords taken from a saved posting
+                    (requirement-style sections plus tech tokens, at most 25)
+  --keywords LIST   comma-separated keywords to check instead (the jd-match mirror list)
+  --lint            6-second lint: email and phone as literal text, a year in the first
+                    15 lines, a number in the first Experience bullet, at most 900 words
+  --target-title T  also check that T's words (3+ letters) appear in the first 5 lines;
+                    implies --lint
+  --slop            banned-phrase scan against assets/slop-phrases.txt
+  --text            print the extracted text as well (the default when no check is asked)
+  --json            the same report as one JSON object
+
+Exit codes: 0 whenever text was extracted, FAIL lines included; 2 for bad
+arguments, an unreadable file, or no PDF extractor.
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import shutil
+import subprocess
+import sys
+import unicodedata
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _common import docx_text, optional_import  # noqa: E402
+
+SLOP_FILE = Path(__file__).resolve().parent.parent / "assets" / "slop-phrases.txt"
+FALLBACK_LINE = ("Text layer not checked: no PDF text extractor here (pip install pypdf, or install "
+                 "pdftotext). Check the .docx master instead, or fall back to the pre-delivery "
+                 "checklist and tell the user the check did not run.")
+PDFTOTEXT_TIMEOUT = 60
+MAX_KEYWORDS = 25
+MAX_WORDS = 900          # about two pages
+TOP_LINES_DATE = 15
+TOP_LINES_TITLE = 5
+
+# --- normalising text for matching --------------------------------------------------
+
+_FOLD = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"',
+                       "\u2010": "-", "\u2011": "-", "\u00ad": None})  # soft hyphen dropped
+
+
+def _fold(text: str) -> str:
+    """NFKC (ligatures, no-break spaces) plus straight quotes and plain hyphens."""
+    return unicodedata.normalize("NFKC", text or "").translate(_FOLD)
+
+
+def _one_line(text: str, limit: int = 70) -> str:
+    text = " ".join(text.split())
+    return text if len(text) <= limit else text[: limit - 1].rstrip() + "…"
+
+
+# --- extraction -----------------------------------------------------------------------
+
+_MD_HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+(.*?)(?:\s+#+)?\s*$")
+_MD_STAR_BULLET_RE = re.compile(r"^(\s*)[*+]\s+")
+_MD_LINK_RE = re.compile(r"!?\[([^\]]*)\]\(\s*<?([^)\s>]*)>?(?:\s+\"[^\"]*\")?\s*\)")
+_MD_AUTOLINK_RE = re.compile(r"<((?:https?://|mailto:)[^>\s]+)>")
+
+
+def markdown_to_text(md: str) -> str:
+    """A markdown draft as a parser would see the built file: no #, ** or link syntax.
+
+    `*` and `+` bullets become "- " so bullets read the same as in a .docx.
+    """
+    lines = []
+    for line in md.splitlines():
+        m = _MD_HEADING_RE.match(line)
+        if m:
+            line = m.group(1)
+        line = _MD_STAR_BULLET_RE.sub(r"\1- ", line)
+        line = line.replace("**", "")
+        line = _MD_LINK_RE.sub(lambda m: m.group(1) or m.group(2), line)
+        line = _MD_AUTOLINK_RE.sub(r"\1", line)
+        lines.append(line)
+    return "\n".join(lines)
+
+
+def _decode(data: bytes) -> str:
+    return data.decode("utf-8-sig", "replace").replace("\r\n", "\n").replace("\r", "\n")
+
+
+def _pdf_text(path: Path) -> tuple[str, str]:
+    """pypdf if importable, else `pdftotext -raw`, else ("", "unavailable")."""
+    problem = ""
+    pypdf = optional_import("pypdf")
+    if pypdf is not None:
+        try:
+            reader = pypdf.PdfReader(str(path))
+            return "\n".join((page.extract_text() or "") for page in reader.pages), "pypdf"
+        except Exception as e:  # pypdf raises many types on damaged or encrypted files
+            problem = f"pypdf: {e.__class__.__name__}: {e}"
+    exe = shutil.which("pdftotext")
+    if exe:
+        # -raw keeps content-stream order; the default mode interleaves sidebar columns
+        try:
+            proc = subprocess.run([exe, "-raw", "-enc", "UTF-8", str(path), "-"],
+                                  capture_output=True, timeout=PDFTOTEXT_TIMEOUT)
+        except (OSError, subprocess.SubprocessError) as e:
+            raise ValueError(f"pdftotext failed: {e}") from None
+        if proc.returncode != 0:
+            msg = proc.stderr.decode("utf-8", "replace").strip() or f"exit status {proc.returncode}"
+            raise ValueError(f"pdftotext could not read it: {msg}")
+        text = proc.stdout.decode("utf-8", "replace").replace("\r\n", "\n").replace("\f", "\n")
+        return text, "pdftotext-raw"
+    if problem:
+        raise ValueError(f"not a readable .pdf ({problem})")
+    return "", "unavailable"
+
+
+def extract_text(path) -> tuple[str, str]:
+    """(text, method) for a .docx, .pdf, .md/.markdown or .txt file.
+
+    method is "docx-xml", "pypdf", "pdftotext-raw", "markdown", "text" or
+    "unavailable" (a PDF with no extractor on this machine). Raises OSError
+    when the file cannot be read and ValueError when it is not a readable
+    document of a supported type.
+    """
+    path = Path(path)
+    data = path.read_bytes()
+    suffix = path.suffix.lower()
+    if suffix == ".docx" or (suffix != ".pdf" and data.startswith(b"PK\x03\x04")):
+        try:
+            return docx_text(data), "docx-xml"
+        except ValueError:
+            raise
+        except Exception as e:  # zipfile edge cases: encrypted, unsupported compression
+            raise ValueError(f"not a readable .docx ({e.__class__.__name__}: {e})") from None
+    if suffix == ".pdf" or data.startswith(b"%PDF"):
+        return _pdf_text(path)
+    if suffix in (".md", ".markdown"):
+        return markdown_to_text(_decode(data)), "markdown"
+    if suffix == ".txt":
+        return _decode(data), "text"
+    raise ValueError(f"unsupported file type {suffix or '(no extension)'}: "
+                     "pass a .docx, .pdf, .md or .txt")
+
+
+# --- keyword coverage -------------------------------------------------------------------
+
+def _keyword_regex(keyword: str) -> re.Pattern:
+    """Case-insensitive, whitespace-tolerant, and literal about C++, C#, .NET, Node.js."""
+    k = _fold(keyword)
+    body = r"\s+".join(re.escape(part) for part in k.split())
+    left = r"(?<!\w)" if k[0].isalnum() else ""
+    right = r"(?![\w+#])" if k[-1].isalnum() else ""
+    return re.compile(left + body + right, re.I)
+
+
+def keyword_coverage(text: str, keywords) -> dict:
+    """{"present": [...], "missing": [...], "ratio": present/total} in keyword order.
+
+    Keywords are deduped case-insensitively (first spelling wins); blanks drop.
+    """
+    folded = _fold(text)
+    present, missing, seen = [], [], set()
+    for raw in keywords:
+        kw = " ".join(str(raw).split())
+        if not _fold(kw).strip() or kw.lower() in seen:
+            continue
+        seen.add(kw.lower())
+        (present if _keyword_regex(kw).search(folded) else missing).append(kw)
+    total = len(present) + len(missing)
+    return {"present": present, "missing": missing,
+            "ratio": round(len(present) / total, 3) if total else 0.0}
+
+
+# --- keywords from a posting ---------------------------------------------------------------
+
+_REQ_HEADING_RE = re.compile(
+    r"requirement|qualification|skill|must[\s-]*haves?|nice[\s-]*to[\s-]*haves?"
+    r"|what you(?:'ll| will)? need|what you bring|about you|who you are|tech stack", re.I)
+_DESCRIPTION_RE = re.compile(r"^##\s+Description\s*$", re.M | re.I)
+_FRONTMATTER_RE = re.compile(r"\A---\n.*?\n---[ \t]*(?:\n|\Z)", re.S)
+_ANY_BULLET_RE = re.compile(r"^\s*(?:[-*+•●▪◦‣]|\d{1,2}[.)])\s+")
+_INLINE_HEADING_RE = re.compile(
+    r"^(?:\*\*|__)?([A-Za-z][A-Za-z '/&-]{1,48}?)(?:\*\*|__)?\s*:\s*(?:\*\*|__)?\s*(.*)$")
+_SEGMENT_SPLIT_RE = re.compile(r"[,;:()\[\]{}|!?·•—–\"]|\s[/&+-]\s|\.(?=\s|$)")
+
+# Words that end a keyword run: function words plus the generic posting vocabulary.
+_STOP = frozenset("""
+a an the and or nor but of in on at to for with without from by as into onto over under about
+across within via per than then that this these those such is are be been being was were will
+would should can could may might must shall have has had having do does did done you your yours
+you'll you're you've we our ours we're we'll us they their them it its it's who whom which what
+where when how why all any some each every both either neither other others more most less least
+very well also just not no yes if so up out own able like including include includes etc eg ie
+e.g i.e plus get make run runs running ideally
+experience experienced experiences knowledge knowledgeable ability abilities strong solid good
+great excellent exceptional outstanding proven demonstrated demonstrable deep team teams year
+years yrs minimum min preferred preferably prefer required require requires requirement
+requirements nice bonus advantage advantageous added familiarity familiar understanding
+understand comfortable proficiency proficient hands-on working work skills skill production
+environment environments background degree degrees bachelor bachelor's bachelors master master's
+masters diploma phd field fields discipline disciplines related relevant similar equivalent basic
+advanced senior junior mid mid-level level professional practical real clear effective
+effectively high highly using use used new willing willingness learn learning attention detail
+details communication written spoken verbal interpersonal collaboration collaborative teamwork
+problem-solving analytical motivated self-motivated passionate independently independent
+ambiguity mindset fast-paced dynamic common best daily
+""".split())
+# Leading verbs trimmed from a run ("operating gRPC services" -> gRPC, services).
+_LEAD_TRIM = frozenset("""
+designing operating building developing maintaining writing leading managing scaling owning
+delivering driving supporting implementing deploying creating shipping manage
+""".split())
+# Generic nouns that are no keyword on their own.
+_ALONE_DROP = _LEAD_TRIM | frozenset("""
+services service systems system tools tool platform platforms domain concepts principles
+practices methodologies methodology frameworks technologies technology tech stack programming
+language languages certification certifications certified applications application solutions
+products product software code coding projects project tasks task processes process engineers
+engineer engineering development developer developers
+""".split())
+# Lowercase tails trimmed from a run ("backend engineering" -> backend).
+_SUFFIX_TRIM = frozenset("""
+development engineering domain programming language languages concepts principles practices
+methodologies methodology certification certifications background
+""".split())
+# Tech names that look like plain capitalised words (case-sensitive; ALL-CAPS also counts).
+_TECH_VOCAB = frozenset("""
+Go Golang Python Java Kotlin Swift Rust Ruby Rails Scala Elixir Erlang Haskell Clojure Perl Dart
+Flutter Lua Julia MATLAB R C Bash PowerShell JavaScript TypeScript PHP SQL NoSQL HTML CSS
+React Angular Vue Svelte Django Flask FastAPI Spring Express Laravel Symfony Hibernate Kubernetes
+Docker Terraform Ansible Jenkins Helm Istio Nginx Linux Unix Git GitHub GitLab Bitbucket Jira
+Confluence Kafka RabbitMQ Redis Postgres PostgreSQL MySQL MongoDB Cassandra DynamoDB
+Elasticsearch OpenSearch Spark Hadoop Airflow Flink Snowflake Databricks BigQuery Redshift dbt
+Looker Tableau Excel PowerPoint Figma Photoshop Illustrator Salesforce SAP Oracle HubSpot Shopify
+WordPress AWS GCP Azure Firebase Heroku Vercel Cloudflare Pandas NumPy PyTorch TensorFlow Keras
+Selenium Cypress Playwright Jest Webpack Prometheus Grafana Datadog Splunk GraphQL gRPC REST
+Android iOS Unity Unreal
+""".split())
+# All-caps tokens that are not skills (currencies, titles, places, filler).
+_CAPS_IGNORE = frozenset("""
+A I RM SGD USD MYR IDR THB VND EUR GBP HR CEO CTO CFO COO VP OT EPF SOCSO CPF ESOP KL PJ SG
+MY US UK EU APAC SEA ETA NA TBC OK
+""".split())
+_MIXED_CASE_RE = re.compile(r"[a-z][A-Z]")                        # gRPC, PostgreSQL, iOS
+_ALL_CAPS_RE = re.compile(r"[A-Z][A-Z0-9]*[A-Z0-9](?:/[A-Z0-9]+)*")  # AWS, EC2, CI/CD
+_SYMBOL_RE = re.compile(r"[+#]|^\.[A-Za-z]|[A-Za-z]\.[A-Za-z]")     # C++, C#, .NET, Node.js
+
+
+def _is_tech(word: str) -> bool:
+    if word in _TECH_VOCAB or (word.isupper() and word.capitalize() in _TECH_VOCAB):
+        return True
+    if word in _CAPS_IGNORE or not re.search(r"[A-Za-z]", word):
+        return False
+    return bool(_MIXED_CASE_RE.search(word) or _ALL_CAPS_RE.fullmatch(word)
+                or re.search(r"\d", word) or _SYMBOL_RE.search(word))
+
+
+def _strip_md(text: str) -> str:
+    return _MD_LINK_RE.sub(lambda m: m.group(1) or m.group(2), text.replace("**", "").replace("`", ""))
+
+
+def _posting_body(posting_md: str) -> str:
+    md = _fold(posting_md).replace("\r\n", "\n")
+    m = _DESCRIPTION_RE.search(md)
+    if m:
+        return md[m.end():]
+    return _FRONTMATTER_RE.sub("", md, count=1)
+
+
+def _heading(line: str) -> tuple[str, str] | None:
+    """(heading, rest of line) when `line` reads as a section heading, else None."""
+    s = line.strip()
+    m = _MD_HEADING_RE.match(s)
+    if m:
+        return _strip_md(m.group(1)).strip().rstrip(":").strip(), ""
+    if not s or _ANY_BULLET_RE.match(s):
+        return None
+    m = _INLINE_HEADING_RE.match(s)          # "Skills: Go, Python", "**Must have:** Kafka"
+    if m and _REQ_HEADING_RE.search(m.group(1)):
+        return m.group(1).strip(), m.group(2).strip()
+    plain = _strip_md(s).strip().rstrip(":").strip()
+    if (plain[:1].isupper() and len(plain.split()) <= 8
+            and not re.search(r"[,;.!?:]", plain)):
+        return plain, ""                       # "Requirements", "**Nice to have**", "What we offer"
+    return None
+
+
+def _segments(line: str) -> list[list[str]]:
+    """A line split at punctuation into lists of cleaned words."""
+    line = _strip_md(_ANY_BULLET_RE.sub("", line))
+    out = []
+    for seg in _SEGMENT_SPLIT_RE.split(line):
+        words = [w.strip("'\"`*_") for w in seg.split()]
+        words = [w for w in words if w]
+        if words:
+            out.append(words)
+    return out
+
+
+def _chunks(words: list[str]) -> list[str]:
+    """Keyword candidates in one segment: tech tokens alone, other runs between stopwords."""
+    found, run = [], []
+
+    def flush():
+        while run and run[0].lower() in _LEAD_TRIM:
+            run.pop(0)
+        while run and run[-1] in _SUFFIX_TRIM:
+            run.pop()
+        capitalised = all(w[:1].isupper() for w in run)
+        if (run and not all(w.lower() in _ALONE_DROP for w in run)
+                and len(run) <= (5 if capitalised else 3)
+                and len(" ".join(run)) > 1):
+            found.append(" ".join(run))
+        run.clear()
+
+    for w in words:
+        if w.lower() in _STOP or w in _CAPS_IGNORE or not re.search(r"[A-Za-z]", w):
+            flush()
+        elif _is_tech(w):
+            flush()
+            found.append(w)
+        else:
+            run.append(w)
+    flush()
+    return found
+
+
+def extract_keywords(posting_md: str) -> list[str]:
+    """Up to 25 keywords from a saved posting, in the posting's own spelling.
+
+    Reads the body after `## Description` when there is one. Under
+    requirement-style headings (Requirements, Qualifications, Skills, Must
+    have, What you'll need, Nice to have…) every comma/semicolon/"and"-separated
+    item becomes a candidate: tech tokens (Go, PostgreSQL, gRPC, AWS, C++…)
+    on their own, other runs trimmed of generic words (experience, strong,
+    team…). A posting without such headings yields its tech tokens only.
+    Deduped case-insensitively.
+    """
+    lines = _posting_body(posting_md).split("\n")
+    section_items, in_req = [], False
+    for line in lines:
+        head = _heading(line)
+        if head is not None:
+            title, rest = head
+            in_req = bool(_REQ_HEADING_RE.search(title))
+            if not (in_req and rest):
+                continue
+            line = rest
+        if in_req:
+            for words in _segments(line):
+                section_items += _chunks(words)
+    if not section_items:
+        section_items = [w for line in lines for words in _segments(line) for w in words
+                         if w.lower() not in _STOP and _is_tech(w)]
+    keywords, seen = [], set()
+    for item in section_items:
+        if item.lower() not in seen:
+            seen.add(item.lower())
+            keywords.append(item)
+    return keywords[:MAX_KEYWORDS]
+
+
+# --- 6-second lint ------------------------------------------------------------------------
+
+_EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
+_PHONE_RE = re.compile(r"(?<![\w/.])\+?\(?\d[\d \t().-]{5,}\d(?![\w/])")
+_DATE_RANGE_RE = re.compile(
+    r"(?:\d{1,2}[./-])?(?:19|20)\d\d[ \t]*[-.][ \t]*(?:\d{1,2}[./-])?(?:19|20)\d\d")
+_URL_RE = re.compile(r"(?:https?://|www\.)\S+", re.I)
+_YEAR_RE = re.compile(r"(?<!\d)(?:19|20)\d\d(?!\d)")
+_EXPERIENCE_RE = re.compile(r"experience|employment|work history|career history", re.I)
+_LINT_BULLET_RE = re.compile(r"^\s*[-•*●▪◦‣]\s+")
+_TITLE_SKIP = frozenset({"and", "of", "the"})
+
+
+def _phones(text: str) -> list[str]:
+    """Phone-like runs of 7–15 digits, leaving out year ranges such as 2019 - 2021."""
+    out = []
+    for m in _PHONE_RE.finditer(text):
+        s = m.group().strip()
+        if 7 <= len(re.sub(r"\D", "", s)) <= 15 and not _DATE_RANGE_RE.fullmatch(s):
+            out.append(s)
+    return out
+
+
+def _first_experience_bullet(lines: list[str]) -> tuple[bool, str | None]:
+    """(found an Experience heading, text of the first bullet after it or None)."""
+    for i, line in enumerate(lines):
+        if _EXPERIENCE_RE.search(line) and len(line.split()) <= 6:
+            for later in lines[i + 1:]:
+                m = _LINT_BULLET_RE.match(later)
+                if m:
+                    return True, later[m.end():].strip()
+            return True, None
+    return False, None
+
+
+def lint_six_second(text: str, target_title: str | None = None) -> list[str]:
+    """The recruiter's-skim lint: one "ok <check>" or "FAIL <check>: <why>" per check.
+
+    Checks: contact (email and a 7+ digit phone as literal text), date (a
+    19xx/20xx year in the first 15 lines), first-bullet (a digit or % in the
+    first bullet after the Experience heading), length (at most 900 words,
+    about two pages) and, with `target_title`, title (every 3+ letter word of
+    it, bar and/of/the, in the first 5 lines).
+    """
+    text = _fold(text)
+    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    findings = []
+
+    has_email, has_phone = bool(_EMAIL_RE.search(text)), bool(_phones(text))
+    if has_email and has_phone:
+        findings.append("ok contact")
+    else:
+        missing = " or ".join(w for w, ok in (("email address", has_email),
+                                                ("phone number (7+ digits)", has_phone)) if not ok)
+        findings.append(f"FAIL contact: no {missing} as literal text")
+
+    top = "\n".join(lines[:TOP_LINES_DATE])
+    for pattern in (_EMAIL_RE, _URL_RE):
+        top = pattern.sub(" ", top)
+    for phone in _phones(top):
+        top = top.replace(phone, " ")
+    if _YEAR_RE.search(top):
+        findings.append("ok date")
+    else:
+        findings.append(f"FAIL date: no year (19xx/20xx) in the first {TOP_LINES_DATE} lines")
+
+    has_heading, bullet = _first_experience_bullet(lines)
+    if bullet is not None and re.search(r"[\d%]", bullet):
+        findings.append("ok first-bullet")
+    elif bullet is not None:
+        findings.append(f'FAIL first-bullet: no number in "{_one_line(bullet)}"')
+    elif has_heading:
+        findings.append('FAIL first-bullet: no "- " or "• " bullet under the Experience heading '
+                        "(a PDF text layer often drops list markers; lint the .md draft or .docx master)")
+    else:
+        findings.append("FAIL first-bullet: no Experience heading found")
+
+    words = sum(1 for tok in text.split() if re.search(r"\w", tok))
+    if words <= MAX_WORDS:
+        findings.append(f"ok length: {words} words (limit {MAX_WORDS}, about 2 pages)")
+    else:
+        findings.append(f"FAIL length: {words} words, over the {MAX_WORDS}-word limit (about 2 pages)")
+
+    if target_title is not None:
+        wanted, seen = [], set()
+        for w in re.findall(r"[^\W\d_]+(?:['-][^\W\d_]+)*", _fold(target_title)):
+            letters = sum(c.isalpha() for c in w)
+            if letters >= 3 and w.lower() not in _TITLE_SKIP and w.lower() not in seen:
+                seen.add(w.lower())
+                wanted.append(w)
+        head = "\n".join(lines[:TOP_LINES_TITLE])
+        absent = [w for w in wanted if not re.search(rf"(?<!\w){re.escape(w)}(?!\w)", head, re.I)]
+        if not wanted:
+            findings.append(f'FAIL title: "{target_title}" has no word of 3+ letters to check')
+        elif absent:
+            quoted = ", ".join(f'"{w}"' for w in absent)
+            findings.append(f"FAIL title: {quoted} not in the first {TOP_LINES_TITLE} lines")
+        else:
+            findings.append("ok title")
+    return findings
+
+
+# --- anti-slop scan ---------------------------------------------------------------------------
+
+def get_slop_phrases(path=None) -> list[str]:
+    """The phrase list, one per line; blank lines and # comments skipped."""
+    raw = Path(path or SLOP_FILE).read_text(encoding="utf-8-sig")
+    return [s for s in (line.strip() for line in raw.splitlines()) if s and not s.startswith("#")]
+
+
+def _phrase_regex(phrase: str) -> re.Pattern:
+    p = _fold(phrase).strip()
+    body = r"\s+".join(re.escape(w) for w in p.split()).replace(r"\-", r"[-\s]")
+    left = r"(?<![^\W\d_])" if p[:1].isalpha() else ""
+    right = r"(?![^\W\d_])" if p[-1:].isalpha() else ""
+    return re.compile(left + body + right, re.I)
+
+
+def slop_scan(text: str, phrases=None) -> list[tuple[str, int]]:
+    """[(phrase, count)] for every banned phrase in `text`, most frequent first."""
+    if phrases is None:
+        phrases = get_slop_phrases()
+    folded = _fold(text)
+    hits = []
+    for phrase in phrases:
+        if phrase.strip():
+            n = len(_phrase_regex(phrase).findall(folded))
+            if n:
+                hits.append((phrase.strip(), n))
+    hits.sort(key=lambda hit: -hit[1])
+    return hits
+
+
+# --- report -------------------------------------------------------------------------------
+
+def render_report(result: dict) -> str:
+    out = [f"**Method:** {result['method']} ({result['file']})"]
+    if result["empty"]:
+        out.append("**Text layer:** empty, so an ATS would read nothing (image-only or flattened file)")
+    if "keywords" in result:
+        kw = result["keywords"]
+        total = len(kw["present"]) + len(kw["missing"])
+        if not total:
+            out.append('**Keywords:** none found in the posting; pass --keywords "a,b" '
+                       "(the jd-match mirror list)")
+        else:
+            line = f"**Keywords:** {len(kw['present'])}/{total} present"
+            if kw["missing"]:
+                line += " — missing: " + ", ".join(kw["missing"])
+            out.append(line)
+            if kw["present"]:
+                out.append("present: " + ", ".join(kw["present"]))
+    if "lint" in result:
+        out.append("**Lint:**")
+        out += result["lint"]
+    if "slop" in result:
+        if result["slop"]:
+            out.append("**Slop:**")
+            out += [f"{hit['phrase']} ×{hit['count']}" for hit in result["slop"]]
+        else:
+            out.append("**Slop:** none found")
+    if "text" in result:
+        out += ["**Text layer:**", "```text", result["text"].rstrip("\n"), "```"]
+    return "\n".join(out)
+
+
+def _fail(msg: str) -> int:
+    print(f"ats_check.py: {msg}", file=sys.stderr)
+    return 2
+
+
+def main(argv=None) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    ap = argparse.ArgumentParser(prog="ats_check.py", description=__doc__,
+                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("file", type=Path, help="the built .docx/.pdf, or a .md/.txt draft")
+    source = ap.add_mutually_exclusive_group()
+    source.add_argument("--posting", type=Path, help="saved posting, e.g. postings/<slug>.md")
+    source.add_argument("--keywords", help='comma-separated keywords, e.g. "Go,PostgreSQL,gRPC"')
+    ap.add_argument("--lint", action="store_true", help="6-second lint")
+    ap.add_argument("--target-title", help="target role title for the lint's title check")
+    ap.add_argument("--slop", action="store_true", help="banned-phrase scan")
+    ap.add_argument("--text", action="store_true", help="print the extracted text too")
+    ap.add_argument("--json", action="store_true", help="print the report as JSON")
+    a = ap.parse_args(argv)
+
+    keywords = None
+    if a.keywords is not None:
+        keywords = [k.strip() for k in re.split(r"[,;\n]", a.keywords) if k.strip()]
+        if not keywords:
+            return _fail("--keywords is empty: pass a comma-separated list")
+    elif a.posting is not None:
+        try:
+            keywords = extract_keywords(a.posting.read_text(encoding="utf-8-sig", errors="replace"))
+        except OSError as e:
+            return _fail(f"cannot read the posting {a.posting}: {e.strerror or e}")
+    phrases = None
+    if a.slop:
+        try:
+            phrases = get_slop_phrases()
+        except OSError as e:
+            return _fail(f"cannot read the phrase list {SLOP_FILE}: {e.strerror or e}")
+
+    try:
+        text, method = extract_text(a.file)
+    except OSError as e:
+        return _fail(f"cannot read {a.file}: {e.strerror or e}")
+    except ValueError as e:
+        return _fail(f"{a.file}: {e}")
+    if method == "unavailable":
+        print(FALLBACK_LINE)
+        return 2
+
+    lint = a.lint or a.target_title is not None
+    result = {"file": str(a.file), "method": method, "empty": not text.strip()}
+    if keywords is not None:
+        result["keywords"] = keyword_coverage(text, keywords)
+    if lint:
+        result["lint"] = lint_six_second(text, target_title=a.target_title or None)
+    if phrases is not None:
+        result["slop"] = [{"phrase": p, "count": n} for p, n in slop_scan(text, phrases)]
+    if a.text or not (keywords is not None or lint or phrases is not None):
+        result["text"] = text
+    print(json.dumps(result, indent=2, ensure_ascii=False) if a.json else render_report(result))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
