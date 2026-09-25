@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{name}} — Resume</title>
+<style>
+/* Chicago — single column, centred masthead, 1pt rules under the headings,
+   one muted navy accent used only for structure. Conservative default. */
+@page { size: A4; margin: 14mm; }
+:root {
+  --accent: #1f3a5f;
+  --ink: #141414;
+  --muted: #474747;
+  --body: 10pt;
+  --small: 9pt;
+  --h2: 12.5pt;   /* uppercase, so it reads ~14pt */
+  --name: 20pt;   /* ~1.5x the heading */
+  --gap: 5pt;     /* item gap; sections take 2x */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; }
+body {
+  font-family: Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, "Times New Roman", serif;
+  font-size: var(--body);
+  line-height: 1.45;
+  color: var(--ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+h1, h2, h3, p, ul { margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+header { position: relative; text-align: center; padding-bottom: var(--gap); }
+header:has(.photo) { padding-left: 24mm; padding-right: 24mm; }
+h1 { font-size: var(--name); font-weight: 600; letter-spacing: 0.03em; line-height: 1.2; }
+.headline { font-size: 11pt; margin-top: 1pt; }
+.headline:empty { display: none; }
+.contact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+  margin-top: 3pt;
+  font-size: var(--small);
+  color: var(--muted);
+}
+.contact li + li::before { content: "\00B7"; margin: 0 6pt; }
+.photo { position: absolute; top: 0; right: 0; width: 20mm; height: 25mm; object-fit: cover; }
+
+.section { margin-top: calc(var(--gap) * 2); }
+.section-title {
+  font-size: var(--h2);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  border-bottom: 1pt solid var(--accent);
+  padding-bottom: 1pt;
+  margin-bottom: var(--gap);
+  break-after: avoid;
+}
+.entry + .entry { margin-top: var(--gap); }
+.entry-head, .dated { display: flex; justify-content: space-between; align-items: baseline; gap: 10pt; }
+.entry-head { break-inside: avoid; break-after: avoid; }
+.entry-title { font-size: 10.5pt; font-weight: 600; }
+.org-sep, .org { font-weight: 400; }
+.org { font-style: italic; }
+.dates { flex: none; font-size: var(--small); color: var(--muted); white-space: nowrap; }
+.line + .line { margin-top: 1pt; }
+.bullets { padding-left: 13pt; margin-top: 2pt; }
+.bullets li { margin-bottom: 1.5pt; break-inside: avoid; }
+.skill-group + .skill-group { margin-top: 1.5pt; }
+.skill-label { font-weight: 600; }
+.tags, .tags li { display: inline; padding: 0; list-style: none; }
+</style>
+</head>
+<body>
+<header>
+{{photo_html}}
+<h1>{{name}}</h1>
+<p class="headline">{{headline}}</p>
+{{contact_html}}
+</header>
+<main>
+{{sections_html}}
+</main>
+</body>
+</html>

@@ -11,6 +11,7 @@ import datetime
 import html as html_mod
 import http.client
 import importlib
+import io
 import json
 import os
 import re
@@ -18,6 +19,8 @@ import ssl
 import time
 import urllib.error
 import urllib.request
+import xml.etree.ElementTree as ET
+import zipfile
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -154,6 +157,43 @@ def html_to_text(html: str) -> str:
     s = s.replace(" ", " ").replace("\r\n", "\n").replace("\r", "\n")
     s = "\n".join(re.sub(r"[ \t]+", " ", line).strip() for line in s.split("\n"))
     return re.sub(r"\n{3,}", "\n\n", s).strip()
+
+
+# --- .docx -> text -------------------------------------------------------------
+
+_W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
+
+
+def docx_text(data: bytes) -> str:
+    """The text layer of a .docx, one line per paragraph, in document order.
+
+    Reads `word/document.xml` only (no headers, footers or text boxes — an
+    ATS master should have none). Runs keep their `w:tab` as a tab and
+    `w:br` as a newline; list paragraphs (any `w:numPr`) are prefixed with
+    "- " so bullets stay recognizable in the flat text. Raises ValueError
+    when `data` is not a .docx package.
+    """
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as z:
+            root = ET.fromstring(z.read("word/document.xml"))
+    except (zipfile.BadZipFile, KeyError, ET.ParseError) as e:
+        raise ValueError(f"not a readable .docx: {e}") from None
+    lines = []
+    for p in root.iter(f"{_W}p"):
+        parts = []
+        for run in p.iter(f"{_W}r"):
+            for el in run:
+                if el.tag == f"{_W}t":
+                    parts.append(el.text or "")
+                elif el.tag == f"{_W}tab":
+                    parts.append("\t")
+                elif el.tag in (f"{_W}br", f"{_W}cr"):
+                    parts.append("\n")
+        text = "".join(parts)
+        if p.find(f"{_W}pPr/{_W}numPr") is not None:
+            text = "- " + text
+        lines.append(text)
+    return "\n".join(lines)
 
 
 # --- Parsing helpers shared by the board sources -----------------------------

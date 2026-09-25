@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{name}} — Resume</title>
+<style>
+/* Corporate sidebar — full-width masthead, then two columns: a light-tint
+   30% sidebar (contact, skills, certifications, languages) and a 70% main
+   column (summary, experience, education). */
+@page { size: A4; margin: 14mm; }
+:root {
+  --accent: #1d4e89;
+  --tint: color-mix(in srgb, var(--accent) 9%, white);
+  --ink: #16191d;
+  --muted: #4a5058;
+  --body: 10pt;
+  --small: 9pt;
+  --h2: 13pt;
+  --name: 20pt;   /* ~1.5x the heading */
+  --gap: 5pt;     /* item gap; sections take 2x */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; }
+body {
+  font-family: "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: var(--body);
+  line-height: 1.45;
+  color: var(--ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+h1, h2, h3, p, ul { margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+/* The tint is a fixed strip so it runs the full height of every page. */
+.tint { position: fixed; top: 0; bottom: 0; left: 0; width: 30%; background: var(--tint); }
+.masthead {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12pt;
+  background: #fff;
+  padding-bottom: 8pt;
+  border-bottom: 2pt solid var(--accent);
+}
+.masthead .id { flex: 1; }
+h1 { font-size: var(--name); font-weight: 600; line-height: 1.15; }
+.headline { margin-top: 2pt; font-size: 11pt; color: var(--muted); }
+.headline:empty { display: none; }
+.photo { width: 20mm; height: 25mm; object-fit: cover; }
+
+.layout { position: relative; display: grid; grid-template-columns: 30% 70%; }
+.sidebar { padding: 10pt 9pt 10pt 8pt; font-size: 9.5pt; }
+.main { padding: 10pt 0 0 14pt; }
+
+.section + .section { margin-top: calc(var(--gap) * 2); }
+.section-title {
+  font-size: var(--h2);
+  font-weight: 600;
+  color: var(--accent);
+  border-bottom: 1pt solid var(--accent);
+  padding-bottom: 1pt;
+  margin-bottom: var(--gap);
+  break-after: avoid;
+}
+.sidebar .section-title { font-size: 10.5pt; text-transform: uppercase; letter-spacing: 0.08em; }
+.contact { list-style: none; padding: 0; }
+.contact li { overflow-wrap: anywhere; }
+.contact li + li { margin-top: 2pt; }
+
+.entry + .entry { margin-top: var(--gap); }
+.entry-head, .dated { display: flex; justify-content: space-between; align-items: baseline; gap: 10pt; }
+.entry-head { break-inside: avoid; break-after: avoid; }
+.entry-title { font-size: 10.5pt; font-weight: 600; }
+.org-sep { display: none; }
+.org { display: block; font-weight: 400; color: var(--muted); }
+.dates { flex: none; font-size: var(--small); color: var(--muted); white-space: nowrap; }
+.line + .line { margin-top: 2pt; }
+.bullets { padding-left: 12pt; margin-top: 2pt; }
+.bullets li { margin-bottom: 1.5pt; break-inside: avoid; }
+.bullets li::marker { color: var(--accent); }
+
+.sidebar .dated { display: block; }
+.sidebar .dated .dates { display: block; }
+.skill-group + .skill-group { margin-top: 4pt; }
+.skill-label { display: block; font-weight: 600; }
+.skill-colon { display: none; }
+.tags, .tags li { display: inline; padding: 0; list-style: none; }
+</style>
+</head>
+<body>
+<div class="tint" aria-hidden="true"></div>
+<header class="masthead">
+<div class="id">
+<h1>{{name}}</h1>
+<p class="headline">{{headline}}</p>
+</div>
+{{photo_html}}
+</header>
+<div class="layout">
+<aside class="sidebar">
+<section class="section section-contact"><h2 class="section-title">Contact</h2>{{contact_html}}</section>
+{{sidebar_html}}
+</aside>
+<main class="main">
+{{sections_html}}
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{name}} — Resume</title>
+<style>
+/* Accent band — single column under a full-width solid accent band with the
+   name and title reversed out of it; skills as subtle pills; clean sans. */
+@page { size: A4; margin: 14mm; }
+:root {
+  --accent: #0f6b66;
+  --ink: #15191a;
+  --muted: #4b5354;
+  --body: 10pt;
+  --small: 9pt;
+  --h2: 13pt;
+  --name: 21pt;   /* ~1.5x the heading */
+  --gap: 5pt;     /* item gap; sections take 2x */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; }
+body {
+  font-family: "Helvetica Neue", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: var(--body);
+  line-height: 1.45;
+  color: var(--ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+h1, h2, h3, p, ul { margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+.band {
+  display: flex;
+  align-items: center;
+  gap: 14pt;
+  background: var(--accent);
+  color: #fff;
+  padding: 16pt 18pt 14pt;
+}
+.band .id { flex: 1; }
+h1 { font-size: var(--name); font-weight: 600; line-height: 1.15; letter-spacing: 0.01em; }
+.headline { margin-top: 2pt; font-size: 11.5pt; }
+.headline:empty { display: none; }
+.contact { display: flex; flex-wrap: wrap; list-style: none; padding: 0; margin-top: 7pt; font-size: var(--small); }
+.contact li + li::before { content: "|"; margin: 0 6pt; opacity: 0.6; }
+.photo { width: 22mm; height: 22mm; border-radius: 50%; object-fit: cover; border: 1.5pt solid #fff; }
+
+main { padding: 0 4pt; }
+.section { margin-top: calc(var(--gap) * 2.4); }
+.section-title {
+  font-size: var(--h2);
+  font-weight: 600;
+  color: var(--accent);
+  border-left: 3pt solid var(--accent);
+  padding-left: 7pt;
+  line-height: 1.1;
+  margin-bottom: calc(var(--gap) * 1.2);
+  break-after: avoid;
+}
+.entry + .entry { margin-top: calc(var(--gap) * 1.4); }
+.entry-head, .dated { display: flex; justify-content: space-between; align-items: baseline; gap: 10pt; }
+.entry-head { break-inside: avoid; break-after: avoid; }
+.entry-title { font-size: 10.5pt; font-weight: 600; }
+.org-sep, .org { font-weight: 400; }
+.org { color: var(--muted); }
+.dates { flex: none; font-size: var(--small); color: var(--muted); white-space: nowrap; }
+.line + .line { margin-top: 2pt; }
+.bullets { padding-left: 13pt; margin-top: 2pt; }
+.bullets li { margin-bottom: 1.5pt; break-inside: avoid; }
+.bullets li::marker { color: var(--accent); }
+
+.skill-group { display: grid; grid-template-columns: 30mm 1fr; column-gap: 8pt; align-items: baseline; }
+.skill-group + .skill-group { margin-top: 5pt; }
+.skill-label { font-weight: 600; }
+.skill-colon, .sep { display: none; }
+.tags { display: flex; flex-wrap: wrap; gap: 4pt 4pt; padding: 0; list-style: none; }
+.tags li {
+  font-size: var(--small);
+  line-height: 1.35;
+  padding: 1pt 7pt;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 11%, white);
+}
+</style>
+</head>
+<body>
+<header class="band">
+<div class="id">
+<h1>{{name}}</h1>
+<p class="headline">{{headline}}</p>
+{{contact_html}}
+</div>
+{{photo_html}}
+</header>
+<main>
+{{sections_html}}
+</main>
+</body>
+</html>

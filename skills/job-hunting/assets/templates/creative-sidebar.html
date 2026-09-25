@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{name}} — Resume</title>
+<style>
+/* Creative sidebar — a saturated accent sidebar carrying the optional
+   headshot, name, contact, skill tags and languages; the white main column
+   carries summary, experience and education. */
+@page { size: A4; margin: 14mm; }
+:root {
+  --accent: #5b2ab5;
+  --ink: #18161d;
+  --muted: #4d4a55;
+  --body: 10pt;
+  --small: 9pt;
+  --h2: 13pt;
+  --name: 20pt;   /* ~1.5x the heading */
+  --gap: 5pt;     /* item gap; sections take 2x */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; }
+body {
+  font-family: "Avenir Next", Avenir, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: var(--body);
+  line-height: 1.45;
+  color: var(--ink);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+h1, h2, h3, p, ul { margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+/* The colour is a fixed strip so it runs the full height of every page. */
+.strip { position: fixed; top: 0; bottom: 0; left: 0; width: 33%; background: var(--accent); }
+.layout { position: relative; display: grid; grid-template-columns: 33% 67%; }
+
+.sidebar { color: #fff; padding: 16pt 12pt 12pt; font-size: 9.5pt; }
+.photo {
+  display: block;
+  width: 30mm;
+  height: 30mm;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2pt solid #fff;
+  margin-bottom: 10pt;
+}
+h1 { font-size: var(--name); font-weight: 700; line-height: 1.15; }
+.headline { margin-top: 3pt; font-size: 10.5pt; }
+.headline:empty { display: none; }
+.sidebar .section { margin-top: calc(var(--gap) * 3); }
+.sidebar .section-title {
+  font-size: 9.5pt;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding-bottom: 2pt;
+  border-bottom: 0.75pt solid rgba(255, 255, 255, 0.55);
+  margin-bottom: 6pt;
+}
+.contact { list-style: none; padding: 0; }
+.contact li { overflow-wrap: anywhere; }
+.contact li + li { margin-top: 3pt; }
+.sidebar .skill-group + .skill-group { margin-top: 6pt; }
+.sidebar .skill-label { display: block; font-weight: 600; margin-bottom: 3pt; }
+.skill-colon, .sep { display: none; }
+.tags { display: flex; flex-wrap: wrap; gap: 3pt; padding: 0; list-style: none; }
+.tags li { font-size: var(--small); line-height: 1.35; padding: 1pt 6pt; border-radius: 3pt; }
+.sidebar .tags li { background: rgba(255, 255, 255, 0.17); }
+.main .tags li { background: color-mix(in srgb, var(--accent) 12%, white); }
+.sidebar .dated, .sidebar .dated .dates { display: block; }
+.sidebar .dates { color: rgba(255, 255, 255, 0.82); }
+.sidebar .line + .line { margin-top: 4pt; }
+
+.main { padding: 14pt 0 0 16pt; }
+.main .section + .section { margin-top: calc(var(--gap) * 2.4); }
+.main .section-title {
+  font-size: var(--h2);
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: var(--gap);
+  break-after: avoid;
+}
+.main .section-title::after {
+  content: "";
+  display: block;
+  width: 26pt;
+  margin-top: 2pt;
+  border-top: 2.5pt solid var(--accent);
+}
+.entry + .entry { margin-top: calc(var(--gap) * 1.4); }
+.entry-head, .dated { display: flex; justify-content: space-between; align-items: baseline; gap: 10pt; }
+.entry-head { break-inside: avoid; break-after: avoid; }
+.entry-title { font-size: 10.5pt; font-weight: 600; }
+.org-sep { display: none; }
+.org { display: block; font-weight: 400; color: var(--muted); }
+.dates { flex: none; font-size: var(--small); color: var(--muted); white-space: nowrap; }
+.line + .line { margin-top: 2pt; }
+.bullets { padding-left: 12pt; margin-top: 2pt; }
+.bullets li { margin-bottom: 1.5pt; break-inside: avoid; }
+.bullets li::marker { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="strip" aria-hidden="true"></div>
+<div class="layout">
+<aside class="sidebar">
+{{photo_html}}
+<h1>{{name}}</h1>
+<p class="headline">{{headline}}</p>
+<section class="section section-contact"><h2 class="section-title">Contact</h2>{{contact_html}}</section>
+{{sidebar_html}}
+</aside>
+<main class="main">
+{{sections_html}}
+</main>
+</div>
+</body>
+</html>
