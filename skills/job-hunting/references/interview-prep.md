@@ -45,7 +45,7 @@ round covers — a normal question that removes guesswork.
    early, recover) → one recent example → result. The same frame carries
    "how do you handle conflict / failure / criticism".
 5. **Salary expectation** — a single number near the bottom of the true
-   range plus "(negotiable)"; mechanics in `sea-market-notes.md`. In round
+   range plus "(negotiable)"; mechanics in `markets/<cc>.md` §5. In round
    one it's fine to deflect once ("I'd like to understand the role first —
    my range is around X if that helps") but have the number ready.
 6. **Availability / notice** — exact, no hedging.
@@ -79,7 +79,8 @@ much of SEA; no law bars them in Malaysian private-sector hiring. Prep a
 calm one-line answer plus pivot ("Single, and fully mobile for this role —
 on the job itself…"). Declining gracefully is legitimate; note it may cost
 rapport at traditional firms, and let the user pick their comfort level. An
-interviewer who pushes hard here is data about the employer.
+interviewer who pushes hard here is data about the employer. What the law
+says per market: `markets/<cc>.md` §10 (Interview curveballs & rights).
 
 ## Questions to ask them — by stage
 
@@ -94,35 +95,10 @@ comp, asking benefit specifics is normal and expected in MY/SG. Anything
 promised verbally goes into the written offer before accepting
 (`offer-coach.md`).
 
-## Malaysia rights sheet — know the floors before signing
+## Market rights sheet — before signing
 
-Compiled July 2026; statutory figures drift — **re-verify any number
-before quoting it precisely**. Purpose: the user should recognize a
-below-floor offer or an illegal clause on sight. Probation, notice, and
-13th-month mechanics live in `sea-market-notes.md`.
-
-| Floor (Employment Act 1955, as amended 2022) | Number |
-|---|---|
-| Minimum wage | RM1,700/month (from Feb 2025) |
-| Normal working hours | Max 45 h/week; OT paid ≥1.5× weekday (higher on rest days / public holidays) — OT provisions cover wages ≤ RM4,000 |
-| Annual leave | 8 / 12 / 16 days (tenure <2 / 2–5 / >5 years) |
-| Sick leave | 14 / 18 / 22 days by same tenure, + 60 days hospitalization |
-| Public holidays | 11 gazetted minimum |
-| Maternity / paternity | 98 days / 7 days (married fathers) |
-| Written contract | Required for employment beyond one month |
-| Statutory deductions | EPF: employee 11%, employer 12–13%; SOCSO + EIS mandatory from day one — "no EPF during probation" is illegal |
-
-**Contract red flags** — employer keeps original certificates or passport
-(never hand over originals); training bond with a disproportionate
-penalty; "basic" below minimum wage padded with commission; upfront
-payment for uniform, kit, or "training" (scam-adjacent); no written
-contract offered; EPF/SOCSO missing from the payslip.
-
-**Recourse** — wage and EA violations: Jabatan Tenaga Kerja (Labour
-Department, e-Aduan portal); unfair dismissal: Industrial Relations
-Department. Knowing these exist is usually enough leverage; for a real
-dispute, the SKILL.md legal line applies — suggest a qualified
-professional.
+Before signing, check the market's statutory floors and contract red flags:
+`markets/my.md`, `markets/sg.md`.
 
 ## After each interview
 

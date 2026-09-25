@@ -143,7 +143,7 @@ matrix is the default, not a veto. If they want a photo where it says skip
 If a photo goes in: recent professional headshot,
 plain background, business attire, small, top corner of page one.
 LinkedIn/JobStreet **profile** photos are a separate matter and always
-recommended. `sea-market-notes.md` holds the per-country SEA detail.
+recommended. `markets/<cc>.md` §4 holds the per-country resume detail.
 
 ## Step 4 — Re-score before delivery
 

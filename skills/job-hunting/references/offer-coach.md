@@ -2,7 +2,7 @@
 
 Run this when an offer arrives, when the user is weighing more than one, or
 when they ask "should I accept?" / "can I negotiate?". Market comp mechanics
-live in `references/sea-market-notes.md`; this file is the decision and
+live in `references/markets/<cc>.md` (§6–§8); this file is the decision and
 negotiation loop. Salary data changes constantly — verify market ranges with
 a live search, never from memory.
 

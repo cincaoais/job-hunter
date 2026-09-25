@@ -4,8 +4,8 @@ Resumes get read after the user applies; profiles get **searched** before a
 recruiter ever meets them. Run this when the user asks to improve their
 LinkedIn or JobStreet presence, when recruiter inbound is weak, or after a
 resume rebuild (the two must stay consistent). Writing rules come from the
-Application Guide; platform mechanics from `references/sea-market-notes.md`.
-The honesty guardrail applies throughout.
+Application Guide; platform mechanics from `references/markets/<cc>.md`
+§1, §5. The honesty guardrail applies throughout.
 
 ## 1. Intake (one grouped batch, Step 1.5 style)
 
