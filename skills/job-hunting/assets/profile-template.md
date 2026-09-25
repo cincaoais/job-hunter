@@ -30,6 +30,7 @@ _Last updated: [date]_
 - **Target seniority:** (junior / mid / senior / staff / lead / manager)
 - **Target industries:**
 - **Dream companies:**
+- **Target list:** (15–25 companies: dream / realistic / fallback — see strategy.md)
 - **Job boards to search:** (e.g. JobStreet, LinkedIn, local boards)
 - **Must-haves in a posting:** (postings matching none of these go to a 'needs a look' list instead of the main shortlist)
 - **Nice-to-haves:** (raise a job's fit score, but aren't required)
@@ -80,7 +81,7 @@ _Last updated: [date]_
 
 ## 9. Tracking
 > Workspace mode: see `pipeline.md`, `contacts.md`, `answers.md`. Chat mode
-> (claude.ai): keep the three tables below in this file.
+> (claude.ai): keep the sections below in this file.
 
 ### Pipeline
 > Watch the response rate. If lots go out and little comes back, it's time to
@@ -105,6 +106,9 @@ _Last weekly review: —_
 
 | Name | Company | Role | Relationship | Target role | Last touch | Next touch | Status | Notes |
 |---|---|---|---|---|---|---|---|---|
+
+### Answers
+> Chat mode: the screening-answer bank — same fields as answers.md in workspace mode (see answer-bank.md).
 
 ### Soft skills development
 > Goals from the Soft Skills Coach. Keep 2–3 active at most.

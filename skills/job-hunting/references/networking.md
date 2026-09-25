@@ -11,10 +11,11 @@ follow `facts-policy.md`: never invent shared history.
 - Every target company (`strategy.md` §6) and every shortlist row scoring
   7+ gets a referral attempt before the application goes out.
 - **Fresh posting**: send the referral ask to the warmest contact the day
-  it is found, skipping the warm-up touches. No referral by the posting's
-  second day → apply direct and tell the contact, who can still flag the
-  name. Recruiters screen day-one applicants first and skim again at day
-  two (Blind recruiter AMA 2026).
+  it is found, skipping the warm-up touches (not yet connected → the ask
+  goes in the connection note). No referral by the posting's second day →
+  apply direct and tell the contact, who can still flag the name.
+  Recruiters screen day-one applicants first and skim again at day two
+  (Blind recruiter AMA 2026).
 - A referred application is logged with `--channel referral`. Referral
   offer rate 7.3% vs 0.2% inbound (Ashby); referred hires close in 29 vs
   44 days (Pin).
@@ -40,6 +41,8 @@ and never fetch the result pages. Add whoever the user names to contacts
 
 ## 3. The sequence — three touches, one follow-up, then stop
 
+Days are absolute, counted from the first touch (0, 2, 5, 12).
+
 | Day | Touch (Status code) | What to send |
 |---|---|---|
 | 0 | comment (`c`) | a substantive comment on their recent post — a point or a question, never "great post" |
@@ -47,7 +50,7 @@ and never fetch the result pages. Add whoever the user names to contacts
 | 5 | message (`m`) | ≤ 150 words with one specific ask (templates, §5) |
 | 12 | follow-up (`f`) | one short follow-up, then stop |
 
-- No recent post → connect on day 0 and keep the later gaps. Already
+- No recent post → connect on day 0 and keep the later days. Already
   connected (ex-colleague, known alumni) → start at the message; follow up
   7 days later.
 - Keep messages ≤ 150 words and use the room — reason, one proof, one ask.
@@ -73,8 +76,8 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py contacts
   lists rows whose Next touch ≤ today (`today` shows the same list).
 - `tracker.py add` / `set` are pipeline-only — never use them for contacts.
 - **Status**: the last touch sent (`c`, `k`, `m`, `f`) while the sequence
-  runs; `replied`, `referred` or `no reply` when it ends — then clear Next
-  touch with `--next-touch ""` so it drops off the due list.
+  runs; `replied`, `referred`, `no reply` or `thanked` when it ends — then
+  clear Next touch with `--next-touch ""` so it drops off the due list.
 - Chat mode: edit the Contacts table in profile §9 (same columns) and read
   the due Next touch dates by hand.
 - Each week, send the number of touches on profile §8 "Weekly outreach
@@ -84,16 +87,16 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py contacts
 ## 5. Templates — ≤ 150 words, fill every [placeholder] from the profile
 
 **Referral ask**
-> Hi [Name] — [shared context]. I'm applying for [role] on [team] at [Company] ([link]). I've spent [n] years on [Y], most recently [one sourced result from profile §5], which lines up with [one line from the posting]. Would you be open to referring me, or pointing me to the hiring manager? I've attached my resume and a three-line summary you can forward as-is, so it takes two minutes. If the timing is wrong, no problem at all — thank you either way. [Your name]
+> Hi [Name] — [shared context]. I'm applying for [role] on [team] at [Company] ([link]). I've spent [n] years on [Y], most recently [one sourced result from profile §5], which lines up with [one line from the posting]. Would you be open to referring me? I've attached my resume and a three-line summary you can forward as-is, so it takes two minutes. If the timing is wrong, no problem at all — thank you either way. [Your name]
 
 **Informational chat**
-> Hi [Name] — your [post / talk] on [topic] stuck with me, especially [one specific point]. I'm [one-line identity from §8], looking at [area] roles at [Company] and teams like it. Could I ask you three questions over 15 minutes in the next two weeks — how the team works, what a strong first year looks like, and what you'd want to see from a candidate? Happy to work around your calendar, or keep it to messages if that's easier. Thanks, [Your name]
+> Hi [Name] — your [post / talk] on [topic] stuck with me, especially [one specific point]. I'm [one-line identity from profile §8], looking at [area] roles at [Company] and teams like it. Could I ask you three questions over 15 minutes in the next two weeks — how the team works, what a strong first year looks like, and what you'd want to see from a candidate? Happy to work around your calendar, or keep it to messages if that's easier. Thanks, [Your name]
 
 **Recruiter reply**
 > Hi [Name], thanks for reaching out — [role] sounds relevant; I'm [one-line identity]. Before I send my CV, could you share the client's name, the salary band and the work arrangement? My expected range is [range from answers.md] and my notice is [notice]. Please check with me before submitting my CV anywhere. I'm free to talk [two slots]. Best, [Your name]
 
 **Re-engage**
-> Hi [Name] — it's been a while since [last shared context]; [one genuine note about their news]. A quick update from me: [one sourced change — new role, shipped project]. I'm now looking at [target role] roles, and [Company] is on my list because [one company fact]. Would you be up for a short catch-up, or pointing me to the right person on [team]? No pressure either way. [Your name]
+> Hi [Name] — it's been a while since [last shared context]; [one genuine note about their news]. A quick update from me: [one sourced change — new role, shipped project]. I'm now looking at [target role] roles, and [Company] is on my list because [one company fact]. Could you point me to the right person on [team]? No pressure either way. [Your name]
 
 **Thank-you**
 > Hi [Name] — thank you for [the referral / the chat / the intro]. [One specific thing that helped and how you used it.] [Outcome so far: applied / screen on [date] / accepted an offer at [Company].] I'll keep you posted, and if I can return the favour — [a specific offer: an intro, a review] — just say. [Your name]

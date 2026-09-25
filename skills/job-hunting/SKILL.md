@@ -29,7 +29,8 @@ profile as a chat block. End every session with one line: `saved: profile
 
 **Chat mode (claude.ai).** No file tools or no workspace. `candidate-profile.md`
 in the Project's knowledge is the single document; its §9 Tracking section
-holds the pipeline, offers, contacts and soft-skills tables. Scripts cannot
+holds the pipeline, offers, contacts and soft-skills tables and the
+Answers section. Scripts cannot
 reach job boards from the claude.ai sandbox, so use the fallback ladder in
 `references/sourcing.md` (web search, pasted postings). End every session
 that changed anything by regenerating the full updated profile as one

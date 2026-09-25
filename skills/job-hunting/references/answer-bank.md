@@ -8,32 +8,33 @@ the user submits. Every answer follows `facts-policy.md`.
 ## 1. Where the answers live
 
 - Workspace mode: `answers.md` (created from `assets/answers-template.md`).
-- Chat mode: an `### Answers` section in `candidate-profile.md` §9 with the
-  same headings.
-- Each answer traces to a profile line: salary → §3, notice and work
-  authorization → §1, relocation → §3, years → §5 dates, stories → §5. On
-  a conflict the profile wins; ask which is current.
+- Chat mode: the `### Answers` section in profile §9
+  (`candidate-profile.md`), with the same headings.
+- Each answer traces to a profile line: salary → profile §3, notice and
+  work authorization → profile §1, relocation → profile §3, years and
+  stories → profile §5. On a conflict the profile wins; ask which is
+  current.
 
 ## 2. Intake — fill it in one batch
 
 Pre-fill what the profile answers, echo it in one line, and ask only the
 gaps, with options to pick:
 
-| Field | Source, or the question to ask | Differs per market? |
+| Heading in `answers.md` | Source, or the question to ask | Differs per market? |
 |---|---|---|
-| Expected salary | §3 range → "the single number you'd say out loud?" | yes — currency and the market's quoting norm |
-| Notice / earliest start | contract notice; probation or confirmed? | no |
+| Expected salary | profile §3 range → "the single number you'd say out loud?" | yes — currency and the market's quoting norm |
+| Notice period / earliest start | contract notice; probation or confirmed? | no |
 | Work authorization | citizen / PR / pass held (valid until) / sponsorship needed | yes — one row per country |
 | Why this company | a reusable pattern; the hook is filled per posting (§3) | — |
-| Why leaving | one forward-looking, true sentence | no |
-| Relocation | §3 Open to relocation | yes |
-| Years in each tool | §5 dated roles that used it; overlaps count once | no |
-| STAR stories | at least three titles, one line each, from §5 | no |
-| References | names and permission (`post-offer.md` §5) | no |
+| Why leaving (current/last role) | one forward-looking, true sentence | no |
+| Relocation | profile §3 Open to relocation | yes |
+| Years in each tool / skill | profile §5 dated roles that used it; overlaps count once | no |
+| STAR stories | at least three titles, one line each, from profile §5 | no |
 | Essay prompts | "greatest achievement", "why you" — built from the STAR titles | — |
+| References | names and permission (`post-offer.md` §5) | no |
 
-Salary numbers come from the user's §3 range checked against live market
-sources in `markets/<cc>.md` — never from memory.
+Salary numbers come from the user's profile §3 range checked against live
+market sources in `markets/<cc>.md` — never from memory.
 
 ## 3. Tailor per posting
 
@@ -44,8 +45,8 @@ sources in `markets/<cc>.md` — never from memory.
   or build the dossier (`company-dossier.md`).
 - **Why leaving**: the same true sentence every time — interviews test
   consistency; never criticise the employer.
-- **Years**: answer the exact question ("years of Python" → the §5 roles
-  that used Python), rounded down.
+- **Years**: answer the exact question ("years of Python" → the profile §5
+  roles that used Python), rounded down.
 - **Salary**: the single number for that market; a range only where free
   text allows.
 - Respect field limits; plain text, no formatting, paste-ready.
@@ -69,8 +70,8 @@ the background check.
   SG check Employment Pass viability per role first (`markets/sg.md`).
 - Notice: the contractual notice, never a shorter one the user hopes to
   negotiate; a possible buyout goes in the detail field, not the number.
-- Location / onsite: the §3 modality; never a "yes" to relocation the
-  profile does not support.
+- Location / onsite: the profile §3 modality; never a "yes" to relocation
+  the profile does not support.
 - NRIC/IC numbers go only into an official identity step after an offer,
   never a screening field (`markets/my.md`, `markets/sg.md`).
 
@@ -93,9 +94,9 @@ paste.
 
 ## 7. Keep it current
 
-- Profile §1 or §3 changes (salary, availability, work authorization,
-  relocation, modality) → update the answers in the same session and say
-  which ones changed.
+- Profile §1 or profile §3 changes (salary, availability, work
+  authorization, relocation, modality) → update the answers in the same
+  session and say which ones changed.
 - A new market → add a row to each per-market table.
 - Before each use, echo the load-bearing answers in one line ("RM [n],
   1 month notice, Malaysian citizen — still right?").

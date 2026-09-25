@@ -31,7 +31,8 @@ memory rules). Never fill the gap with an invented or "typical" figure.
 
 - Offer ranges to pick from, plus an exit that needs no number.
 - A picked range becomes its floor with a plus: (b) → "50+ tickets a
-  week" — true by construction.
+  week" — true by construction. (a) has no floor → write it without the
+  number.
 - No answer → write the bullet without the number (scope, before vs after,
   who benefited) and mark the profile line `TBD` so it is asked once, not
   forgotten.
@@ -41,9 +42,10 @@ memory rules). Never fill the gap with an invented or "typical" figure.
 - Estimate only when the user supplies the inputs ("about 30 a day, five
   days a week"). Show the arithmetic and store the result with its inputs
   on the profile line: `~150 tickets/week (est.: 30/day × 5)`.
-- Label it "(est.)" in the profile, in every draft and in the claims
-  audit. In the version the user sends, keep it visibly approximate
-  ("~150", "about 150"); never turn it into a precise-looking figure.
+- **Internal records** — the profile, `answers.md` (chat mode: the
+  Answers section) and the claims-audit table — always carry "(est.)".
+- **Outbound text** — resume, cover letter, outreach and the form answers
+  the user submits — writes "~150" or "about 150", never a bare figure.
 - The user must be able to explain the estimate in a screen. If they
   cannot, drop the number.
 
@@ -56,10 +58,10 @@ LinkedIn section and interview-answer script before calling it final.
    titles, employers, dates and tenures, scope words (led, owned, managed,
    architected, built), team and budget sizes, tools and years with them,
    credentials, languages, levels ("fluent", "expert", "production").
-2. **Cite the source line** for each: `§5 [Company] bullet 2`,
-   `§4 Certifications`, `answers.md › Years in each tool`.
+2. **Cite the source line** for each: `profile §5 [Company] bullet 2`,
+   `profile §4 Certifications`, `answers.md › Years in each tool / skill`.
 3. **Decide**: **keep** (sourced as written) · **soften** to what the
-   source supports ("led" → "coordinated" when §5 says coordinated) ·
+   source supports ("led" → "coordinated" when profile §5 says coordinated) ·
    **ask** (a missing number, per §2) · **drop** (no source, no answer).
 4. **Report** one line, then only the exceptions:
 
@@ -67,7 +69,7 @@ LinkedIn section and interview-answer script before calling it final.
 
    | Claim | Source | Action |
    |---|---|---|
-   | "led a team of [n]" | §5 says "coordinated [n] engineers" | softened → "coordinated [n] engineers" |
+   | "led a team of [n]" | profile §5 says "coordinated [n] engineers" | softened → "coordinated [n] engineers" |
 
 - A draft with an open **ask** is not final; say so and ask.
 - A certification in progress reads "in progress" or "expected [month

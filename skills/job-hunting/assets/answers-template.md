@@ -46,6 +46,10 @@
 2. **Title:** — 
 3. **Title:** — 
 
+## Essay prompts
+> Longer free-text questions ("greatest achievement", "why you") — built from the STAR titles above, tailored per posting.
+-
+
 ## References
 
 | Name | Relationship | Permission asked? (Y/N) |

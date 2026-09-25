@@ -82,8 +82,8 @@ link) and apply there: Easy Apply 1–4% vs direct 2–3× (Huntr/LinkedIn
 data). Log `Source` as the place the application actually went (`career
 page`, not `LinkedIn`).
 
-Agencies are a real channel in MY/SG: which ones, and how to handle them,
-is in `markets/my.md` and `markets/sg.md`.
+Agencies are a real channel in MY/SG — which agencies: `markets/my.md`,
+`markets/sg.md`; how to work with them: `networking.md` §6.
 
 ## 5. Legitimacy — flag it, never present it clean
 

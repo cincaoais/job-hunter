@@ -48,17 +48,10 @@ Yours sincerely,
 ## 3. Notice mechanics
 
 The contract governs; read its clause for both probation and confirmed
-status. Market detail lives in `markets/my.md` and `markets/sg.md`; other
-countries: `markets/_template.md` plus a live search.
+status. Statutory floors, probation notice and typical contract terms:
+`markets/my.md`, `markets/sg.md` (other countries: `markets/_template.md`
+plus a live search).
 
-- **MY**: a silent contract falls back to the statutory floor — 4 weeks
-  under 2 years' service, 6 weeks for 2–5, 8 weeks over 5 (Employment Act
-  s.12); professional and managerial contracts commonly say 1–3 months;
-  statutory notice still applies during probation unless the contract
-  says otherwise.
-- **SG**: typically 1–2 weeks during probation and about a month after;
-  statutory defaults scale with tenure, 1 day → 4 weeks (Employment Act),
-  but the contract governs; TAFEP flags long notice for junior roles.
 - **Buyout**: if the contract allows payment in lieu of notice, the user —
   or the new employer, if it agrees — pays salary for the unserved days to
   leave early. Ask the new employer before resigning; get the agreed last
@@ -92,15 +85,15 @@ handover." Use a counter as leverage only if it is real (facts-policy §6).
 
 ## 6. Background-check readiness
 
-- Degree certificates, transcripts and §4 certifications as digital copies.
+- Degree certificates, transcripts and profile §4 certifications as digital
+  copies.
 - Employment dates and titles exactly as on the CV — the check compares
   them; fix any mismatch now. Past-employer contacts or verification letters.
 - Payslips only when a legal requirement is stated; otherwise offer an
   employment-verification letter.
 - NRIC/IC: never on the CV; give it only through the employer's official
   onboarding or check form after the offer — never by chat or to an agency.
-  SG: state work status as "Singapore Citizen", "PR" or "EP holder valid
-  until …".
+  Work-status wording: `markets/my.md`, `markets/sg.md`.
 
 ## 7. 30-60-90 plan
 
@@ -119,9 +112,8 @@ Share it with the manager in week one and adjust. Save as
 ## 8. Probation review
 
 - Confirmation criteria were asked at offer stage (§1); still unknown →
-  ask the manager in week one. MY: confirmation needs a letter — none by
-  the date → ask HR in writing (`markets/my.md`). SG: probation terms sit
-  in the Key Employment Terms (`markets/sg.md`).
+  ask the manager in week one. How confirmation is documented per market:
+  `markets/my.md`, `markets/sg.md`.
 - Keep an evidence log — shipped work, numbers, feedback — and add it to
   profile §5 as it happens; it becomes the next resume.
 - Book a mid-probation check-in: "Am I on track for confirmation? What
@@ -141,8 +133,11 @@ from every other open process the same week:
 
 > Hi [Name], thank you for your time on the [role] process. I've accepted another offer and am withdrawing my application. I enjoyed [one specific thing], and I'd be glad to stay in touch. [Your name]
 
-- Thank referrers and helpful contacts (`networking.md` §5); set Status.
-- Update the profile: §1 current title and Search status; §5 the new role.
-  Stop any recurring `/loop` or `/schedule` search digest.
+- Thank referrers and helpful contacts (`networking.md` §5), then set
+  their Status to `thanked` and clear Next touch
+  (`tracker.py contact --name … --status thanked --next-touch ""`; chat
+  mode: the Contacts table).
+- Update profile §1 (current title, Search status) and profile §5 (the
+  new role); stop any recurring `/loop` or `/schedule` search digest.
 - Workspace mode ends with the `saved:` line; chat mode regenerates the
   profile block.
