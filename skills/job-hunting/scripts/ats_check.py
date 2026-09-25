@@ -257,7 +257,7 @@ advanced senior junior mid mid-level level professional practical real clear eff
 effectively high highly using use used new willing willingness learn learning attention detail
 details communication written spoken verbal interpersonal collaboration collaborative teamwork
 problem-solving analytical motivated self-motivated passionate independently independent
-ambiguity mindset fast-paced dynamic common best daily
+ambiguity mindset fast-paced dynamic common best daily here essential need needs needed
 """.split())
 # Leading verbs trimmed from a run ("operating gRPC services" -> gRPC, services).
 _LEAD_TRIM = frozenset("""
@@ -322,7 +322,13 @@ def _posting_body(posting_md: str) -> str:
 
 
 def _heading(line: str) -> tuple[str, str] | None:
-    """(heading, rest of line) when `line` reads as a section heading, else None."""
+    """(heading, rest of line) when `line` reads as a section heading, else None.
+
+    `#` headings and bold-only lines always count. An unmarked line counts
+    only with a trailing colon (at most 8 words) or as a section name of at
+    most 4 words, so a requirement sentence that merely contains a section
+    word ("Information security fundamentals matter here") stays content.
+    """
     s = line.strip()
     m = _MD_HEADING_RE.match(s)
     if m:
@@ -337,8 +343,11 @@ def _heading(line: str) -> tuple[str, str] | None:
         return m.group(2).strip().rstrip(":").strip(), ""
     plain = _strip_md(s).strip()
     words = plain.rstrip(":").strip()
-    if (words[:1].isupper() and len(words.split()) <= 8 and not re.search(r"[,;.!?:]", words)
-            and (plain.endswith(":") or _section_kind(words) or _SECTION_WORDS_RE.search(words))):
+    n = len(words.split())
+    if not words[:1].isupper() or re.search(r"[,;.!?:]", words):
+        return None
+    if (plain.endswith(":") and n <= 8) or (
+            n <= 4 and (_section_kind(words) or _SECTION_WORDS_RE.search(words))):
         return words, ""                       # "Qualifications", "Key Responsibilities", "Perks:"
     return None
 

@@ -265,6 +265,34 @@ def test_extract_keywords_merges_tech_tokens_when_sections_are_thin():
     assert ats.extract_keywords(posting) == ["Fintech", "Go", "Kafka", "AWS"]
 
 
+SECTION_LEAD = "Requirements\nGo, Kafka, Redis, gRPC and Kubernetes\n"  # 5 keywords: no tech-token merge
+
+
+@pytest.mark.parametrize("line,ends_section", [
+    ("Information security fundamentals matter here", False),   # sentences with section words
+    ("Package management experience required here", False),
+    ("Compensation benchmarking exposure is useful", False),
+    ("Duties may vary by project needs", False),
+    ("Culture fit matters more than tenure", False),
+    ("Additional Information", True),                           # real headings: ≤4 words
+    ("Life at Grab", True),
+    ("What we offer", True),
+    ("Things we would love to see from you:", True),             # colon, ≤8 words
+])
+def test_extract_keywords_unmarked_heading_rule(line, ends_section):
+    kws = ats.extract_keywords(f"{SECTION_LEAD}{line}\nWritten English for client calls\n"
+                               "Docker and Terraform\n")
+    assert {"English", "Docker", "Terraform"}.isdisjoint(kws) is ends_section
+
+
+def test_extract_keywords_reviewer_repro_block():
+    posting = (SECTION_LEAD + "Package management experience required here\n"
+               "Duties may vary by project needs\nInformation security fundamentals matter here\n"
+               "Compensation benchmarking exposure is useful\nCulture fit matters more than tenure\n"
+               "Written English, Docker and Terraform\n")
+    assert {"English", "Docker", "Terraform"} <= set(ats.extract_keywords(posting))
+
+
 def test_extract_keyword_groups_split_must_and_nice():
     groups = ats.extract_keyword_groups(SAMPLE_JD.read_text(encoding="utf-8"))
     assert {"Go", "gRPC", "PostgreSQL"} <= set(groups["must"])
