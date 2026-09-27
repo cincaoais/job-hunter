@@ -18,9 +18,10 @@ Every claim is the strongest **true** form of a profile fact —
    here — it's cheap. Never jump straight to a generated .docx/PDF. Once
    approved, workspace mode saves the draft as
    `resumes/<company>-<role>-vN.md` (a letter under `letters/`; Versioning
-   below) — the file every gate and the build read.
+   below) — the file every gate and the build read (a cover letter is
+   saved and gated before it is shown — see Cover letters).
 4. **Claims audit** (below) on the approved draft — a fresh critical read
-   before any file exists.
+   before any file exists (a cover letter: before it is shown).
    - 4.5 **Anti-slop gate** (below).
    - 4.6 **6-second lint** (below) — resumes only.
 5. **Generate the file.** Default to **.docx** — safest for ATS portals and
@@ -46,9 +47,10 @@ say which checks ran by reading and which script checks could not run.
 
 ## Claims audit (step 4)
 
-After approval, before generating anything, run the claims audit in
-`facts-policy.md` §4 on the final draft and report it in that section's
-format. An open ask stops the flow here until the user answers.
+After approval (a cover letter: before it is shown), before generating
+anything, run the claims audit in `facts-policy.md` §4 on the final draft
+and report it in that section's format. An open ask stops the flow here
+until the user answers.
 
 In the same pass, reread it the way a skeptical second reviewer would —
 against the posting, not from memory of writing it:
@@ -214,10 +216,14 @@ proof already leads above.]
 
 ## Cover letters
 
-Same flow: read → ask → draft inline → approve → claims audit and
-anti-slop gate → deliver (the 6-second lint is resume-only). Always
-tailored to one specific posting — if none is named, ask which job this
-letter is for.
+Same flow, with the gates before the user sees text: read → ask → draft →
+save as `letters/<company>-<role>-vN.md` (workspace mode) → claims audit
+(`facts-policy.md` §4) and anti-slop gate (`ats_check.py <file> --slop`;
+replace every hit) → show it inline with the one-line audit result and the
+scan result → approve → deliver. Iterating overwrites the same file and
+re-runs both gates; chat mode runs both by reading and says so (the
+6-second lint is resume-only). Always tailored to one specific posting —
+if none is named, ask which job this letter is for.
 
 - Beats, length, and rules come from the Application Guide's "Cover letter"
   section — that file is the single source for them.

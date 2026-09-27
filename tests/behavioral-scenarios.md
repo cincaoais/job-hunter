@@ -180,7 +180,7 @@ terminal rows with past dates that must not surface (Orchid Analytics
 `rejected`, Due 2026-09-10; Tropika Travel `cold`, silent since
 2026-08-17). `contacts.md`: Farah Aziz due (Next touch 2026-09-15); Hafiz
 Ismail not due yet (2026-09-21). Follow-up turns: "Draft the follow-up for
-the overdue one." then "Yes, mark Borneo cold."
+the overdue one." then "Sent it. And yes, mark Borneo cold."
 Expected:
 - Runs `tracker.py today --today 2026-09-16` (the stated date, not the
   machine clock) and reports its sections in order — "Overdue" (Tenang
@@ -194,8 +194,8 @@ Expected:
   Logistics in place of "Wait for a reply"; the touch for Farah Aziz
 - On "draft the follow-up": one short, polite nudge for Tenang Pay with no
   phrase from `assets/slop-phrases.txt` and no invented facts, logged with
-  `tracker.py set --company "Tenang Pay" …` — a new Next action and Due
-  that is not a second nudge
+  `tracker.py set --company "Tenang Pay" …` once the user says it was sent
+  — a new Next action and Due that is not a second nudge
 - Auto-cold: shows the printed `tracker.py set --company "Borneo Commerce"
   --role "Backend Engineer" --stage cold` line and runs it only after the
   user's "yes" — never in the first reply
@@ -330,9 +330,11 @@ Expected:
   Awan Ledger name unless the user wants it; never 4, 6 or 8 weeks (the
   s.12 default appears, if at all, only as the contract-silent fallback —
   `markets/my.md` §7)
-- Withdrawal messages from the `post-offer.md` §9 template for exactly
-  Tenang Pay, Lumen Logistics and Harbour Payments (addressed to the
-  contact named in Notes) — none for Orchid Analytics
+- Withdrawal messages from the `post-offer.md` §9 template drafted for
+  exactly Tenang Pay, Lumen Logistics and Harbour Payments (addressed to
+  the contact named in Notes), to send once the background check clears
+  and the start date is agreed — none for Orchid Analytics; no phrase from
+  `assets/slop-phrases.txt`
 - References brief: permission first; each referee gets the role and
   company, when to expect the call, and two points from profile §5 with
   their real numbers — no scripted praise; the current manager only after
@@ -342,7 +344,8 @@ Expected:
   SLOs and alerting — saved as `dossiers/<company>-30-60-90.md`
 - Pipeline closed with `tracker.py set` (run, or given pending the user's
   go-ahead): Awan Ledger → `accepted` with a notice/start next action; the
-  three open rows → `withdrawn` with a note; Offers Status → `accepted`;
+  three open rows → `withdrawn` with a note when the messages are sent
+  (command run or given pending that); Offers Status → `accepted`;
   Orchid left `rejected`; profile §1 Search status updated; ends with a
   `saved:` line
 

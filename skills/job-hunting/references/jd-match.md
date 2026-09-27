@@ -88,7 +88,7 @@ Then three lists and a verdict:
 | Check | Finding |
 |---|---|
 | Ghost-job and scam signals (`sourcing.md` §5) | each hit, or "none" |
-| Repost age | posted date and age; a repost under the `sourcing.md` §3 rule is a flag |
+| Repost age | first-posted date (a re-ad keeps the original date) and its age in days as of today; a repost under the `sourcing.md` §3 rule is a flag |
 | Salary reliability, by advertiser | see below |
 
 Salary reliability is practice, not data: an employer's own posted band

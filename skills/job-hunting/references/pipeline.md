@@ -52,10 +52,10 @@ when non-empty:
 
 | Section | Rule | What to do |
 |---|---|---|
-| Overdue | Due before today, non-terminal stage | Draft the follow-up now; move Due or close the row |
+| Overdue | Due before today, non-terminal stage | Draft the one nudge now (`networking.md` §5 Application nudge) and name what follows it — a Next action that is not a second nudge (e.g. 'Await reply — cold if silent') and its Due; log with `tracker.py set --company … --next … --due …` once the user says it was sent |
 | Due today | Due = today | Do the next action; log the touch |
 | Interviews within 7 days | Due in the next 7 days, stage screen/interview/final | Start the prep pack (`interview-prep.md`), book a mock |
-| Stale | No touch in over 7 days (`STALE_DAYS = 7`), stage applied…final | Set a concrete next action, or send the one nudge if Due + 7 has passed |
+| Stale | No touch in over 7 days (`STALE_DAYS = 7`), stage applied…final | Replace a passive 'Wait…' with a dated action (e.g. 'Nudge the recruiter', Due = last touch + 14) and propose the `tracker.py set` line, or send the one nudge if Due + 7 has passed |
 | Auto-cold candidates | `applied` and silent 21+ days | Confirm, then run the printed `tracker.py set … --stage cold` line |
 | Contacts due | `Next touch` ≤ today (same list as `tracker.py contacts`) | Send the touch from `networking.md`; log with `tracker.py contact --name … --next-touch …` |
 | Fresh postings | always last | `search_jobs.py --days 2` for postings under 48 hours old |

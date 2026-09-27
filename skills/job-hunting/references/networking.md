@@ -10,12 +10,15 @@ follow `facts-policy.md`: never invent shared history.
 
 - Every target company (`strategy.md` §6) and every shortlist row scoring
   7+ gets a referral attempt before the application goes out.
-- **Fresh posting**: send the referral ask to the warmest contact the day
-  it is found, skipping the warm-up touches (not yet connected → the ask
-  goes in the connection note). No referral by the posting's second day →
-  apply direct and tell the contact, who can still flag the name.
-  Recruiters screen day-one applicants first and skim again at day two
-  (Blind recruiter AMA 2026).
+- **Fresh posting**: send the referral ask to the warmest contact the day it
+  is found, skipping the warm-up touches (not yet connected → the ask goes in
+  the connection note). No referral by the posting's second day → apply direct
+  and tell the contact, who can still flag the name. Recruiters screen day-one
+  applicants first and skim again at day two (Blind recruiter AMA 2026).
+- **No posting chosen yet, or not fresh**: send the ask now and state the
+  apply-direct date in the same reply — no referral by the follow-up date
+  (§3; already connected: day 7) → apply direct to the chosen posting that
+  day and tell the contact.
 - A referred application is logged with `--channel referral`. Referral
   offer rate 7.3% vs 0.2% inbound (Ashby); referred hires close in 29 vs
   44 days (Pin).
@@ -30,14 +33,14 @@ follow `facts-policy.md`: never invent shared history.
 | Current employees in the team | people search with `<Company>%20<role keyword>` |
 | TA / recruiters | people search with `<Company>%20recruiter` |
 
-Give the user two LinkedIn people-search links to open themselves —
+Always — even when a warm contact is already on file — give the user two
+LinkedIn people-search links to open themselves —
 `https://www.linkedin.com/search/results/people/?keywords=<Company>%20recruiter`
 (talent acquisition — the referral ask) and the same URL with
 `<Company>%20<role keyword>` (likely teammates — the warm intro), keywords
-URL-encoded — plus the alumni variant with `<Company>%20<school>`. These
-are searches, not found people: never claim a specific person was found
-and never fetch the result pages. Add whoever the user names to contacts
-(§4).
+URL-encoded — plus the alumni variant with `<Company>%20<school>`. These are
+searches, not found people: never claim a specific person was found and
+never fetch the result pages. Add whoever the user names to contacts (§4).
 
 ## 3. The sequence — three touches, one follow-up, then stop
 
@@ -50,9 +53,8 @@ Days are absolute, counted from the first touch (0, 2, 5, 12).
 | 5 | message (`m`) | ≤ 150 words with one specific ask (templates, §5) |
 | 12 | follow-up (`f`) | one short follow-up, then stop |
 
-- No recent post → connect on day 0 and keep the later days. Already
-  connected (ex-colleague, known alumni) → start at the message; follow up
-  7 days later.
+- No recent post → connect on day 0 and keep the later days. Already connected
+  (ex-colleague, known alumni) → start at the message; follow up 7 days later.
 - Keep messages ≤ 150 words and use the room — reason, one proof, one ask.
   Pin found 150–199 words perform best, so a two-liner is too thin.
 - Stop after the follow-up; more touches add little — three touches
@@ -86,8 +88,18 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py contacts
 
 ## 5. Templates — ≤ 150 words, fill every [placeholder] from the profile
 
+Scan every drafted message with `ats_check.py --slop` (workspace mode; chat
+mode: read it against `assets/slop-phrases.txt`) and replace every hit.
+
 **Referral ask**
 > Hi [Name] — [shared context]. I'm applying for [role] on [team] at [Company] ([link]). I've spent [n] years on [Y], most recently [one sourced result from profile §5], which lines up with [one line from the posting]. Would you be open to referring me? I've attached my resume and a three-line summary you can forward as-is, so it takes two minutes. If the timing is wrong, no problem at all — thank you either way. [Your name]
+
+One ask only. No posting chosen → keep [role], [link] and the posting line
+as marked placeholders; don't turn the ask into a 'who's hiring' question.
+Employers and tenure exactly as profile §5 states them.
+
+**Application nudge** (≤ 60 words)
+> Hi [Name] — I applied for [role] on [date] via [source]. [One sourced result from profile §5, as stated.] Is there an update on where it stands? Thanks, [Your name]
 
 **Informational chat**
 > Hi [Name] — your [post / talk] on [topic] stuck with me, especially [one specific point]. I'm [one-line identity from profile §8], looking at [area] roles at [Company] and teams like it. Could I ask you three questions over 15 minutes in the next two weeks — how the team works, what a strong first year looks like, and what you'd want to see from a candidate? Happy to work around your calendar, or keep it to messages if that's easier. Thanks, [Your name]

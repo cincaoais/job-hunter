@@ -17,7 +17,9 @@ Offers do get withdrawn — 18% of Huntr users had an offer withdrawn
       (ask now if missing — §8); leave, medical, work arrangement.
 - [ ] Conditions (background check, references) cleared or dated; work
       pass approved where one is needed (`markets/sg.md`).
-- [ ] Start date fits the user's real notice (§3).
+- [ ] Start date fits the user's real notice (§3) — state the last working
+      day if resigning today and the earliest start (first working day after
+      it).
 
 Set the Offers table Status to `accepted` (workspace: the `## Offers` table
 in `pipeline.md`; chat mode: profile §9).
@@ -27,7 +29,10 @@ in `pipeline.md`; chat mode: profile §9).
 Tell the manager first, in a meeting or call, then send the letter the same
 day. No reasons, no criticism, no new employer's name unless the user wants
 to share it. Save the letter as `letters/resignation-<company>.md`
-(workspace) or deliver it inline (chat).
+(workspace) or deliver it inline (chat). Fill both dates: effective = the
+planned resignation day (today if none given); last working day computed
+from the contract notice. Say they move if a buyout or new start date is
+agreed.
 
 ```
 Subject: Resignation — [Full name]
@@ -75,6 +80,10 @@ handover." Use a counter as leverage only if it is real (facts-policy §6).
 
 ## 5. References
 
+- Brief references now, together with the acceptance checklist — the
+  background check (§1) may call them before the start date. No references
+  on file → ask for names and permission in the same batch and give the
+  brief with [placeholders].
 - Ask each referee's permission before giving their details; record it in
   the References table of `answers.md` (chat mode: the Answers section).
   The current manager only after resigning, and only if the user chooses.
@@ -128,8 +137,11 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "X" --stage accepte
 python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "Y" --stage withdrawn --note "withdrew after accepting X"
 ```
 
-Chat mode: set Stage in the profile §9 pipeline table by hand. Withdraw
-from every other open process the same week:
+Chat mode: set Stage in the profile §9 pipeline table by hand. Draft a
+withdrawal for every other open process now; send each once the background
+check clears and the start date is agreed in writing, then set `withdrawn`.
+Scan every drafted message with `ats_check.py --slop` (workspace mode; chat
+mode: read it against `assets/slop-phrases.txt`) and replace every hit.
 
 > Hi [Name], thank you for your time on the [role] process. I've accepted another offer and am withdrawing my application. I enjoyed [one specific thing], and I'd be glad to stay in touch. [Your name]
 

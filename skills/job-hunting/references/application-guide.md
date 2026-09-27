@@ -30,7 +30,9 @@ estimate for them (`facts-policy.md` §2–§3).
 
 ## Cover letter
 
-Only when it adds value or is requested. Keep it to ~250–350 words, four beats:
+Only when it adds value or is requested. Keep it to ~250–350 words (profile
+§10 'concise' → ~250; echo §10 tone and length in one line with the gap
+batch — don't ask), four beats:
 1. **Hook** — why this role/company specifically (show you did homework).
 2. **Why them** — what draws you to their mission/product.
 3. **Why you** — 2–3 concrete proofs mapped to their needs (reuse resume wins).
