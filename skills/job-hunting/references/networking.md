@@ -97,7 +97,7 @@ showing a referral ask, check it has exactly one result from profile §5 and
 one question — a second result or an 'or …?' alternative is a hit; fix it.
 
 **Referral ask**
-> Hi [Name] — [shared context]. I'm applying for [role] on [team] at [Company] ([link]). I've spent [n] years on [Y], most recently [one sourced result from profile §5], which lines up with [one line from the posting]. Would you be open to referring me? I've attached my resume and a three-line summary you can forward as-is, so it takes two minutes. If the timing is wrong, no problem at all — thank you either way. [Your name]
+> Hi [Name] — [shared context]. I'm applying for [role] on [team] at [Company] ([link]). I've spent [n] years on [Y] — for example, [one sourced result from profile §5, as stated], which lines up with [one line from the posting]. Would you be open to referring me? I've attached my resume and a three-line summary you can forward as-is, so it takes two minutes. If the timing is wrong, no problem at all — thank you either way. [Your name]
 
 One ask only. No posting chosen → keep [role], [link] and the posting line
 as marked placeholders; don't turn the ask into a 'who's hiring' question.

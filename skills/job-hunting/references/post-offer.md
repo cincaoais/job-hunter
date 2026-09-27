@@ -99,6 +99,11 @@ handover." Use a counter as leverage only if it is real (facts-policy §6).
   (profile §5) — never scripted praise.
 - Thank each one after the check (`networking.md` §5, thank-you template).
 
+**References brief**
+> Hi [Referee] — thank you for agreeing to be a reference. I've accepted [role] at [Company]; their background check may call you between [today] and [start date]. Two things you could speak to: [profile §5 result 1, as stated]; [profile §5 result 2, as stated]. Thanks, [Your name]
+
+Not the current manager until after resigning.
+
 ## 6. Background-check readiness
 
 - Degree certificates, transcripts and profile §4 certifications as digital
