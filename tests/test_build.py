@@ -1,4 +1,5 @@
 import zipfile, sys, pathlib
+import pytest
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import build
 
@@ -73,3 +74,11 @@ def test_build_zip_is_lf_and_deterministic(tmp_path):
         assert "job-hunting/SKILL.md" in names
         assert not any(n.endswith(".DS_Store") or "__pycache__" in n for n in names)
         assert b"\r\n" not in z.read("job-hunting/SKILL.md")
+
+@pytest.mark.parametrize("verb, command", [("today", "today"), ("review", "funnel")])
+def test_inline_tracker_command_falls_back_to_python(verb, command):
+    text = (ROOT / "skills" / verb / "SKILL.md").read_text(encoding="utf-8")
+    body = text.split("\n---\n", 1)[1]
+    first = next(line for line in body.splitlines() if line.strip())
+    assert first.startswith("!`") and "command -v python3 || command -v python" in first
+    assert first.endswith(f"tracker.py {command}`")

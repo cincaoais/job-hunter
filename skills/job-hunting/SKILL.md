@@ -18,8 +18,10 @@ reached through a weekly loop — not a pile of generic applications.
 **Workspace mode (Claude Code).** File tools are available and a workspace
 resolves. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/workspace.py where` at
 session start; it resolves `JOB_HUNT_DIR` env → `./job-hunt/` if it exists →
-`~/job-hunt` and prints the path. If the printed path has no `profile.md`,
-offer `python3 ${CLAUDE_SKILL_DIR}/scripts/workspace.py init` (creates
+`~/job-hunt` and prints the path. Commands below use `python3`; if it is not
+found (a python.org install on Windows), use `python` — or `py -3`. If the
+printed path has no `profile.md`, offer
+`python3 ${CLAUDE_SKILL_DIR}/scripts/workspace.py init` (creates
 `profile.md`, `pipeline.md`, `contacts.md`, `answers.md`, `seen-jobs.json`,
 and `postings/ resumes/ letters/ dossiers/ reviews/` from `assets/`). If the
 user declines `init`, fall back to chat mode for the rest of the session.

@@ -5,7 +5,7 @@ argument-hint: [optional date YYYY-MM-DD]
 disable-model-invocation: true
 ---
 
-!`python3 ${CLAUDE_SKILL_DIR}/../job-hunting/scripts/tracker.py today`
+!`"$(command -v python3 || command -v python)" ${CLAUDE_SKILL_DIR}/../job-hunting/scripts/tracker.py today`
 
 Use the `job-hunting` skill, role **Operations** (`references/pipeline.md`). Date override: $ARGUMENTS
 

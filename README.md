@@ -201,9 +201,13 @@ recurring digest, run `/loop 1d /job-hunter:search` in Claude Code.
   workspace is `$env:USERPROFILE\job-hunt`; to put it elsewhere, set
   `$env:JOB_HUNT_DIR = "D:\job-hunt"` for the session or
   `setx JOB_HUNT_DIR D:\job-hunt` for new shells.
-- The skills call `python3`. Some Windows installs provide only `python`
-  and `py`; check that `python3 --version` works in the shell Claude Code
-  uses. The Microsoft Store build of Python adds a `python3` command.
+- The skills call `python3`. A python.org install on Windows provides only
+  `python` and `py`, so `python3 --version` fails in the shell Claude Code
+  uses. Either install Python from the Microsoft Store, which adds a
+  `python3` command, or run the commands with `python` (or `py -3`) in
+  place of `python3`; the skill tells Claude to do the same when `python3`
+  is not found. The inline commands of `/job-hunter:today` and
+  `/job-hunter:review` already fall back to `python`.
 - `build.py --link` needs Developer Mode or an elevated shell to create
   symlinks. Without either it copies the folders instead; copies do not
   follow your edits, so re-run `python build.py --link --force` after
