@@ -3,7 +3,7 @@
   python3 workspace.py init   # create ~/job-hunt (or $JOB_HUNT_DIR) from templates, never overwrites
   python3 workspace.py where  # print the resolved path
 """
-import json, shutil, sys
+import shutil, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _common import workspace_dir

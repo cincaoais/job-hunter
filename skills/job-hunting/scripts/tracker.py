@@ -333,6 +333,8 @@ def _bucket(key: str, rows: list[dict]) -> dict:
 def _group(rows: list[dict], column: str) -> list[dict]:
     groups: dict[str, tuple[str, list[dict]]] = {}
     for row in rows:
+        if not _cell(row, column) and _stage(row) == "saved":
+            continue  # never sent: an "(unset)" bucket of zeros says nothing
         label = _cell(row, column) or "(unset)"
         _, members = groups.setdefault(label.lower(), (label, []))
         members.append(row)

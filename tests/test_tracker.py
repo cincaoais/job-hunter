@@ -464,3 +464,14 @@ def test_cli_runs_as_a_subprocess(filled):
                        env={**os.environ, "JOB_HUNT_DIR": str(filled)})
     assert r.returncode == 0, r.stderr
     assert "Apex Digital" in r.stdout
+
+
+def test_funnel_has_no_unset_bucket_for_rows_never_sent():
+    rows = [{"Company": "A", "Role": "R", "Source": "JobStreet", "Channel": "cold", "Stage": "applied"},
+            {"Company": "B", "Role": "R", "Source": "", "Channel": "", "Stage": "saved"}]
+    f = tracker.funnel(rows)
+    assert [b["key"] for b in f["channels"]] == ["cold"]
+    assert [b["key"] for b in f["sources"]] == ["JobStreet"]
+    assert f["total"]["rows"] == 2
+    sent_unset = [dict(rows[1], Stage="applied")]
+    assert [b["key"] for b in tracker.funnel(sent_unset)["channels"]] == ["(unset)"]

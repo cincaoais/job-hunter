@@ -111,7 +111,8 @@ def main(argv=None) -> int:
     if problems:
         return 1
     if a.check:
-        print(f"OK: {len(list(SKILLS.iterdir()))} skills pass checks"); return 0
+        count = sum(1 for d in SKILLS.iterdir() if (d / "SKILL.md").is_file())
+        print(f"OK: {count} skills pass checks"); return 0
     if a.link:
         print("\n".join(link_skills(force=a.force))); print("Restart Claude Code to pick up the skills."); return 0
     out = build_zip(MAIN, DIST / "job-hunting.skill")

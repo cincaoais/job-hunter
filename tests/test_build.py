@@ -75,6 +75,14 @@ def test_build_zip_is_lf_and_deterministic(tmp_path):
         assert not any(n.endswith(".DS_Store") or "__pycache__" in n for n in names)
         assert b"\r\n" not in z.read("job-hunting/SKILL.md")
 
+def test_check_ok_line_counts_only_skill_directories(tmp_path, monkeypatch, capsys):
+    for name in ("alpha", "beta"):
+        _make_skill_with_n_lines(tmp_path, name, 10)
+    (tmp_path / ".DS_Store").write_bytes(b"\0")
+    monkeypatch.setattr(build, "SKILLS", tmp_path)
+    assert build.main(["--check"]) == 0
+    assert "OK: 2 skills pass checks" in capsys.readouterr().out
+
 @pytest.mark.parametrize("verb, command", [("today", "today"), ("review", "funnel")])
 def test_inline_tracker_command_falls_back_to_python(verb, command):
     text = (ROOT / "skills" / verb / "SKILL.md").read_text(encoding="utf-8")

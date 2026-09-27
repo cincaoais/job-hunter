@@ -30,12 +30,12 @@ UA = "job-hunter-skill/6.0 (+https://github.com/cincaoais/job-hunter)"
 def workspace_dir() -> Path:
     """Resolve the job-hunt workspace directory.
 
-    Precedence: $JOB_HUNT_DIR env var -> ./job-hunt (if it already exists) ->
-    ~/job-hunt.
+    Precedence: $JOB_HUNT_DIR env var (a leading `~` expands) -> ./job-hunt
+    (if it already exists) -> ~/job-hunt.
     """
     env = os.environ.get("JOB_HUNT_DIR")
     if env:
-        return Path(env)
+        return Path(env).expanduser()
     local = Path.cwd() / "job-hunt"
     if local.exists():
         return local

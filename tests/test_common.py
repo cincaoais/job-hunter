@@ -33,6 +33,11 @@ def test_workspace_dir_env_wins(tmp_path, monkeypatch):
     monkeypatch.setenv("JOB_HUNT_DIR", str(tmp_path))
     assert c.workspace_dir() == tmp_path
 
+def test_workspace_dir_env_expands_a_leading_tilde(tmp_path, monkeypatch):
+    monkeypatch.setenv("HOME", str(tmp_path)); monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.setenv("JOB_HUNT_DIR", "~/hunt")
+    assert c.workspace_dir() == tmp_path / "hunt"
+
 def test_workspace_dir_local_folder(tmp_path, monkeypatch):
     monkeypatch.delenv("JOB_HUNT_DIR", raising=False)
     (tmp_path / "job-hunt").mkdir(); monkeypatch.chdir(tmp_path)
