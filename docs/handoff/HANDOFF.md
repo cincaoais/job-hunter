@@ -1,4 +1,4 @@
-# Handoff — job-hunter v6 revamp (paused after Task 15)
+# Handoff — job-hunter v6 revamp (paused after Task 16)
 
 Written 2026-09-25 on the original Mac, right before the user moved to a new
 device and a new Claude account. Everything a fresh Claude Code session needs
@@ -48,9 +48,10 @@ the first task without a `Task N: complete` line. Review-package diffs
 ## 3. State at handoff
 
 - Branch `v6-revamp`, pushed to `origin` (`git@github.com:cincaoais/job-hunter.git`, private). `main` is untouched on the remote.
-- Tasks 1–15: **complete**, each implemented by a subagent, reviewed (spec + quality), fix-looped until clean.
-- Tests: `python3 -m pytest -q -m "not network"` → 403 passed. `python3 build.py --check` → `OK: 12 skills pass checks`.
-- Remaining: **Task 16**, **Task 17**, then the **final whole-branch review**, then **finishing the branch** (merge / PR decision is the user's).
+- Tasks 1–16: **complete**, each implemented by a subagent, reviewed (spec + quality), fix-looped until clean.
+- Behavioural Round 4 (scenarios M–Q, workspace mode) ran on 2026-09-27 with two hardening passes: M, N, O, P PASS with minor gaps; Q FAIL on one bullet (references brief described, not drafted). Results block is in `tests/behavioral-scenarios.md`.
+- Tests: `python3 -m pytest -q -m "not network"` → 403 passed; `-m network` → 3 passed (live JobStreet, MCF, posting fetch). `python3 build.py --check` → `OK: 12 skills pass checks`.
+- Remaining: **Task 17**, then the **final whole-branch review**, then **finishing the branch** (merge / PR decision is the user's).
 
 What exists now:
 
@@ -93,10 +94,10 @@ wrappers, committed `job-hunting.skill`, `NEXT-STEPS.md`, `tech-role-map.md`,
    ```
 4. Start Claude Code in the repo root and say:
    **"Read docs/handoff/HANDOFF.md and the ledger, then continue the v6 revamp
-   with superpowers:subagent-driven-development from Task 16."**
+   with superpowers:subagent-driven-development from Task 17."**
    The session should confirm the branch is `v6-revamp`, read this file and
    `.superpowers/sdd/2026-09-16-v6-revamp/progress.md`, and resume at the first
-   task without a `Task N: complete` line (Task 16). Never re-dispatch a
+   task without a `Task N: complete` line (Task 17). Never re-dispatch a
    completed task. (A project `CLAUDE.md` was not added: a hook on the old
    machine reserves that file for architecture sessions.)
 
@@ -105,27 +106,26 @@ across accounts; the handoff files replace it.
 
 ## 5. What to do next, in order
 
-1. **Task 16** — brief: `.superpowers/sdd/2026-09-16-v6-revamp/task-16-brief.md`.
-   `tests/test_live.py` (network-marked JobStreet + MCF smoke), append
-   behavioural scenarios M–Q to `tests/behavioral-scenarios.md`, align
-   `tests/fixtures/sample-profile.md` with the new template numbering (keep the
-   planted 4-vs-5-years tension). Planned controller addition: after Task 16,
-   run scenarios M–Q as simulated sessions (fresh agent + packaged skill +
-   fixtures, Sonnet-class) and record a "Round 4" results block, as rounds 1–3
-   in that file did.
-2. **Task 17** — brief: `task-17-brief.md`. Rewrite `README.md`, update
+1. **Task 17** — brief: `task-17-brief.md`. Rewrite `README.md`, update
    `docs/PROJECT-DESCRIPTION.md`, confirm version `6.0.0`, build, tag
    `v6.0.0` locally (the user pushes tags). README must mention: Windows
    `python build.py`; `playwright install chromium`; python.org Python on macOS
    needs `Install Certificates.command` or `certifi`; what the skill will not
    do (auto-apply, interview copilots, logins, scraping blocked boards).
-3. **Final whole-branch review** on the most capable model with
+2. **Final whole-branch review** on the most capable model with
    `requesting-code-review`'s code-reviewer prompt over
    `git merge-base main HEAD..HEAD`. Point it at every "minor (deferred)" and
    "Deferred minors" line in the ledger. Recommended to fix before merge: Task 14
    items 1 (hard-wrapped bullets detach), 2 (temp HTML before `try`),
-   5 (wrapped contact line starts with a separator).
-4. **Finish**: `superpowers:finishing-a-development-branch`. Before merging,
+   5 (wrapped contact line starts with a separator). Also triage the Round 4
+   open fixes listed in the ledger ("Round 4: deferred to final review"): a
+   literal references-brief template in `post-offer.md` §5, a dated
+   new-contact sequence directly under the search links in `networking.md`,
+   "as stated" wording for the result in the referral-ask template, and the
+   alumni-link order. If those land, re-run scenarios O and Q as in Round 4
+   (fresh Sonnet agent per scenario on a scratch copy of the fixture, Opus
+   grader) and add the result to the Round 4 block.
+3. **Finish**: `superpowers:finishing-a-development-branch`. Before merging,
    remove the handoff scaffolding: `docs/handoff/`, the handoff banner at the
    top of `README.md` (Task 17 rewrites README anyway), and `.superpowers/` from git
    (`git rm -r --cached .superpowers`). List every ledger `Ruling:` line to the
@@ -182,6 +182,7 @@ superpowers, context7 and snapclaude enabled, theme auto.
 - jd-match one-shot rule: ignore the posting's own row; another row past `saved` at the same company this cycle → skip.
 - `ats_check.py`: `--target-title`; PDF extraction pypdf → `pdftotext -raw` → declared fallback (exit 2); PDF lint skips first-bullet/date; short/all-caps keywords match case-sensitively; step 6 uses `--posting … --lint --text`; unmarked headings need a colon, ≤ 4 words, or (for requirement/nice vocabulary only) a title-cased ≤ 8-word line.
 - Commit trailer switched to the Opus 5.5 line when the harness changed it.
+- Round 4 hardening: cover letters saved, claims-audited and slop-scanned before they are shown; referral replies carry links, one ask and an apply-direct date; stale rows get dated actions; "I accepted" drafts everything and sends nothing; withdrawals drafted now, sent once the background check clears and the start date is agreed. One more loop was not run by design; open items went to the final review.
 
 ## 9. Known open items (not blockers)
 

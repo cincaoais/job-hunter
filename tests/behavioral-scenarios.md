@@ -451,3 +451,58 @@ routing doesn't depend on model judgment.
   provable artifact per skill (repo/EKS deploy/CKA, with a
   production-pilot stretch option); goals written into §8 + full Step 0
   regeneration.
+
+### Round 4 — 2026-09-27 · 4/5 PASS with minor gaps, Q FAIL (Sonnet-class agents, Opus grader) — M–Q, v6 modules
+
+First workspace-mode round: each scenario ran in a fresh agent on a scratch
+copy of its fixture, graded against its replies and its workspace diff. Two
+hardening passes were adopted mid-round, the house pattern from Round 2.
+
+**First pass: 1/5.** N PASS with a minor gap (repost age measured to the
+re-ad date, not today). M, O, P, Q FAIL: a stale row left at "keep
+waiting"; no people-search links and no apply-direct date; a cover letter
+shown before its slop scan and claims audit (the skill gated letters only
+after approval); references and resignation dates deferred.
+
+**Hardening 1 (0941e54, 657c89d):** letters saved, audited and scanned
+before they are shown (resume-builder + `/cover`); people-search links
+always, one ask, and an apply-direct date on every referral; an
+application-nudge template that names its follow-on; dated actions for
+stale rows; slop scan on every drafted message; repost age as of today;
+post-offer dates computed and references briefed with the acceptance.
+Re-run: M and P PASS with minor gaps; O FAIL (no search links, two results,
+a second "who's hiring" ask); Q FAIL and regressed (the stricter gates were
+read as blocking drafts).
+
+**Hardening 2 (870b51b):** a referral reply must carry the map, links, ask,
+dates and apply-direct date; a one-result, one-question check on the ask;
+"I accepted" drafts everything and sends nothing; the claims audit covers
+every sentence about the user's past.
+
+Final:
+- **M: PASS (minor gap).** Today view in order with terminal rows kept out;
+  Lumen given "Nudge the recruiter", Due 2026-09-19; a 50-word nudge that
+  scanned clean, logged after "Sent it" as "Await reply — cold if silent",
+  Due 2026-10-07; Borneo marked cold only after the yes. Gap: the undated
+  webhook win framed as "since then … most recently".
+- **N: PASS (minor gap).** Knockout pre-check first, `skip (knockout: work
+  authorization)`, repost flagged, clean stop with `saved: nothing`. Gap
+  fixed in `jd-match.md` (age as of today); not re-run.
+- **O: PASS (minor gaps).** Tan Wei Jie found in `contacts.md`, nothing
+  applied first; one 112-word ask with one result and one question;
+  recruiter, role and alumni searches framed as links; apply-direct date
+  2026-09-23; touch logged with `tracker.py contact` after "Sent". Gaps: no
+  dated sequence for new contacts; the result paraphrased; the posting-line
+  slot filled with a guess.
+- **P: PASS (minor gap).** No letter until story and fact were chosen; tone
+  and length echoed; letter saved, audited and scanned before it was shown
+  (236 words, clean on re-scan). Gap: two unsourced experience lines passed
+  the audit (addressed by hardening 2, not re-run).
+- **Q: FAIL (one bullet).** Last day 2026-10-16 and earliest start
+  2026-10-19 computed against the 2026-10-01 letter, resignation held on
+  the background check; resignation letter, three slop-clean withdrawals
+  (none for Orchid) and the 30-60-90 plan drafted and saved; Awan and the
+  Offers row set `accepted`, profile §1 updated. Fail: the references brief
+  was described, not drafted; the `withdrawn` commands were promised, not
+  shown. Open fixes (a literal brief template, a dated new-contact
+  sequence under the search links) are listed for the final review.
