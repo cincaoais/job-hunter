@@ -230,6 +230,10 @@ if none is named, ask which job this letter is for.
   section — that file is the single source for them.
 - The why-you beat maps 2–3 of the resume's quantified wins onto the
   posting's stated needs.
+- The claims audit covers every sentence about the user's past, not only
+  numbers: the posting's domain words applied to the user's past work (e.g.
+  'shipping settlement services') or a scene the profile doesn't state (e.g.
+  'a production incident') are drops.
 - Specific enough that it couldn't be sent to any other company — if it
   could, rewrite it.
 - Delivery: many SEA portals take pasted text rather than an upload — ask

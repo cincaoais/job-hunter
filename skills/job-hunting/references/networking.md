@@ -18,7 +18,10 @@ follow `facts-policy.md`: never invent shared history.
 - **No posting chosen yet, or not fresh**: send the ask now and state the
   apply-direct date in the same reply — no referral by the follow-up date
   (§3; already connected: day 7) → apply direct to the chosen posting that
-  day and tell the contact.
+  day and tell the contact. The same reply carries the §2 map — the warm
+  contact plus the recruiter, role-keyword and alumni search links — the §5
+  ask, the §3 dates for the contact and for anyone new from the searches,
+  and the apply-direct date.
 - A referred application is logged with `--channel referral`. Referral
   offer rate 7.3% vs 0.2% inbound (Ashby); referred hires close in 29 vs
   44 days (Pin).
@@ -89,7 +92,9 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py contacts
 ## 5. Templates — ≤ 150 words, fill every [placeholder] from the profile
 
 Scan every drafted message with `ats_check.py --slop` (workspace mode; chat
-mode: read it against `assets/slop-phrases.txt`) and replace every hit.
+mode: read it against `assets/slop-phrases.txt`) and replace every hit. Before
+showing a referral ask, check it has exactly one result from profile §5 and
+one question — a second result or an 'or …?' alternative is a hit; fix it.
 
 **Referral ask**
 > Hi [Name] — [shared context]. I'm applying for [role] on [team] at [Company] ([link]). I've spent [n] years on [Y], most recently [one sourced result from profile §5], which lines up with [one line from the posting]. Would you be open to referring me? I've attached my resume and a three-line summary you can forward as-is, so it takes two minutes. If the timing is wrong, no problem at all — thank you either way. [Your name]
@@ -100,6 +105,9 @@ Employers and tenure exactly as profile §5 states them.
 
 **Application nudge** (≤ 60 words)
 > Hi [Name] — I applied for [role] on [date] via [source]. [One sourced result from profile §5, as stated.] Is there an update on where it stands? Thanks, [Your name]
+
+Quote the result as a plain past fact — no 'since then' or 'most recently'
+the profile doesn't date.
 
 **Informational chat**
 > Hi [Name] — your [post / talk] on [topic] stuck with me, especially [one specific point]. I'm [one-line identity from profile §8], looking at [area] roles at [Company] and teams like it. Could I ask you three questions over 15 minutes in the next two weeks — how the team works, what a strong first year looks like, and what you'd want to see from a candidate? Happy to work around your calendar, or keep it to messages if that's easier. Thanks, [Your name]

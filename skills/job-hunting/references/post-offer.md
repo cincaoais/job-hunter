@@ -6,6 +6,13 @@ background check, plan the first 90 days, pass probation, close the
 pipeline. Letters and plans follow `facts-policy.md`. Contract or legal
 questions: general information, then suggest a qualified professional.
 
+'I accepted' gets one reply that drafts everything and sends nothing: the §1
+checklist with the computed dates; the §2 letter drafted and saved (sent
+only once every §1 box is ticked); the §5 references brief ([placeholders]
+if no names); the §7 plan saved; the §9 withdrawal drafts with their pending
+`withdrawn` commands; and profile §1 Search status updated. Open §1 items go
+in the same question batch — they gate sending, never drafting.
+
 ## 1. Accept in writing — before resigning
 
 Offers do get withdrawn — 18% of Huntr users had an offer withdrawn
