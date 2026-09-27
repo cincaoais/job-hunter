@@ -39,3 +39,12 @@ Minor items the v6.0.0 final review deferred ("fix later"); none blocks the rele
 - [ ] Scenario Q checklist bullet 6 wording (pipeline closed with `tracker.py set`, pending the user's go-ahead) — `tests/behavioral-scenarios.md:345`
 - [ ] Run nits recorded in the Round 4 block — `tests/behavioral-scenarios.md:455`
 - [ ] Re-run scenarios O and Q after the items above (and after the v6.0.0 references-brief and referral-ask template changes)
+
+## From the final fix-wave re-review (2026-09-27)
+
+- [ ] `fetch_posting.fetch()`: on the HTTP path, treat a thin page with challenge markers as blocked (`if blocked and len(extracted["text"]) < MIN_GENERIC_TEXT: return None, "blocked"`) so a challenge page with the user's IP is never saved. **Do first.**
+- [ ] `fetch_posting.py` ~339: when plain HTTP already returned an unblocked short posting, keep it even if the browser render is also thin (return "blocked" only when `blocked or not extracted["text"]`).
+- [ ] `fetch_posting.py` ~272-280: browser-path markers checked in the first 2,000 chars reject a real JD mentioning "access denied" early; consider title-only markers for generic phrases.
+- [ ] `build_resume.py` ~207/225: exempt `**Label:**` lines from lazy bullet continuation.
+- [ ] Windows: the App Execution Alias stub `python3.exe` can satisfy `command -v python3`; replace the inline fallback with a runtime probe (`python3 -c ''` then `python -c ''`) and verify on a real Windows machine.
+- [ ] Thin-page browser fallback fires on short valid postings (T8); temp-HTML unlink not OSError-guarded (T14-2); `indeed._MISSING` literal "None"; `Applied` auto-fill edge cases (T9) — confirm or close.

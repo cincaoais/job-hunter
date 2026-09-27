@@ -1,4 +1,4 @@
-# Handoff — job-hunter v6 revamp (paused after Task 16)
+# Handoff — job-hunter v6 revamp (all 17 tasks done; awaiting the merge decision)
 
 Written 2026-09-25 on the original Mac, right before the user moved to a new
 device and a new Claude account. Everything a fresh Claude Code session needs
@@ -48,10 +48,11 @@ the first task without a `Task N: complete` line. Review-package diffs
 ## 3. State at handoff
 
 - Branch `v6-revamp`, pushed to `origin` (`git@github.com:cincaoais/job-hunter.git`, private). `main` is untouched on the remote.
-- Tasks 1–16: **complete**, each implemented by a subagent, reviewed (spec + quality), fix-looped until clean.
+- Tasks 1–17: **complete**, each implemented by a subagent, reviewed (spec + quality), fix-looped until clean.
+- Final whole-branch review (2026-09-27): "ready to merge with fixes"; one fix wave applied (blocked-page save, Windows `python` fallback, CI on every branch, hard-wrapped bullets, salary-floor currency, sourcing politeness text, references-brief template) and re-reviewed clean. Remaining small items are in `docs/followups-v6.0.1.md`.
 - Behavioural Round 4 (scenarios M–Q, workspace mode) ran on 2026-09-27 with two hardening passes: M, N, O, P PASS with minor gaps; Q FAIL on one bullet (references brief described, not drafted). Results block is in `tests/behavioral-scenarios.md`.
-- Tests: `python3 -m pytest -q -m "not network"` → 403 passed; `-m network` → 3 passed (live JobStreet, MCF, posting fetch). `python3 build.py --check` → `OK: 12 skills pass checks`.
-- Remaining: **Task 17**, then the **final whole-branch review**, then **finishing the branch** (merge / PR decision is the user's).
+- Tests: `python3 -m pytest -q -m "not network"` → 431 passed; `-m network` → 3 passed (live JobStreet, MCF, posting fetch). `python3 build.py --check` → `OK: 12 skills pass checks`.
+- Remaining: **the user's merge decision** (merge locally / open a PR / keep the branch), a click-through of the claude.ai skill-upload path in the README, and a green GitHub Actions run on this branch (ubuntu + windows). Then remove the handoff scaffolding and tag `v6.0.0`.
 
 What exists now:
 
@@ -93,11 +94,11 @@ wrappers, committed `job-hunting.skill`, `NEXT-STEPS.md`, `tech-role-map.md`,
    python3 build.py --check                 # expect OK: 12 skills
    ```
 4. Start Claude Code in the repo root and say:
-   **"Read docs/handoff/HANDOFF.md and the ledger, then continue the v6 revamp
-   with superpowers:subagent-driven-development from Task 17."**
+   **"Read docs/handoff/HANDOFF.md and the ledger, then finish the v6 branch
+   with superpowers:finishing-a-development-branch."**
    The session should confirm the branch is `v6-revamp`, read this file and
    `.superpowers/sdd/2026-09-16-v6-revamp/progress.md`, and resume at the first
-   task without a `Task N: complete` line (Task 17). Never re-dispatch a
+   task without a `Task N: complete` line (none remain: go to finishing). Never re-dispatch a
    completed task. (A project `CLAUDE.md` was not added: a hook on the old
    machine reserves that file for architecture sessions.)
 
@@ -106,12 +107,7 @@ across accounts; the handoff files replace it.
 
 ## 5. What to do next, in order
 
-1. **Task 17** — brief: `task-17-brief.md`. Rewrite `README.md`, update
-   `docs/PROJECT-DESCRIPTION.md`, confirm version `6.0.0`, build, tag
-   `v6.0.0` locally (the user pushes tags). README must mention: Windows
-   `python build.py`; `playwright install chromium`; python.org Python on macOS
-   needs `Install Certificates.command` or `certifi`; what the skill will not
-   do (auto-apply, interview copilots, logins, scraping blocked boards).
+1. **Tasks 17 and the final review are done.** See the ledger's last entries.
 2. **Final whole-branch review** on the most capable model with
    `requesting-code-review`'s code-reviewer prompt over
    `git merge-base main HEAD..HEAD`. Point it at every "minor (deferred)" and
