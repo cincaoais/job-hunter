@@ -164,6 +164,7 @@ def parse_resume(md: str) -> dict:
     sections: list[dict] = []
     section = entry = None
     last: tuple[list, int] | None = None   # the string a continuation line extends
+    after_bullet = False                    # `last` is a bullet: an unindented hard wrap extends it
     blank = False
 
     def target_entry() -> dict:
@@ -187,7 +188,7 @@ def parse_resume(md: str) -> dict:
         if heading and len(heading.group(1)) <= 2:
             section = {"title": heading.group(2), "entries": []}
             sections.append(section)
-            entry, last, blank = None, None, False
+            entry, last, after_bullet, blank = None, None, False, False
             continue
         if heading:
             if section is None:
@@ -195,7 +196,7 @@ def parse_resume(md: str) -> dict:
                 sections.append(section)
             entry = _create_entry(*_split_heading(heading.group(2)))
             section["entries"].append(entry)
-            last, blank = None, False
+            last, after_bullet, blank = None, False, False
             continue
         if section is None:
             header.append(stripped)
@@ -203,6 +204,7 @@ def parse_resume(md: str) -> dict:
 
         kind = _section_kind(section["title"])
         bullet = _BULLET_RE.match(line)
+        continues = last is not None and not blank and (after_bullet or kind == "summary")
         if bullet:
             text = bullet.group(1).strip()
             label = _LABEL_RE.match(text) if kind in ("proof", "skills") else None
@@ -219,16 +221,17 @@ def parse_resume(md: str) -> dict:
                 bullets = target_entry()["bullets"]
                 bullets.append(text)
                 last = (bullets, len(bullets) - 1)
-        elif last is not None and (raw[:2] == "  " or raw[:1] == "\t" or (kind == "summary" and not blank)):
+            after_bullet = last is not None
+        elif continues or (last is not None and (raw[:2] == "  " or raw[:1] == "\t")):
             seq, idx = last                  # wrapped continuation of the previous bullet/line
             seq[idx] = f"{seq[idx]} {stripped}"
         elif kind == "skills" and (groups := _skill_groups(stripped)):
             target_entry()["groups"].extend(groups)
-            last = None
+            last, after_bullet = None, False
         else:
             lines = target_entry()["lines"]
             lines.append(stripped)
-            last = (lines, len(lines) - 1)
+            last, after_bullet = (lines, len(lines) - 1), False
         blank = False
 
     if not name:
@@ -686,12 +689,14 @@ def _print_pdf(browser, page_url: str, out: Path) -> None:
         browser.close()
 
 
-def render_pdf(html_text: str, out: Path) -> str | None:
+def render_pdf(html_text: str, out: Path, failures: list[str] | None = None) -> str | None:
     """Render with playwright's Chromium, else cloakbrowser; the backend used, or None.
 
     The page loads from a transient file next to `out` (cloakbrowser's
-    Chromium hangs on `set_content`), removed again afterwards.
+    Chromium hangs on `set_content`), removed again afterwards. A backend
+    that imports but fails is recorded in `failures` as "name (ErrorClass)".
     """
+    failures = [] if failures is None else failures
     with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".html", prefix=f".{out.stem}-",
                                      dir=out.parent, delete=False) as tmp:
         tmp.write(html_text)
@@ -703,8 +708,8 @@ def render_pdf(html_text: str, out: Path) -> str | None:
                 with sync_api.sync_playwright() as pw:
                     _print_pdf(pw.chromium.launch(headless=True), page_url, out)
                 return "playwright"
-            except Exception:  # noqa: BLE001 — missing browser build, sandbox, event loop: next backend
-                pass
+            except Exception as exc:  # noqa: BLE001 — missing browser build, sandbox, event loop: next backend
+                failures.append(f"playwright ({exc.__class__.__name__})")
         cloak = optional_import("cloakbrowser")
         if cloak is not None:
             try:
@@ -714,8 +719,8 @@ def render_pdf(html_text: str, out: Path) -> str | None:
                     browser = cloak.launch(headless=True)
                 _print_pdf(browser, page_url, out)
                 return "cloakbrowser"
-            except Exception:  # noqa: BLE001
-                pass
+            except Exception as exc:  # noqa: BLE001
+                failures.append(f"cloakbrowser ({exc.__class__.__name__})")
         return None
     finally:
         Path(tmp.name).unlink(missing_ok=True)
@@ -925,12 +930,15 @@ def main(argv=None) -> int:
             write(".html", html_text)
         if a.pdf:
             pdf_path = out_dir / f"{stem}.pdf"
-            if render_pdf(html_text, pdf_path):
+            failures: list[str] = []
+            if render_pdf(html_text, pdf_path, failures):
                 print(pdf_path)
             else:
                 if not a.html:
                     write(".html", html_text)
                 print(PDF_SKIPPED)
+                if failures:
+                    print(f"note: installed but failed: {', '.join(failures)}", file=sys.stderr)
         if a.json:
             write(".json", json.dumps(json_resume(resume), indent=2, ensure_ascii=False) + "\n")
     except OSError as e:

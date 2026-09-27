@@ -414,3 +414,31 @@ def test_cli_pdf_backend_order_and_close(md_copy, monkeypatch, capsys, playwrigh
     assert pdf.read_bytes() == b"%PDF-1.7 fake A4" and str(pdf) in capsys.readouterr().out
     assert log == [backend, "closed"]
     assert sorted(p.name for p in md_copy.parent.iterdir()) == ["moneta-backend-v1.md", "moneta-backend-v1.pdf"]
+
+
+# --- final review --------------------------------------------------------------
+
+HARD_WRAPPED = ("# A B\nEngineer · a@b.co\n## Experience\n### Dev — Acme, KL · 2019 – 2021\n"
+                "- Cut latency 40% by moving the hot path\nto Redis and batching writes\n- Second bullet\n")
+WRAPPED_SENTENCE = "Cut latency 40% by moving the hot path to Redis and batching writes"
+
+
+def test_an_unindented_hard_wrap_continues_its_bullet():
+    dev = _section(br.parse_resume(HARD_WRAPPED), "experience")["entries"][0]
+    assert dev["bullets"] == [WRAPPED_SENTENCE, "Second bullet"]
+    assert dev["lines"] == []
+    text = docx_text(br.docx_bytes(br.parse_resume(HARD_WRAPPED)))
+    assert text.count("to Redis and batching writes") == 1
+    lines = text.splitlines()
+    heading = lines.index("Dev — Acme, KL\t2019 – 2021")
+    assert lines[heading + 1] == f"- {WRAPPED_SENTENCE}"
+
+
+def test_cli_pdf_names_a_backend_that_is_installed_but_fails(md_copy, monkeypatch, capsys):
+    mods = _fake_modules([], playwright_ok=False)
+    monkeypatch.setattr(br, "optional_import", lambda name: mods["playwright.sync_api"]
+                        if name == "playwright.sync_api" else None)
+    assert br.main([str(md_copy), "--pdf"]) == 0
+    captured = capsys.readouterr()
+    assert SKIP_LINE in captured.out
+    assert "playwright (RuntimeError)" in captured.err
