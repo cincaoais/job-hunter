@@ -33,15 +33,29 @@ def test_mcf_live():
 
 
 def test_fetch_posting_live_jobstreet_id(jobstreet_results):
+    """fetch_posting turns a live JobStreet id into a posting.
+
+    Tries the first three search results, so one expired or odd listing
+    does not fail the test; every miss is reported if none fetches.
+    """
     jobs, _ = jobstreet_results
     if not jobs:
         pytest.skip("the live JobStreet search returned nothing to fetch")
     import fetch_posting
     from sources import jobstreet
-    job_id = jobs[0]["id"].split(":", 1)[1]
-    job, reason = fetch_posting.fetch(job_id)
-    assert job is not None, (f"fetch_posting could not fetch JobStreet id {job_id}: {reason}; "
-                             f"LAST_WARNINGS={jobstreet.LAST_WARNINGS}")
-    assert job["source"] == "jobstreet"
-    assert job["description_md"].strip(), f"empty description for JobStreet id {job_id}"
-    assert fetch_posting.render_posting(job).startswith("---\nsource: jobstreet\n")
+    misses = []
+    for record in jobs[:3]:
+        raw_id = str(record.get("id") or "")
+        prefix, _, job_id = raw_id.partition(":")
+        if prefix != "jobstreet" or not job_id.isdigit():
+            misses.append(f"{raw_id!r}: not a jobstreet:<digits> id")
+            continue
+        job, reason = fetch_posting.fetch(job_id)
+        if job is None or not str(job.get("description_md") or "").strip():
+            misses.append(f"{job_id}: {reason or 'empty description'}; "
+                          f"LAST_WARNINGS={list(jobstreet.LAST_WARNINGS)}")
+            continue
+        assert job["source"] == "jobstreet", f"{job_id}: source {job['source']!r}"
+        assert fetch_posting.render_posting(job).startswith("---\nsource: jobstreet\n")
+        return
+    pytest.fail("fetch_posting fetched none of the first 3 JobStreet results: " + " | ".join(misses))

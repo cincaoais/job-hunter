@@ -1,11 +1,11 @@
 ---
-source: jobstreet
-url: "https://my.jobstreet.com/job/88412356"
+source: generic
+url: "https://careers.kiraanpay.example/jobs/backend-engineer-go-settlement"
 company: Kiraan Pay Sdn Bhd
 title: "Backend Engineer (Go), Settlement"
-location: "Bangsar South, Kuala Lumpur"
-salary: "RM 10,000 – RM 13,000 per month"
-posted: 2026-09-15
+location:
+salary:
+posted:
 fetched: 2026-09-16
 screening_questions: []
 ---

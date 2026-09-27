@@ -1,11 +1,11 @@
 ---
-source: linkedin
-url: "https://www.linkedin.com/jobs/view/4312345678"
+source: generic
+url: "https://careers.awanledger.example/jobs/backend-engineer-go"
 company: Awan Ledger Sdn Bhd
 title: Backend Engineer (Go)
-location: "Kuala Lumpur, Malaysia"
+location:
 salary:
-posted: 2026-08-10
+posted:
 fetched: 2026-08-11
 screening_questions: []
 ---

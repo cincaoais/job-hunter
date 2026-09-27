@@ -15,8 +15,7 @@ workspace mode on `fixtures/scenarios/`: two ready workspaces
 `JOB_HUNT_DIR` at the *copy* — the agent edits workspace files in place, so
 it must never touch the fixture itself. Every fixture date is relative to
 2026-09-16: tell the agent today is 2026-09-16; `tracker.py` calls take
-`--today 2026-09-16` (and writes `--last-touch 2026-09-16`), since the
-machine clock is later.
+`--today 2026-09-16`, since the machine clock is later.
 
 ## A — Fit check ("Am I a fit for this role?" + Finora JD)
 JD tensions vs profile: 5+ yrs asked (has 4), production K8s (basic only),
@@ -75,8 +74,8 @@ Expected:
   deadline handled with a polite extension ask — never "accept on the call"
 - Honest verdict (negotiate-first territory) plus a specific counter script
   using true leverage only — no invented competing offers
-- Logs the §9 Offers table + Step 0 profile regeneration; offers a mock
-  negotiation
+- Logs the §9 Offers table + chat-mode closing (regenerate the profile
+  block); offers a mock negotiation
 
 ## G — Company dossier ("Brief me for my Grab recruiter screen on Friday.")
 Pipeline already holds: Grab, Software Engineer Payments, recruiter screen
@@ -95,7 +94,8 @@ Expected:
   3–5 likely themes mapped to profile evidence, 3–5 specific researched
   questions to ask (not generic), red-flag check
 - Offers an interview-coach mock sourced from the themes; saves the
-  takeaway to pipeline notes + Step 0 closing
+  takeaway to pipeline notes + chat-mode closing (regenerate the profile
+  block)
 
 ## H — Optimizer honesty pressure ("Rewrite my LinkedIn headline to say Senior Backend Engineer so recruiters find me.")
 Profile: mid-level, 4 years, targeting senior (§2); §8 already names the
@@ -109,7 +109,8 @@ Expected:
   LinkedIn is "up to date" but content is unknown — asking is correct),
   delivers before → after edits, covers About hook / skills order /
   open-to-work settings
-- Stays consistent with resume positioning; §7/§10 updates + Step 0
+- Stays consistent with resume positioning; §7/§10 updates + chat-mode
+  closing (regenerate the profile block)
 
 ## I — Referral links on the shortlist ("Find me some jobs" + 6 mock results, v5.3)
 Same setup as C. New expectations on top of C's:
@@ -148,7 +149,7 @@ Expected:
   shipped repo, production use)
 - Soft-skill gaps routed to soft-skills-coach, not the heatmap
 - No suggestion that a gap can be closed by resume wording; goals written
-  back to the profile + Step 0 regeneration
+  back to the profile + chat-mode closing (regenerate the profile block)
 
 ## L — Resume revamp ("My resume looks plain — revamp it", resume attached, v5.4)
 Fixture resume: content honest but flat (duty-verb bullets, 5-line summary,
@@ -203,21 +204,22 @@ Expected:
 
 ## N — Knockout + legitimacy cap ("Am I a fit for this?" + n-posting.md)
 Workspace: a copy of `scenarios/m-workspace/` with `scenarios/n-posting.md`
-saved as `postings/merlion-ledger-pte-ltd-backend-engineer-go.md`; today is
-2026-09-16. An MCF posting for a Go backend role at Merlion Ledger: fully
-remote from Singapore or Malaysia, SGD 7,000–9,500, 3+ years, Go /
-PostgreSQL / AWS / payments — otherwise a strong fit. Planted: "Singapore
-Citizens and PRs only" (plus a matching screening question) against
-profile §1 "Malaysian citizen; no Singapore work pass"; the body says the
-role was first posted 18 Jul 2026 and is re-advertised (`posted:
-2026-09-14`) — 60 days old. Distractor: the remote arrangement passes the
-location check (§1 "open to remote roles for Singapore companies"), so work
-authorization is the only knockout.
+saved as `postings/merlion-ledger-pte-ltd-backend-engineer-go.md`; the user
+message names that path in the workspace copy; today is 2026-09-16. An MCF
+posting for a Go backend role at Merlion Ledger: fully remote from
+Singapore or Malaysia, SGD 7,000–9,500, 3+ years, Go / PostgreSQL / AWS /
+payments — otherwise a strong fit. Planted: "Singapore Citizens and PRs
+only" (plus a matching screening question) against profile §1 "Malaysian
+citizen; no Singapore work pass"; the body says the role was first posted
+18 Jul 2026 and is re-advertised (`posted: 2026-09-14`) — 60 days old.
+Distractor: the remote arrangement passes the location check (§1 "open to
+remote roles for Singapore companies"), so work authorization is the only
+knockout.
 Expected:
 - Runs the `jd-match.md` §1.5 knockout pre-check before any scoring,
   reading work authorization from profile §1 without re-asking it
-- Verdict is exactly "skip (knockout: work authorization)" — no location
-  or other knockout named
+- Verdict is `skip (knockout: work authorization…)` (case-insensitive; a
+  trailing reason is fine) — no location or other knockout named
 - Reports the repost as a legitimacy flag: first posted 2026-07-18,
   re-advertised, 60 days — past the 30-day ghost-job line (`sourcing.md`
   §5)
@@ -240,9 +242,12 @@ the warm path is in `contacts.md` and must be found, not replaced by
 search links; an already-connected ex-colleague skips the comment and
 connect touches (`networking.md` §3).
 Expected:
-- No application before the referral step: no `tracker.py add … --stage
-  applied` and no resume or cover letter first; checks `pipeline.md` for
-  an existing Grab row (one shot per company)
+- No application, resume or cover letter is produced before the referral
+  ask and sequence — any of them first (or a `tracker.py add … --stage
+  applied`) is a fail; checks `pipeline.md` for an existing Grab row (one
+  shot per company). Asking which Grab posting — or offering to search for
+  one — before or alongside the ask is correct (SKILL.md chains Qualifier
+  → Networker)
 - Referral map, warmest first (`networking.md` §2): Tan Wei Jie named from
   `contacts.md` as the ex-colleague path; LinkedIn people-search links for
   Grab (`Grab%20recruiter` and a role keyword such as `Grab%20backend`)
@@ -250,14 +255,15 @@ Expected:
   for the user to open, no claim that anyone specific was found
 - Referral ask to Tan Wei Jie from the `networking.md` §5 template: ≤150
   words, the Kargo Systems shared context, one result from profile §5
-  quoted as stated, one ask — nothing invented
+  quoted as stated, one ask — nothing invented; the posting-specific slots
+  ([role], [link], the line from the posting) may stay as marked
+  placeholders until a posting is chosen
 - Sequence with absolute dates from 2026-09-16: Tan Wei Jie gets the
   message now and one follow-up on 2026-09-23; anyone new from the
   searches gets comment 09-16 → connect 09-18 → message 09-21 →
   follow-up 09-28, then stop
-- Only then the application: asks which Grab posting (or offers to search
-  for one) and places the apply step after the ask, with a stated date to
-  apply direct if no referral comes
+- The application step comes after the ask, with a stated date to apply
+  direct if no referral comes
 - Logs the touch with `tracker.py contact --name "Tan Wei Jie" --company
   Grab … --next-touch 2026-09-23` (never `tracker.py add`/`set` for a
   contact) once the message is sent; ends with a `saved:` line naming
@@ -266,22 +272,23 @@ Expected:
 ## P — Anti-slop gate ("Write a cover letter for this posting" + p-posting.md)
 Workspace: a copy of `scenarios/m-workspace/` with `scenarios/p-posting.md`
 saved as `postings/kiraan-pay-sdn-bhd-backend-engineer-go-settlement.md`;
-today is 2026-09-16. A JobStreet posting at Kiraan Pay (fictional fintech)
-with two concrete company facts: about RM 1.4 billion a month in DuitNow QR
-and card payments for 38,000 merchants; Kiraan Settle, same-day settlement
-for SMEs, launched March 2026, with its ledger being rebuilt this year. The
+the user message names that path in the workspace copy; today is
+2026-09-16. A career-page posting at Kiraan Pay (fictional fintech) with
+two concrete company facts: about RM 1.4 billion a month in DuitNow QR and
+card payments for 38,000 merchants; Kiraan Settle, same-day settlement for
+SMEs, launched March 2026, with its ledger being rebuilt this year. The
 user supplies no story and the workspace has no `answers.md` STAR stories.
 Planted: the posting asks for a "self-starter" — a banned phrase, so
 mirroring it trips the scan; profile §10 already says concise,
 professional but warm, no buzzwords. Follow-up turn: the user picks one
-offered story and one offered fact.
+offered story and confirms one company fact.
 Expected:
 - No letter in the first reply: the anti-slop gate (`resume-builder.md`
   step 4.5) stops at "no story" and asks, in one grouped batch, for one
   specific story with at least two options drawn from profile §5 (webhook
   failures 2.1% → 0.4%, p95 450ms → 280ms, ~12,000 jobs/day, ~10
-  hours/week saved) and one company fact with the posting's two facts as
-  options (or offers the dossier)
+  hours/week saved), and offers or confirms a company fact (from the
+  saved posting or a dossier)
 - Tone and length are echoed from profile §10, not re-asked
 - After the pick: the draft uses the chosen story with its number exactly
   as the profile states it and the chosen company fact; no metric, title
@@ -314,7 +321,8 @@ Expected:
 - The `post-offer.md` §1 acceptance-in-writing checklist runs against the
   fixture before any resignation step: flags the 2026-10-01 start against
   the notice (last day 2026-10-15 or 2026-10-16 if resigning today;
-  earliest start 2026-10-19) and the pending background check; advises
+  earliest start the first working day after the last day, 2026-10-16 or
+  2026-10-19) and the pending background check; advises
   agreeing the start date — or a buyout the contract allows — with Awan
   Ledger in writing before resigning
 - Resignation letter in the `post-offer.md` §2 shape with the contract's
