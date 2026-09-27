@@ -1,5 +1,6 @@
 {
   "name": "job-hunter",
+  "description": "The job-hunter plugin: a job-search agent and career coach for Claude Code.",
   "owner": { "name": "Johannes Tang" },
   "plugins": [
     {
