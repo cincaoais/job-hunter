@@ -63,6 +63,16 @@ def test_classify(url, expected):
     assert fp.classify(url) == expected
 
 
+@pytest.mark.parametrize("url,country", [
+    ("https://www.jobstreet.com.sg/en/job/12345678", "SG"),
+    ("https://jobstreet.com.sg/job/12345678", "SG"),
+    ("https://www.jobstreet.com.my/en/job/12345678", "MY"),
+    ("https://jobstreet.com.my/job/12345678", "MY"),
+])
+def test_classify_jobstreet_country_domains(url, country):
+    assert fp.classify(url) == ("jobstreet", "12345678", country)
+
+
 def test_classify_bare_numeric_id_is_jobstreet_my():
     assert fp.classify("94655291") == ("jobstreet", "94655291", "MY")
 
@@ -321,8 +331,13 @@ def test_main_exits_3_when_blocked_without_cloakbrowser(monkeypatch, capsys):
     assert "blocked; paste the posting text instead (or pip install cloakbrowser)" in err
 
 
+BROWSER_JD = ("Real description from the browser. You will own the billing service end "
+              "to end, from the schema to the on-call rotation, and you will be the person "
+              "other teams ask before they change it. Go, Postgres, Kafka; hybrid in KL.")
+
+
 class FakePage:
-    def __init__(self, text="Real description from the browser.", title="Role at Acme"):
+    def __init__(self, text=BROWSER_JD, title="Role at Acme"):
         self.text, self.title, self.goto_args = text, title, None
         self.closed = False
         self.waits = []
@@ -360,7 +375,7 @@ def test_blocked_page_falls_back_to_the_stealth_browser(monkeypatch):
     monkeypatch.setattr(fp, "http_get", getter(403, b"<html><body>Forbidden</body></html>"))
     job, reason = fp.fetch("https://jobs.example.com/roles/7")
     assert reason == ""
-    assert job["description_md"] == "Real description from the browser."
+    assert job["description_md"] == BROWSER_JD
     assert job["title"] == "Role at Acme"
     assert cloak.launch_kwargs == {"headless": True}
     assert cloak.page.goto_args == {"url": "https://jobs.example.com/roles/7",
@@ -445,12 +460,13 @@ THIN_PAGE = (b"<html><head><title>Careers at Acme</title></head>"
 
 
 def test_a_javascript_only_page_falls_back_to_the_browser(monkeypatch):
-    cloak = FakeCloak(FakePage(text="The whole job description, rendered by the browser."))
+    rendered = "The whole job description, rendered by the browser. " * 5
+    cloak = FakeCloak(FakePage(text=rendered.strip()))
     monkeypatch.setattr(fp, "optional_import", lambda name: cloak)
     monkeypatch.setattr(fp, "http_get", getter(200, THIN_PAGE))
     job, reason = fp.fetch("https://jobs.example.com/roles/7")
     assert reason == ""
-    assert job["description_md"] == "The whole job description, rendered by the browser."
+    assert job["description_md"] == rendered.strip()
     assert cloak.page.goto_args["url"] == "https://jobs.example.com/roles/7"
 
 
@@ -605,3 +621,39 @@ def test_jobstreet_location_and_posted_reach_the_frontmatter():
     assert '\nlocation: "Kuala Lumpur City Centre, Kuala Lumpur"\n' in md
     assert "\nposted: 2026-09-15\n" in md
     assert "\nsalary:\n" in md  # this advertiser published none
+
+
+# --- final review: a still-blocked browser page is never a posting ------------
+
+GLASSDOOR_WALL = (
+    "Help Us Protect Glassdoor\n"
+    "Humans only. We have received a high volume of requests from your network. "
+    "Please verify you are a human to continue using Glassdoor, the site where "
+    "people share salaries, interviews and reviews of their employers.\n"
+    "Your IP address: 203.0.113.42\nRay ID: 8c1f2e3d4a5b6c7d")
+
+
+def test_main_exits_3_and_saves_nothing_when_the_browser_is_walled(ws, monkeypatch, capsys):
+    page = FakePage(text=GLASSDOOR_WALL, title="Security | Glassdoor")
+    monkeypatch.setattr(fp, "optional_import", lambda name: FakeCloak(page))
+    monkeypatch.setattr(fp, "http_get", getter(403, b"<html><body>Forbidden</body></html>"))
+    url = "https://www.glassdoor.com/job-listing/backend-engineer-acme-JV_IC123.htm"
+    assert fp.main([url, "--save"]) == 3
+    captured = capsys.readouterr()
+    assert fp.BLOCKED_MSG in captured.err
+    assert "203.0.113.42" not in captured.out + captured.err
+    assert not list(ws.rglob("postings/*"))
+
+
+LATE_MENTION = BROWSER_JD + " " + "Own IAM policy reviews. " * 100 + "Triage access denied alerts."
+
+
+@pytest.mark.parametrize("text,title,blocked", [
+    ("Just a moment...", "Checking your browser", True),
+    ("Are you a robot? Tick the box to continue. " * 6, "", True),
+    ("Loading", "Careers at Acme", True),
+    (BROWSER_JD, "Role at Acme", False),
+    (LATE_MENTION, "Security Engineer at Acme", False),
+], ids=["cloudflare", "robot-check", "thin-shell", "posting", "late-access-denied"])
+def test_is_browser_blocked(text, title, blocked):
+    assert fp.is_browser_blocked({"text": text, "title": title}) is blocked

@@ -55,6 +55,10 @@ BLOCK_STATUSES = (403, 429, 503)
 # Lowercased markers of a challenge page served with a 200.
 BLOCK_MARKERS = ("cf-chl", "cf-challenge", "just a moment", "prove your humanity",
                  "challenge-platform", "access denied")
+# What the stealth browser can still land on (Glassdoor's "Humans only").
+BROWSER_BLOCK_MARKERS = BLOCK_MARKERS + (
+    "humans only", "prove you are human", "verify you are human", "are you a robot")
+BROWSER_MARKER_SPAN = 2000  # a challenge states itself at the top of the page
 
 FRONTMATTER_KEYS = ("source", "url", "company", "title", "location", "salary",
                     "posted", "fetched", "screening_questions")
@@ -82,12 +86,15 @@ def _host(url: str) -> str:
 
 
 def _country_of(url: str) -> str:
-    """Market from the host: my./sg. subdomain, or the board's own market."""
+    """Market from the host: my./sg. subdomain, a JobStreet country domain, or the board's own market."""
     host = _host(url)
     if "mycareersfuture" in host:
         return "SG"
     if "hiredly" in host:
         return "MY"
+    for domain, code in (("jobstreet.com.sg", "SG"), ("jobstreet.com.my", "MY")):
+        if host == domain or host.endswith("." + domain):
+            return code
     for prefix, code in (("my.", "MY"), ("sg.", "SG")):
         if host.startswith(prefix) or ("." + prefix) in host:
             return code
@@ -262,6 +269,19 @@ def browse(url: str, *, cloak=None) -> dict | None:
     return {"title": title, "text": text}
 
 
+def is_browser_blocked(got: dict) -> bool:
+    """True when the stealth browser still met a wall, or rendered next to nothing.
+
+    Such a page is never saved as a posting: it is a challenge (and may
+    carry the user's IP address), not a job description.
+    """
+    text = str(got.get("text") or "")
+    head = (str(got.get("title") or "") + "\n" + text[:BROWSER_MARKER_SPAN]).lower()
+    if any(marker in head for marker in BROWSER_BLOCK_MARKERS):
+        return True
+    return len(text.strip()) < MIN_GENERIC_TEXT
+
+
 def _source_module(name: str):
     try:
         return __import__(f"sources.{name}", fromlist=[name])
@@ -316,6 +336,8 @@ def fetch(target: str, *, get=None, detail_fetch=None) -> tuple[dict | None, str
     extracted = generic_extract(body) if status == 200 else {"title": "", "text": ""}
     if len(extracted["text"]) < MIN_GENERIC_TEXT and (blocked or status == 200):
         got = browse(url)
+        if got and is_browser_blocked(got):
+            return None, "blocked"
         if got and len(got["text"]) > len(extracted["text"]):
             extracted = {"title": got["title"] or extracted["title"], "text": got["text"]}
     if not extracted["text"]:
