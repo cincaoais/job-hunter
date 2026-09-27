@@ -130,16 +130,16 @@ Share it with the manager in week one and adjust. Save as
 
 ## 9. Close the pipeline
 
-Workspace mode:
+Workspace mode — the `withdrawn` line only after that withdrawal is sent:
 
 ```
 python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "X" --stage accepted --next "Serve notice; start at X" --due <start-date>
 python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "Y" --stage withdrawn --note "withdrew after accepting X"
 ```
 
-Chat mode: set Stage in the profile §9 pipeline table by hand. Draft a
-withdrawal for every other open process now; send each once the background
-check clears and the start date is agreed in writing, then set `withdrawn`.
+Draft a withdrawal for every other open process now; send each once the
+background check clears and the start date is agreed in writing, then set
+`withdrawn` (chat mode: set Stage in the profile §9 pipeline table by hand).
 Scan every drafted message with `ats_check.py --slop` (workspace mode; chat
 mode: read it against `assets/slop-phrases.txt`) and replace every hit.
 

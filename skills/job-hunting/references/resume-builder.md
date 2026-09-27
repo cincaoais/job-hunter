@@ -20,8 +20,9 @@ Every claim is the strongest **true** form of a profile fact —
    `resumes/<company>-<role>-vN.md` (a letter under `letters/`; Versioning
    below) — the file every gate and the build read (a cover letter is
    saved and gated before it is shown — see Cover letters).
-4. **Claims audit** (below) on the approved draft — a fresh critical read
-   before any file exists (a cover letter: before it is shown).
+4. **Claims audit** (below) on the approved draft (a cover letter: on the
+   saved draft, before it is shown) — a fresh critical read before any file
+   exists.
    - 4.5 **Anti-slop gate** (below).
    - 4.6 **6-second lint** (below) — resumes only.
 5. **Generate the file.** Default to **.docx** — safest for ATS portals and
