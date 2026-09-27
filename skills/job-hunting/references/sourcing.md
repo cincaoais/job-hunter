@@ -52,7 +52,9 @@ Never answer from memory: listings and salaries change daily.
   words. The teaser is short, so this list is noisy: skim it, do not skip it.
   The table shows at most 10 rows; `--json` carries the rest.
 - `### Knocked out` — `Company — Role: reason`, where the reason is
-  `dealbreaker: <phrase>`, `salary below floor` or `missing must-have`.
+  `dealbreaker: <phrase>` or `salary below floor` (checked only against pay
+  in the floor's currency — the profile's, else the market's); rows missing
+  a must-have go to "Needs a look" instead.
   Postings older than `--days` are dropped silently before this step and
   never listed. Knocked-out rows are not remembered as seen, so they
   reappear if the criteria change.
@@ -128,7 +130,10 @@ high-fit dozen beats a noisy fifty, with one or two stretch targets:
   the application goes out (`networking.md`).
 - A search that keeps returning the same knockouts or an empty main table is
   a targeting signal — hand it to `strategy.md`, not to more searching.
-- Keep politeness: only LinkedIn is throttled — `PAGE_DELAY = 2.5` seconds
-  between pages and `MAX_PAGES = 3`, so `--pages` above 3 has no effect
-  there; every request identifies itself with the `job-hunter-skill`
-  User-Agent from `_common.py`.
+- Keep politeness: every host is rate-limited to about one request per
+  second (`_common._rate_limit`; Indeed goes through `python-jobspy`'s own
+  client). LinkedIn additionally pauses 2.5 s between pages and stops at 3
+  pages, so `--pages` above 3 has no effect there. Board APIs and a
+  posting's first fetch attempt identify as `job-hunter-skill`; LinkedIn's
+  guest pages and the generic-page retry send a browser User-Agent, because
+  those pages return nothing to a non-browser client.

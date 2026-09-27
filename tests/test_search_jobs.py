@@ -486,3 +486,46 @@ def test_get_sources_imports_the_real_modules():
     mods = search_jobs.get_sources(["jobstreet", "mcf"])
     assert mods["jobstreet"].NAME == "jobstreet"
     assert mods["mcf"].NAME == "mcf"
+
+
+# --- final review: the salary floor's currency, an unsupported country --------
+
+RM_FLOOR = search_jobs.read_criteria("- **Salary expectation:** RM 15,000 / month")
+
+FLOOR_CURRENCY_CASES = [
+    ("sgd posting kept", {"currency": "SGD", "country": "SG", "salary_max": 8000}, None),
+    ("rm posting knocked", {"currency": "MYR", "salary_max": 9000}, "salary below floor"),
+    ("no currency, same market", {"currency": "", "country": "MY", "salary_max": 9000},
+     "salary below floor"),
+    ("no currency, other market", {"currency": "", "country": "SG", "salary_max": 9000}, None),
+]
+
+
+@pytest.mark.parametrize(
+    "fields,reason", [c[1:] for c in FLOOR_CURRENCY_CASES], ids=[c[0] for c in FLOOR_CURRENCY_CASES]
+)
+def test_salary_floor_applies_only_in_its_own_currency(fields, reason):
+    assert RM_FLOOR["salary_currency"] == "MYR"
+    assert search_jobs.knockout(job(**fields), dict(RM_FLOOR, must_have=[])) == reason
+
+
+@pytest.mark.parametrize("value,currency", [
+    ("RM9k/month", "MYR"), ("MYR 9,000", "MYR"), ("S$8,000 / month", "SGD"),
+    ("up to 8 months bonus, SGD 7,500 / month", "SGD"), ("9,000 per month, permanent", ""),
+])
+def test_read_criteria_salary_currency(value, currency):
+    assert search_jobs.read_criteria(f"- **Salary expectation:** {value}")["salary_currency"] == currency
+
+
+def test_run_keeps_a_foreign_floor_away_from_the_board_filter():
+    stub = StubSource("fake", [job(id="fake:1", currency="SGD", country="SG", salary_max=8000)])
+    criteria = dict(BASE, country="SG", salary_currency="MYR", salary_min=15000)
+    out = search_jobs.run(criteria, sources={"fake": stub}, seen={}, today="2026-09-22")
+    assert stub.calls[0]["salary_min"] is None
+    assert [j["id"] for j in out["new"]] == ["fake:1"]
+
+
+def test_run_names_an_unsupported_country():
+    sources = search_jobs.get_sources(["jobstreet"])
+    out = search_jobs.run(dict(BASE, country="ID"), sources=sources, seen={}, today="2026-09-22")
+    assert out["sources"]["jobstreet"]["warnings"] == ["jobstreet: unsupported country ID"]

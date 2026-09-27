@@ -43,6 +43,8 @@ BOARD_ALIASES = (
     ("hiredly", "hiredly"), ("indeed", "indeed"),
 )
 
+# The currency a floor with no stated currency is read in: the search market's.
+MARKET_CURRENCY = {"MY": "MYR", "SG": "SGD"}
 MISSING_MUST_HAVE = "missing must-have"
 # The soft bucket can run into the hundreds on a broad query; the table is a
 # digest, so only the top rows are printed (--json carries all of them).
@@ -55,6 +57,7 @@ _DATE_RE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 _NUM_RE = re.compile(r"(\d[\d,]*)\s*([kK])?")
 _ANNUAL_RE = re.compile(r"per\s*(?:year|annum)|annually|annual|yearly|/\s*yr|\bp\.?\s?a\.?\b")
 _MONTHLY_RE = re.compile(r"per\s*month|monthly|/\s*mo|\bp\.?\s?m\.?\b|a month")
+_CURRENCY_RE = re.compile(r"\b(?:(rm|myr|ringgit)|(s\$|sg\$|sgd))(?![a-z])")
 _WORD_RE = re.compile(r"[a-z0-9+#.]+")
 # Pure category nouns: a dealbreaker that ends in one names a field rather
 # than a phrase to find verbatim, so "gambling industry" must still catch
@@ -131,6 +134,14 @@ def _salary_floor(value: str) -> int | None:
     return None
 
 
+def _salary_currency(value: str) -> str:
+    """"RM 9,000" -> "MYR", "S$8k" -> "SGD"; "" when the line names no currency."""
+    m = _CURRENCY_RE.search((value or "").lower())
+    if not m:
+        return ""
+    return "MYR" if m.group(1) else "SGD"
+
+
 def _boards(value: str) -> list[str]:
     """Profile board names -> known source names, in priority order."""
     found = []
@@ -160,6 +171,7 @@ def read_criteria(profile_md: str) -> dict:
         "location": _location_of(f.get("location", "")),
         "country": _country_of(f.get("job market / country i'm hunting in", "")) or "MY",
         "salary_min": _salary_floor(f.get("salary expectation", "")),
+        "salary_currency": _salary_currency(f.get("salary expectation", "")),
         "must_have": _split(f.get("must-haves in a posting", "")),
         "dealbreakers": _split(f.get("dealbreakers (must avoid)", "")),
         "boards": _boards(f.get("job boards to search", "")),
@@ -224,13 +236,35 @@ def _must_have_tokens(phrases) -> set[str]:
     return tokens
 
 
+def _floor_currency(criteria: dict) -> str:
+    """The floor's currency: stated in the profile, else the search market's ("" if neither)."""
+    stated = str(criteria.get("salary_currency") or "").upper()
+    return stated or MARKET_CURRENCY.get(str(criteria.get("country") or "").upper(), "")
+
+
+def _is_floor_comparable(job: dict, criteria: dict) -> bool:
+    """True when the posting's pay is in the floor's currency.
+
+    A posting without a currency counts when its market uses the floor's
+    currency. A floor with no currency at all is compared with everything.
+    """
+    floor_currency = _floor_currency(criteria)
+    if not floor_currency:
+        return True
+    currency = str(job.get("currency") or "").strip().upper()
+    if currency:
+        return currency == floor_currency
+    return MARKET_CURRENCY.get(str(job.get("country") or "").upper()) == floor_currency
+
+
 def knockout(job: dict, criteria: dict) -> str | None:
     """Why this posting is out, or None to keep it.
 
     Dealbreakers are matched against title + company + teaser, must-haves
     against title + teaser only (a must-have is about the work, not the
-    employer). "missing must-have" is soft: callers put those rows in a
-    "needs a look" list instead of dropping them.
+    employer). The salary floor only applies to pay in its own currency.
+    "missing must-have" is soft: callers put those rows in a "needs a look"
+    list instead of dropping them.
     """
     haystack = " ".join(str(job.get(k) or "") for k in ("title", "company", "teaser")).lower()
     for phrase in criteria.get("dealbreakers") or []:
@@ -239,7 +273,8 @@ def knockout(job: dict, criteria: dict) -> str | None:
 
     floor = criteria.get("salary_min")
     top = job.get("salary_max")
-    if floor and isinstance(top, (int, float)) and top < floor:
+    if (floor and isinstance(top, (int, float)) and top < floor
+            and _is_floor_comparable(job, criteria)):
         return "salary below floor"
 
     tokens = _must_have_tokens(criteria.get("must_have"))
@@ -338,6 +373,9 @@ def _gather(criteria: dict, sources: dict) -> tuple[list[dict], dict]:
     """
     country = str(criteria.get("country") or "").upper()
     keywords = [k for k in (criteria.get("keywords") or []) if str(k).strip()] or [""]
+    # A board filters on the bare number, so a floor in another currency stays local.
+    salary_min = (criteria.get("salary_min")
+                  if _floor_currency(criteria) in ("", MARKET_CURRENCY.get(country, "")) else None)
     jobs: list[dict] = []
     stats: dict[str, dict] = {}
     for name in sorted(sources, key=lambda n: (_priority({"source": n}), n)):
@@ -351,9 +389,14 @@ def _gather(criteria: dict, sources: dict) -> tuple[list[dict], dict]:
             try:
                 found = module.search(
                     keyword, criteria.get("location") or "", country=country,
-                    days=criteria.get("days"), salary_min=criteria.get("salary_min"),
+                    days=criteria.get("days"), salary_min=salary_min,
                     pages=int(criteria.get("pages") or 1),
                 )
+            except ValueError as exc:
+                problem = (f"unsupported country {country or '(none)'}"
+                           if "unsupported country" in str(exc) else "search failed (ValueError)")
+                stat["warnings"].append(f"{name}: {problem}")
+                break
             except Exception as exc:  # a source must never take the run down
                 stat["warnings"].append(f"{name}: search failed ({exc.__class__.__name__})")
                 break
@@ -548,7 +591,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--location", help="city or state to search in")
     p.add_argument("--country", choices=["MY", "SG", "my", "sg"], help="job market")
     p.add_argument("--days", type=int, help="only postings this fresh")
-    p.add_argument("--salary-min", type=int, dest="salary_min", help="monthly salary floor")
+    p.add_argument("--salary-min", type=int, dest="salary_min",
+                   help="monthly salary floor, in the market's currency")
     p.add_argument("--sources", help=f"comma-separated: {','.join(SOURCE_PRIORITY)}")
     p.add_argument("--pages", type=int, default=1, help="pages per board (default 1)")
     p.add_argument("--all", action="store_true", dest="all_",
@@ -571,6 +615,7 @@ def _criteria_from(args, profile_md: str) -> dict:
         criteria["country"] = args.country.upper()
     if args.salary_min is not None:
         criteria["salary_min"] = args.salary_min
+        criteria["salary_currency"] = ""  # a bare number: the market's currency
     criteria["days"] = args.days
     criteria["pages"] = max(1, args.pages or 1)
     return criteria
