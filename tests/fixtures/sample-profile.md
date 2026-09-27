@@ -1,7 +1,7 @@
 # Candidate Profile — Arif Rahman
 
-> TEST FIXTURE — fictional candidate for behavioral scenario testing. Follows
-> the v5.0 template structure.
+> TEST FIXTURE — fictional candidate for behavioral scenario testing.
+> Follows the v6 template structure.
 
 _Last updated: 2026-07-10_
 
@@ -24,6 +24,7 @@ _Last updated: 2026-07-10_
 - **Target seniority:** mid moving to senior
 - **Target industries:** fintech, logistics, B2B SaaS
 - **Dream companies:** Grab, GXBank, StashAway
+- **Target list:** TBD
 - **Job boards to search:** JobStreet, LinkedIn
 - **Must-haves in a posting:** backend role primarily in Go or Python; hybrid or remote
 - **Nice-to-haves:** Kubernetes exposure, fintech domain, learning budget
@@ -68,23 +69,49 @@ _Last updated: 2026-07-10_
 - **One-line identity:** a backend engineer who makes payment and logistics systems reliable and fast
 - **Unique selling point:** quantified reliability wins in fintech production systems
 - **Known weak spots to address:** only basic Kubernetes; no gRPC in production; 4 yrs vs "senior" title
+- **Weekly application cap:** 10 targeted applications
+- **Weekly outreach target:** 6 touches
 
-## 9. Pipeline (applications tracker)
+## 9. Tracking
+> Workspace mode: see `pipeline.md`, `contacts.md`, `answers.md`. Chat mode
+> (claude.ai): keep the sections below in this file.
+
+### Pipeline
 - **Applications sent / responses so far:** 6 sent / 1 response
 - **Referral vs cold applications:** 1 referral / 5 cold
 
-| Company | Role | Applied on | Channel (apply/referral) | Stage | Next action | Notes |
-|---------|------|-----------|--------------------------|-------|-------------|-------|
-| StashAway | Backend Engineer | 2026-06-28 | cold | no reply | follow up 07-14 | |
-| Grab | Software Engineer, Payments | 2026-07-02 | referral (ex-colleague) | recruiter screen 07-18 | prep STAR stories | |
+_Last weekly review: —_
 
-## 10. Soft skills development
+| Company | Role | Source | Channel | Applied | Stage | Next action | Due | Last touch | Resume | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| StashAway | Backend Engineer | | cold | 2026-06-28 | applied | Follow up | 2026-07-14 | 2026-06-28 | | No reply |
+| Grab | Software Engineer, Payments | | referral | 2026-07-02 | screen | Prep STAR stories | 2026-07-18 | 2026-07-02 | | Referral from an ex-colleague; recruiter screen 2026-07-18 |
+
+### Offers
+> "True annual comp" counts contractual 13th month/AWS only; a discretionary
+> bonus goes in as a labeled estimate.
+
+| Company | Role | Base / month | Bonus (contractual?) | True annual comp | Probation / notice | Deadline | Status |
+|---|---|---|---|---|---|---|---|
+
+### Contacts
+> Networking CRM. Relationship: alumni / ex-colleague / recruiter /
+> hiring-manager / peer / 2nd-degree. Touches: c = comment, k = connect,
+> m = message, f = follow-up.
+
+| Name | Company | Role | Relationship | Target role | Last touch | Next touch | Status | Notes |
+|---|---|---|---|---|---|---|---|---|
+
+### Answers
+> Chat mode: the screening-answer bank — same fields as answers.md in workspace mode (see answer-bank.md).
+
+### Soft skills development
+> Goals from the Soft Skills Coach. Keep 2–3 active at most.
 
 | Skill | Why (which postings ask) | Practice actions | Status | Evidence (STAR story / bullet) |
-|-------|--------------------------|------------------|--------|--------------------------------|
-|       |                          |                  |        |                                |
+|---|---|---|---|---|
 
-## 11. Notes the agent has learned
+## 10. Notes the agent has learned
 - Tone preference: professional but warm, no corporate buzzwords
 - Prefers .docx deliverables
 - Wants cover letters concise

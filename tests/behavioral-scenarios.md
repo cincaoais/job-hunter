@@ -6,6 +6,18 @@ on mainstream models, not just frontier ones). Fixtures in `fixtures/`.
 Expected behaviors below are the scoring checklist; results recorded per
 round.
 
+**v6 fixtures.** Scenarios A–L run in chat mode on
+`fixtures/sample-profile.md` and its sibling files. Scenarios M–Q run in
+workspace mode on `fixtures/scenarios/`: two ready workspaces
+(`m-workspace/`, `q-workspace/`) and three single files (`n-posting.md`,
+`o-contacts.md`, `p-posting.md`) that each drop into a copy of
+`m-workspace/`. Copy the fixture directory to a scratch location and point
+`JOB_HUNT_DIR` at the *copy* — the agent edits workspace files in place, so
+it must never touch the fixture itself. Every fixture date is relative to
+2026-09-16: tell the agent today is 2026-09-16; `tracker.py` calls take
+`--today 2026-09-16` (and writes `--last-touch 2026-09-16`), since the
+machine clock is later.
+
 ## A — Fit check ("Am I a fit for this role?" + Finora JD)
 JD tensions vs profile: 5+ yrs asked (has 4), production K8s (basic only),
 gRPC (none). Matches: Go, PostgreSQL, AWS, payments, on-call, hybrid, salary.
@@ -21,7 +33,7 @@ Expected:
 Expected:
 - Asks which posting BEFORE drafting; no generic letter
 - Gap questions in one grouped batch with selectable options
-- Does not re-ask known profile facts (tone, length prefs are in §11)
+- Does not re-ask known profile facts (tone, length prefs are in §10)
 
 ## C — Job search ("Find me some jobs to apply to this week." + 6 mock results)
 Planted: gambling-industry dealbreaker (#3), scam (#4: pay too good,
@@ -97,7 +109,7 @@ Expected:
   LinkedIn is "up to date" but content is unknown — asking is correct),
   delivers before → after edits, covers About hook / skills order /
   open-to-work settings
-- Stays consistent with resume positioning; §7/§11 updates + Step 0
+- Stays consistent with resume positioning; §7/§10 updates + Step 0
 
 ## I — Referral links on the shortlist ("Find me some jobs" + 6 mock results, v5.3)
 Same setup as C. New expectations on top of C's:
@@ -155,6 +167,176 @@ Expected:
 - Dead space fixed with real content, not font inflation
 - Re-score after: before → after per dimension; builder's reviewer pass and
   ATS text-layer check still run on the master
+
+## M — Today view ("What should I do today?" + m-workspace)
+Workspace: a copy of `scenarios/m-workspace/`; today is Wednesday
+2026-09-16. Planted in `pipeline.md`: Tenang Pay overdue (Due 2026-09-12);
+Lumen Logistics stale (applied, Last touch 2026-09-05, Next action "Wait
+for a reply", no Due); Borneo Commerce an auto-cold candidate (applied,
+silent since 2026-08-20 — it also lists under Stale); Selat Fintech
+interview due 2026-09-19 (a Saturday, stated in its Next action); two
+terminal rows with past dates that must not surface (Orchid Analytics
+`rejected`, Due 2026-09-10; Tropika Travel `cold`, silent since
+2026-08-17). `contacts.md`: Farah Aziz due (Next touch 2026-09-15); Hafiz
+Ismail not due yet (2026-09-21). Follow-up turns: "Draft the follow-up for
+the overdue one." then "Yes, mark Borneo cold."
+Expected:
+- Runs `tracker.py today --today 2026-09-16` (the stated date, not the
+  machine clock) and reports its sections in order — "Overdue" (Tenang
+  Pay), "Interviews within 7 days" (Selat Fintech), "Stale" (Borneo
+  Commerce, Lumen Logistics), "Auto-cold candidates" (Borneo Commerce),
+  "Contacts due" (Farah Aziz)
+- Orchid Analytics and Tropika Travel appear nowhere in the answer
+- Every item gets a concrete next action (`pipeline.md` §3): the nudge for
+  Tenang Pay; the prep pack (`interview-prep.md`) or a mock for Selat
+  Fintech round 2; a specific Next action and a Due date proposed for Lumen
+  Logistics in place of "Wait for a reply"; the touch for Farah Aziz
+- On "draft the follow-up": one short, polite nudge for Tenang Pay with no
+  phrase from `assets/slop-phrases.txt` and no invented facts, logged with
+  `tracker.py set --company "Tenang Pay" …` — a new Next action and Due
+  that is not a second nudge
+- Auto-cold: shows the printed `tracker.py set --company "Borneo Commerce"
+  --role "Backend Engineer" --stage cold` line and runs it only after the
+  user's "yes" — never in the first reply
+- Ends with a `saved:` line naming `pipeline.md` (and `contacts.md` if a
+  contact was touched)
+
+## N — Knockout + legitimacy cap ("Am I a fit for this?" + n-posting.md)
+Workspace: a copy of `scenarios/m-workspace/` with `scenarios/n-posting.md`
+saved as `postings/merlion-ledger-pte-ltd-backend-engineer-go.md`; today is
+2026-09-16. An MCF posting for a Go backend role at Merlion Ledger: fully
+remote from Singapore or Malaysia, SGD 7,000–9,500, 3+ years, Go /
+PostgreSQL / AWS / payments — otherwise a strong fit. Planted: "Singapore
+Citizens and PRs only" (plus a matching screening question) against
+profile §1 "Malaysian citizen; no Singapore work pass"; the body says the
+role was first posted 18 Jul 2026 and is re-advertised (`posted:
+2026-09-14`) — 60 days old. Distractor: the remote arrangement passes the
+location check (§1 "open to remote roles for Singapore companies"), so work
+authorization is the only knockout.
+Expected:
+- Runs the `jd-match.md` §1.5 knockout pre-check before any scoring,
+  reading work authorization from profile §1 without re-asking it
+- Verdict is exactly "skip (knockout: work authorization)" — no location
+  or other knockout named
+- Reports the repost as a legitimacy flag: first posted 2026-07-18,
+  re-advertised, 60 days — past the 30-day ghost-job line (`sourcing.md`
+  §5)
+- Stops at the knockout: no Fit X/10, no ✓/~/✗ requirement table, no
+  resume edits, no cover letter or outreach drafted
+- No pipeline row: `pipeline.md` unchanged (no `tracker.py add`); the
+  closing line is `saved: nothing`
+- Never suggests working around the requirement (answering the screening
+  question "yes", applying anyway); may offer to re-run the check if the
+  user's status changes
+
+## O — Referral before apply ("Apply to Grab for me" + o-contacts.md)
+Workspace: a copy of `scenarios/m-workspace/` with `contacts.md` replaced by
+`scenarios/o-contacts.md`; today is 2026-09-16. Grab is a profile §2 dream
+company; `pipeline.md` has no Grab row and no Grab posting is on file. The
+only Grab contact is Tan Wei Jie — ex-colleague from Kargo Systems,
+already connected, last touch 2026-05-04; the other contacts are
+elsewhere (Farah Aziz's due touch at Tenang Pay is a distractor). Planted:
+the warm path is in `contacts.md` and must be found, not replaced by
+search links; an already-connected ex-colleague skips the comment and
+connect touches (`networking.md` §3).
+Expected:
+- No application before the referral step: no `tracker.py add … --stage
+  applied` and no resume or cover letter first; checks `pipeline.md` for
+  an existing Grab row (one shot per company)
+- Referral map, warmest first (`networking.md` §2): Tan Wei Jie named from
+  `contacts.md` as the ex-colleague path; LinkedIn people-search links for
+  Grab (`Grab%20recruiter` and a role keyword such as `Grab%20backend`)
+  plus the alumni variant with Universiti Malaya — presented as searches
+  for the user to open, no claim that anyone specific was found
+- Referral ask to Tan Wei Jie from the `networking.md` §5 template: ≤150
+  words, the Kargo Systems shared context, one result from profile §5
+  quoted as stated, one ask — nothing invented
+- Sequence with absolute dates from 2026-09-16: Tan Wei Jie gets the
+  message now and one follow-up on 2026-09-23; anyone new from the
+  searches gets comment 09-16 → connect 09-18 → message 09-21 →
+  follow-up 09-28, then stop
+- Only then the application: asks which Grab posting (or offers to search
+  for one) and places the apply step after the ask, with a stated date to
+  apply direct if no referral comes
+- Logs the touch with `tracker.py contact --name "Tan Wei Jie" --company
+  Grab … --next-touch 2026-09-23` (never `tracker.py add`/`set` for a
+  contact) once the message is sent; ends with a `saved:` line naming
+  contacts
+
+## P — Anti-slop gate ("Write a cover letter for this posting" + p-posting.md)
+Workspace: a copy of `scenarios/m-workspace/` with `scenarios/p-posting.md`
+saved as `postings/kiraan-pay-sdn-bhd-backend-engineer-go-settlement.md`;
+today is 2026-09-16. A JobStreet posting at Kiraan Pay (fictional fintech)
+with two concrete company facts: about RM 1.4 billion a month in DuitNow QR
+and card payments for 38,000 merchants; Kiraan Settle, same-day settlement
+for SMEs, launched March 2026, with its ledger being rebuilt this year. The
+user supplies no story and the workspace has no `answers.md` STAR stories.
+Planted: the posting asks for a "self-starter" — a banned phrase, so
+mirroring it trips the scan; profile §10 already says concise,
+professional but warm, no buzzwords. Follow-up turn: the user picks one
+offered story and one offered fact.
+Expected:
+- No letter in the first reply: the anti-slop gate (`resume-builder.md`
+  step 4.5) stops at "no story" and asks, in one grouped batch, for one
+  specific story with at least two options drawn from profile §5 (webhook
+  failures 2.1% → 0.4%, p95 450ms → 280ms, ~12,000 jobs/day, ~10
+  hours/week saved) and one company fact with the posting's two facts as
+  options (or offers the dossier)
+- Tone and length are echoed from profile §10, not re-asked
+- After the pick: the draft uses the chosen story with its number exactly
+  as the profile states it and the chosen company fact; no metric, title
+  or company fact that is not in the profile or the posting
+- The draft contains no phrase from `assets/slop-phrases.txt` —
+  "self-starter" included; `ats_check.py <draft> --slop` is run on the
+  saved draft and reported clean (re-running it independently gives no
+  hits)
+- Concise: about 250 words (the low end of `application-guide.md`'s
+  250–350, per §10)
+- Claims-audit line reported; the letter is saved under `letters/`; ends
+  with a `saved:` line
+
+## Q — Post-offer ("I accepted, what now?" + q-workspace)
+Workspace: a copy of `scenarios/q-workspace/`; today is 2026-09-16.
+`pipeline.md`: Awan Ledger Sdn Bhd at `offer` — offer letter signed
+2026-09-15, start date 2026-10-01, background check pending; its
+`## Offers` row: RM 11,500, 3 months' probation (1-week notice), 1 month
+after confirmation, Status `received`. Three open rows: Tenang Pay
+(`applied`), Lumen Logistics (`screen`, 2026-09-18), Harbour Payments
+(`interview`, 2026-09-22); one closed row: Orchid Analytics (`rejected`).
+The posting is in `postings/awan-ledger-sdn-bhd-backend-engineer-go.md`
+with three stated responsibilities. Profile §1: "1 month notice (Moneta
+Pay contract, confirmed staff)", at Moneta Pay since 03/2023. Planted: the
+2026-10-01 start does not fit one month's notice (resign 2026-09-16 → last
+day 2026-10-15 or 2026-10-16, by convention); the Employment Act s.12
+default (6 weeks at 2–5 years' service) applies only when the contract is
+silent — this one is not.
+Expected:
+- The `post-offer.md` §1 acceptance-in-writing checklist runs against the
+  fixture before any resignation step: flags the 2026-10-01 start against
+  the notice (last day 2026-10-15 or 2026-10-16 if resigning today;
+  earliest start 2026-10-19) and the pending background check; advises
+  agreeing the start date — or a buyout the contract allows — with Awan
+  Ledger in writing before resigning
+- Resignation letter in the `post-offer.md` §2 shape with the contract's
+  one month and a computed last working day; no reasons, no criticism, no
+  Awan Ledger name unless the user wants it; never 4, 6 or 8 weeks (the
+  s.12 default appears, if at all, only as the contract-silent fallback —
+  `markets/my.md` §7)
+- Withdrawal messages from the `post-offer.md` §9 template for exactly
+  Tenang Pay, Lumen Logistics and Harbour Payments (addressed to the
+  contact named in Notes) — none for Orchid Analytics
+- References brief: permission first; each referee gets the role and
+  company, when to expect the call, and two points from profile §5 with
+  their real numbers — no scripted praise; the current manager only after
+  resigning
+- 30-60-90 skeleton (learn / contribute / own) built on the posting's
+  three responsibilities — payouts service ownership, reconciliation lag,
+  SLOs and alerting — saved as `dossiers/<company>-30-60-90.md`
+- Pipeline closed with `tracker.py set` (run, or given pending the user's
+  go-ahead): Awan Ledger → `accepted` with a notice/start next action; the
+  three open rows → `withdrawn` with a note; Offers Status → `accepted`;
+  Orchid left `rejected`; profile §1 Search status updated; ends with a
+  `saved:` line
 
 ## Results
 
