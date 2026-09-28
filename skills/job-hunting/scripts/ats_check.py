@@ -45,7 +45,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from _common import docx_text, optional_import  # noqa: E402
+from _common import docx_text, optional_import, use_utf8_output  # noqa: E402
 
 SLOP_FILE = Path(__file__).resolve().parent.parent / "assets" / "slop-phrases.txt"
 FALLBACK_LINE = ("Text layer not checked: no PDF text extractor here (pip install pypdf, or install "
@@ -680,8 +680,7 @@ def _fail(msg: str) -> int:
 
 
 def main(argv=None) -> int:
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    use_utf8_output()
     ap = argparse.ArgumentParser(prog="ats_check.py", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("file", type=Path, help="the built .docx/.pdf, or a .md/.txt draft")

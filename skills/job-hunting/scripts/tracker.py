@@ -30,7 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from _common import read_table, today as today_iso, workspace_dir, write_table  # noqa: E402
+from _common import read_table, today as today_iso, use_utf8_output, workspace_dir, write_table  # noqa: E402
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
@@ -675,6 +675,7 @@ READERS = {"today": cmd_today, "funnel": cmd_funnel, "contacts": cmd_contacts,
 
 
 def main(argv=None) -> int:
+    use_utf8_output()
     parser = build_parser()
     args = parser.parse_args(argv)
     if not args.cmd:

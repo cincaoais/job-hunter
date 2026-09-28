@@ -459,11 +459,12 @@ def test_no_workspace_beats_bad_input(tmp_path, monkeypatch, capsys):
 def test_cli_runs_as_a_subprocess(filled):
     import os
     import subprocess
+    # a piped stdout on Windows is cp1252, which has no "→"
     r = subprocess.run([sys.executable, str(SCRIPTS / "tracker.py"), "today", "--today", TODAY],
-                       capture_output=True, text=True,
-                       env={**os.environ, "JOB_HUNT_DIR": str(filled)})
+                       capture_output=True, text=True, encoding="utf-8",
+                       env={**os.environ, "JOB_HUNT_DIR": str(filled), "PYTHONIOENCODING": "cp1252"})
     assert r.returncode == 0, r.stderr
-    assert "Apex Digital" in r.stdout
+    assert "Apex Digital" in r.stdout and "→" in r.stdout
 
 
 def test_funnel_has_no_unset_bucket_for_rows_never_sent():

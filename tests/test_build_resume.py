@@ -348,7 +348,7 @@ def test_cli_missing_name_and_missing_file_exit_2(tmp_path):
     bad.write_text("## Experience\n- no name line\n", encoding="utf-8")
     for target in (bad, tmp_path / "missing.md"):
         proc = subprocess.run([sys.executable, str(SCRIPTS / "build_resume.py"), str(target), "--docx"],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, encoding="utf-8")
         assert proc.returncode == 2
         assert "Traceback" not in proc.stderr and proc.stderr.strip()
     assert not (tmp_path / "bad.docx").exists()

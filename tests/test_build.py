@@ -1,4 +1,4 @@
-import zipfile, sys, pathlib
+import pathlib, shutil, subprocess, sys, zipfile
 import pytest
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import build
@@ -36,8 +36,14 @@ def _make_skill_with_n_lines(root, name, n):
     header = f"---\nname: {name}\ndescription: fine\n---\n"
     header_lines = len(header.splitlines())
     body = "\n".join(f"line {i}" for i in range(n - header_lines)) + "\n"
-    (d / "SKILL.md").write_text(header + body, encoding="utf-8")
+    (d / "SKILL.md").write_text(header + body, encoding="utf-8", newline="\n")
     return d
+
+@pytest.mark.skipif(shutil.which("git") is None, reason="git not installed")
+def test_text_files_check_out_with_lf_everywhere():
+    out = subprocess.run(["git", "check-attr", "eol", "--", "skills/job-hunting/assets/slop-phrases.txt",
+                          "pytest.ini", ".gitignore"], cwd=ROOT, capture_output=True, text=True).stdout
+    assert out.count("eol: lf") == 3, out
 
 def test_check_skill_line_count_boundary(tmp_path):
     ok_dir = _make_skill_with_n_lines(tmp_path, "ok", 500)

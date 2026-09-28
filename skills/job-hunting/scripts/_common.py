@@ -16,6 +16,7 @@ import json
 import os
 import re
 import ssl
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -25,6 +26,13 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 UA = "job-hunter-skill/6.0 (+https://github.com/cincaoais/job-hunter)"
+
+
+def use_utf8_output() -> None:
+    """Print UTF-8 whatever the console: a piped stdout on Windows is cp1252, which lacks "→"."""
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
 
 
 def workspace_dir() -> Path:

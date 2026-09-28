@@ -40,7 +40,7 @@ from urllib.parse import urlparse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from _common import optional_import, slugify  # noqa: E402
+from _common import optional_import, slugify, use_utf8_output  # noqa: E402
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "assets" / "templates"
 TEMPLATES = ("chicago", "executive", "corporate-sidebar", "accent-band", "creative-sidebar")
@@ -875,6 +875,7 @@ def _fail(msg: str) -> int:
 
 
 def main(argv=None) -> int:
+    use_utf8_output()
     ap = argparse.ArgumentParser(prog="build_resume.py", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("input", type=Path, help="resume markdown, e.g. resumes/<company>-<role>-v1.md")

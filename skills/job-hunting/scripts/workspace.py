@@ -6,7 +6,7 @@
 import shutil, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import workspace_dir
+from _common import use_utf8_output, workspace_dir
 ASSETS = Path(__file__).resolve().parents[1] / "assets"
 FILES = {"profile.md": "profile-template.md", "pipeline.md": "pipeline-template.md",
          "contacts.md": "contacts-template.md", "answers.md": "answers-template.md"}
@@ -26,6 +26,7 @@ def init(ws: Path) -> list[str]:
     return created
 
 def main(argv):
+    use_utf8_output()
     cmd = argv[0] if argv else "where"
     ws = workspace_dir()
     if cmd == "init":

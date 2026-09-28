@@ -31,7 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _common import (  # noqa: E402
     default_fetch, html_to_text, http_get, optional_import, slugify,
-    today, workspace_dir,
+    today, use_utf8_output, workspace_dir,
 )
 
 # The identified UA first (honest), then one Chrome-shaped retry: a fair
@@ -468,8 +468,7 @@ def _apply_overrides(job: dict, args) -> dict:
 
 
 def main(argv=None) -> int:
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    use_utf8_output()
     parser = build_parser()
     args = parser.parse_args(argv)
 

@@ -26,7 +26,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _common import (  # noqa: E402
-    loads_or_empty, slugify, today as today_iso, workspace_dir, write_table,
+    loads_or_empty, slugify, today as today_iso, use_utf8_output, workspace_dir, write_table,
 )
 
 # Board priority: which board wins when the same posting shows up twice, and
@@ -622,9 +622,7 @@ def _criteria_from(args, profile_md: str) -> dict:
 
 
 def main(argv=None) -> int:
-    # The table uses "·" and "—": a redirected Windows console is cp1252.
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    use_utf8_output()
     parser = build_parser()
     args = parser.parse_args(argv)
 
