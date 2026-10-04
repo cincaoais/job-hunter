@@ -24,7 +24,7 @@ Each market file opens with its compiled date and the re-verify note:
 | 7 | Probation & notice | Typical probation; notice in and after probation vs the statutory default; how confirmation is documented |
 | 8 | 13th month / bonus wording | Mandatory or not; the wording that makes it contractual vs discretionary; contribution caps on bonuses |
 | 9 | Work authorization signals | Work-status wording for CV and forms; pass rules and per-role viability checks for non-citizens |
-| 10 | Interview curveballs & rights | Personal questions that still get asked, what the law says about them, the right to decline |
+| 10 | Interview process, curveballs & rights | Process: typical rounds and order, timeline, assessments, salary-expectation handling, notice talk, language, AI-tool policy, source; then personal questions that still get asked, what the law says about them, the right to decline |
 | 11 | Recourse | Where wage, contract, dismissal and discrimination complaints go |
 
 ## Any other country — fill it from a live search

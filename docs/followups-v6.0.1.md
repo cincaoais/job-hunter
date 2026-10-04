@@ -28,7 +28,7 @@ Minor items the v6.0.0 final review deferred ("fix later"); none blocks the rele
 
 ## References
 
-- [ ] `interview-prep.md` still carries the Malaysia law sentence that belongs in `markets/my.md` — `skills/job-hunting/references/interview-prep.md:79`
+- [x] `interview-prep.md` still carries the Malaysia law sentence that belongs in `markets/my.md` — `skills/job-hunting/references/interview-prep.md:79`
 - [ ] `markets/my.md` legal accuracy: the "not to complain" wording vs EA s.69F (`:164`, `:176`); §8 bonus-contribution item (`:144`); the contributions table header vs the EPF Act (`:104`); "EPF Act 1991" attribution unhedged (`:104`)
 
 ## Round 4 leftovers (behaviour scenarios)

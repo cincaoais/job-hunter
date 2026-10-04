@@ -144,3 +144,12 @@ cap:" and "Weekly outreach target:":
 Re-run §3 and §4, then the target list. Change one thing and let a week of
 numbers test it. Workspace mode: edit `profile.md` in place and end with
 the `saved:` line. Chat mode: regenerate the profile block.
+
+### Lessons from a career vault (optional)
+
+If the workspace's parent folder holds `wiki/_index.md`, it is a career
+vault: before revising targets, read `wiki/hot.md` and the index rows whose
+Topics include `targeting`, `sourcing`, `materials` or `networking`. Cite
+articles by name. Propose changes to profile §2 and §8 and write them only
+on the user's confirmation. A lesson is never a fact about the user
+(facts-policy §1). No vault: skip silently. Never write to the vault.

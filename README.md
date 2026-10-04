@@ -22,7 +22,7 @@ roles:
 | 3 | Qualifier | Knockout check, legitimacy check, fit score, apply / stretch / skip | "Am I a fit for this?" + posting | `/job-hunter:match` |
 | 4 | Writer | Resume tailor or revamp, HR-eye score, cover letter, screening answers | "Tailor my resume for this posting" | `/job-hunter:resume`, `/job-hunter:cover` |
 | 5 | Networker | Referral map before applying, outreach, contacts CRM | "Who can refer me at Grab?" | `/job-hunter:network` |
-| 6 | Coach | Interview prep pack, mock interview, company dossier, soft skills | "Mock interview me for Friday" | `/job-hunter:interview`, `/job-hunter:company` |
+| 6 | Coach | Interview prep pack, mock interview, debrief, company dossier, soft skills | "Mock interview me for Friday" | `/job-hunter:interview`, `/job-hunter:company` |
 | 7 | Negotiator | True annual comp, offer comparison, negotiation | "I got an offer — should I take it?" | `/job-hunter:offer` |
 | 8 | Operations | Today view, weekly funnel review, stale and silent applications | "What should I do today?" | `/job-hunter:today`, `/job-hunter:review` |
 | 9 | Onboarder | Resignation, notice, references, background check, 30-60-90 plan | "I accepted — what now?" | (plain English) |
@@ -139,6 +139,7 @@ set, else `./job-hunt/` if that folder exists in the current directory, else
 | `resumes/`, `letters/` | Versioned resume and cover-letter drafts and the built files |
 | `dossiers/` | Company briefs |
 | `reviews/` | Weekly review files (`tracker.py digest`) |
+| `interviews/` | Prep packs, mock scorecards and debriefs per pipeline row, written by `interview.py` (every file carries `contract: 1`), plus a generated `question-bank.md`; a career vault next to the workspace can read them |
 
 Each workspace session ends with one `saved: …` line naming the files and
 sections it changed.
@@ -222,9 +223,9 @@ recurring digest, run `/loop 1d /job-hunter:search` in Claude Code.
 | `.claude-plugin/plugin.json` | Plugin manifest: name `job-hunter`, version |
 | `.claude-plugin/marketplace.json` | The marketplace that lists the plugin, so `claude plugin marketplace add` works on this repo |
 | `skills/job-hunting/SKILL.md` | The main skill: storage modes, memory rules, the nine-role router, principles |
-| `skills/job-hunting/references/` | One file per role or flow; `markets/` holds `my.md`, `sg.md` and `_template.md` for other countries |
-| `skills/job-hunting/scripts/` | The six scripts, `_common.py`, and `sources/` (one module per board) |
-| `skills/job-hunting/assets/` | Workspace and profile templates, five resume HTML templates, `slop-phrases.txt` |
+| `skills/job-hunting/references/` | One file per role or flow (including `interview-debrief.md`); `markets/` holds `my.md`, `sg.md` and `_template.md` for other countries |
+| `skills/job-hunting/scripts/` | The scripts (including `interview.py`: `new`, `outcome`, `bank`), `_common.py`, and `sources/` (one module per board) |
+| `skills/job-hunting/assets/` | Workspace and profile templates, `interview-*-template.md`, five resume HTML templates, `slop-phrases.txt` |
 | `skills/<verb>/SKILL.md` | The eleven verb skills: `company`, `cover`, `help`, `interview`, `match`, `network`, `offer`, `resume`, `review`, `search`, `today` |
 | `build.py` | `--check`, zip build to `dist/job-hunting.skill` (gitignored), `--link [--force]` |
 | `docs/PROJECT-DESCRIPTION.md` | Instructions to paste into a claude.ai Project |
@@ -253,11 +254,13 @@ same version in `.claude-plugin/plugin.json`, the entry in
 Windows, builds the zip, and attaches it to a GitHub release for the tag.
 
 Behaviour tests: [`tests/behavioral-scenarios.md`](tests/behavioral-scenarios.md)
-holds scenarios A–Q, run as fresh-agent sessions and graded against a
-checklist, with results for rounds 1–4. In Round 4 (the v6 workspace-mode
+holds scenarios A–U, run as fresh-agent sessions and graded against a
+checklist, with results for rounds 1–5. In Round 4 (the v6 workspace-mode
 scenarios, 2026-09-27) M, N, O and P passed with minor gaps and Q failed one
 checklist item: the references brief was described, not drafted, and the
-`withdrawn` tracker commands were promised, not shown.
+`withdrawn` tracker commands were promised, not shown. In Round 5 (the
+interview scenarios R–U, 2026-10-02) all four passed, R and T with minor gaps,
+after one hardening pass.
 
 ## What it deliberately does not do
 

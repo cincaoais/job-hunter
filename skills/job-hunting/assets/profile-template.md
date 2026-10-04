@@ -80,7 +80,7 @@ _Last updated: [date]_
 - **Weekly outreach target:** (e.g. 6 touches; 60/40 outreach to applications)
 
 ## 9. Tracking
-> Workspace mode: see `pipeline.md`, `contacts.md`, `answers.md`. Chat mode
+> Workspace mode: see `pipeline.md`, `contacts.md`, `answers.md`, `interviews/`. Chat mode
 > (claude.ai): keep the sections below in this file.
 
 ### Pipeline
@@ -109,6 +109,12 @@ _Last weekly review: —_
 
 ### Answers
 > Chat mode: the screening-answer bank — same fields as answers.md in workspace mode (see answer-bank.md).
+
+### Interviews
+> Chat mode: one row per debriefed round, newest 12 kept (older rows fold into one line in §10). Workspace mode: see `interviews/`.
+
+| Date | Company | Role | Round | Outcome | Asked (themes) | Landed / missed | Next |
+|---|---|---|---|---|---|---|---|
 
 ### Soft skills development
 > Goals from the Soft Skills Coach. Keep 2–3 active at most.

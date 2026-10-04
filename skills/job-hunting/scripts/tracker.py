@@ -30,7 +30,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from _common import read_table, today as today_iso, use_utf8_output, workspace_dir, write_table  # noqa: E402
+from _common import (  # noqa: E402
+    read_table, slugify, today as today_iso, use_utf8_output, workspace_dir, write_table)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
@@ -42,6 +43,7 @@ TERMINAL_STAGES = frozenset({"accepted", "rejected", "withdrawn", "cold"})
 # Stages a row can go stale in: sent, not yet closed.
 OPEN_STAGES = frozenset({"applied", "screen", "interview", "final"})
 INTERVIEW_DUE_STAGES = frozenset({"screen", "interview", "final"})
+DEBRIEF_WINDOW_DAYS = 7  # an interview this recent with no debrief file is 'debrief due'
 # Funnel buckets. "Sent" is every stage but `saved`; a stage counts for every
 # bucket it has already passed through, judged by the row's current stage.
 RESPONSE_STAGES = frozenset({"screen", "interview", "final", "offer", "accepted"})
@@ -210,18 +212,30 @@ def set_review_line(ws: Path, iso: str) -> None:
 
 # --- today view (pure) -------------------------------------------------------
 
-def today_data(rows: list[dict], contacts_rows: list[dict], date) -> dict:
-    """The today view as structured data — no I/O, no clock."""
+def today_data(rows: list[dict], contacts_rows: list[dict], date,
+               debriefs: dict[str, str] | None = None) -> dict:
+    """The today view as structured data — no I/O, no clock.
+
+    `debriefs` maps a row slug (slugify(company + " " + role)) to its newest
+    debrief date (ISO); a recent interview row without one is "debrief due".
+    """
     date = _as_date(date)
     horizon = date + datetime.timedelta(days=INTERVIEW_WINDOW_DAYS)
-    overdue, due_today, interviews, stale, auto_cold = [], [], [], [], []
+    debriefs = debriefs or {}
+    overdue, debriefs_due, due_today, interviews, stale, auto_cold = [], [], [], [], [], []
 
     for row in rows:
         stage, due = _stage(row), parse_date(row.get("Due"))
         open_row = stage not in TERMINAL_STAGES
         if due and open_row:
             if due < date:
-                overdue.append(row)
+                slug = slugify(f"{_cell(row, 'Company')} {_cell(row, 'Role')}")
+                if (stage in INTERVIEW_DUE_STAGES
+                        and (date - due).days <= DEBRIEF_WINDOW_DAYS
+                        and debriefs.get(slug, "") < due.isoformat()):
+                    debriefs_due.append(row)
+                else:
+                    overdue.append(row)
             elif due == date:
                 due_today.append(row)
             elif due <= horizon and stage in INTERVIEW_DUE_STAGES:
@@ -243,6 +257,7 @@ def today_data(rows: list[dict], contacts_rows: list[dict], date) -> dict:
     return {
         "date": date.isoformat(),
         "overdue": sorted(overdue, key=by_due),
+        "debriefs_due": sorted(debriefs_due, key=by_due),
         "due_today": sorted(due_today, key=by_due),
         "interviews": sorted(interviews, key=by_due),
         "stale": sorted(stale, key=by_touch),
@@ -273,9 +288,10 @@ def _section(title: str, items: list[str], note: str = "") -> list[str]:
     return [head, *items, ""]
 
 
-def today_report(rows: list[dict], contacts_rows: list[dict], date) -> str:
+def today_report(rows: list[dict], contacts_rows: list[dict], date,
+                 debriefs: dict[str, str] | None = None) -> str:
     """The today view as markdown — sections omitted when empty."""
-    data = today_data(rows, contacts_rows, date)
+    data = today_data(rows, contacts_rows, date, debriefs)
     day = _as_date(date)
     out = [f"## Today — {data['date']}", ""]
 
@@ -285,6 +301,10 @@ def today_report(rows: list[dict], contacts_rows: list[dict], date) -> str:
     out += _section("Overdue", [
         line(r, f"due {_cell(r, 'Due')} ({_days(_age(r, 'Due', day))} late) · {_next_action(r)}")
         for r in data["overdue"]])
+    out += _section("Debriefs due", [
+        line(r, f"interviewed {_cell(r, 'Due')} ({_days(_age(r, 'Due', day))} ago) "
+                f"→ run `/job-hunter:interview debrief`")
+        for r in data["debriefs_due"]], note="interviewed, no debrief written yet")
     out += _section("Due today", [line(r, _next_action(r)) for r in data["due_today"]])
     out += _section("Interviews within 7 days", [
         line(r, f"{_cell(r, 'Due')} (in {_days(-_age(r, 'Due', day))}) · {_next_action(r)}")
@@ -551,13 +571,31 @@ def cmd_contact(ws: Path, args, touch: str) -> int:
     return 0
 
 
+_DEBRIEF_NAME_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-debrief-")
+
+
+def debrief_dates(ws: Path) -> dict[str, str]:
+    """Row slug -> newest debrief date, from file NAMES under interviews/ only.
+
+    File contract shared with interview.py (never imported):
+    interviews/<slug>/<YYYY-MM-DD>-debrief-<round_type>[-2].md
+    """
+    found: dict[str, str] = {}
+    for path in (ws / "interviews").glob("*/*-debrief-*.md"):
+        m = _DEBRIEF_NAME_RE.match(path.name)
+        if m and m.group(1) > found.get(path.parent.name, ""):
+            found[path.parent.name] = m.group(1)
+    return found
+
+
 def cmd_today(ws: Path, args, date: datetime.date) -> int:
     _, rows = load(ws)
     _, contacts_rows = get_contacts(ws)
+    debriefs = debrief_dates(ws)
     if args.as_json:
-        print(json.dumps(today_data(rows, contacts_rows, date), indent=2))
+        print(json.dumps(today_data(rows, contacts_rows, date, debriefs), indent=2))
     else:
-        print(today_report(rows, contacts_rows, date))
+        print(today_report(rows, contacts_rows, date, debriefs))
     return 0
 
 

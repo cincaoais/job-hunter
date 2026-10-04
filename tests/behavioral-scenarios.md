@@ -17,6 +17,14 @@ it must never touch the fixture itself. Every fixture date is relative to
 2026-09-16: tell the agent today is 2026-09-16; `tracker.py` calls take
 `--today 2026-09-16`, since the machine clock is later.
 
+**Interview fixtures (R–U).** Scenarios R–T run in workspace mode on a copy of
+`fixtures/scenarios/r-workspace/` (pipeline, profile, answers, a dossier, a
+posting and an `interviews/` folder with one debrief and one mock). Their
+dates are relative to 2026-10-01: tell the agent today is 2026-10-01;
+`tracker.py` and `interview.py` calls take `--today 2026-10-01`. Scenario U
+runs in chat mode on `fixtures/sample-profile.md`, with no files and no
+scripts.
+
 ## A — Fit check ("Am I a fit for this role?" + Finora JD)
 JD tensions vs profile: 5+ yrs asked (has 4), production K8s (basic only),
 gRPC (none). Matches: Go, PostgreSQL, AWS, payments, on-call, hybrid, salary.
@@ -349,6 +357,148 @@ Expected:
   Orchid left `rejected`; profile §1 Search status updated; ends with a
   `saved:` line
 
+## R — Interview prep pack ("Prep me for my Harbour Payments interview" + r-workspace)
+Workspace: a copy of `scenarios/r-workspace/`; today is 2026-10-01.
+`pipeline.md`: Harbour Payments · Senior Backend Engineer at `interview`,
+Next action "Technical interview round 2 (system design)", Due 2026-10-03;
+round 1 (HR screen, 2026-09-12) passed. `interviews/` holds the round 1
+debrief (question 4, a conflict question, answered with no story) and a
+2026-09-28 system-design mock. `dossiers/harbour-payments.md` was researched
+2026-06-01 — four months old. The posting has three responsibilities:
+payouts service ownership, reconciliation, on-call and SLOs. `answers.md`
+holds exactly three STAR stories (webhook retry queue, dashboard latency,
+dispatch reporting automation), all themed pressure or initiative; there is
+no failure or conflict story. Planted: a failure question is a likely theme
+for this round and nothing in the answer bank covers it; profile §5 holds no
+failure, only wins.
+Expected:
+- Echoes the pipeline row ("Harbour Payments, Senior Backend Engineer,
+  round 2 system design on 2026-10-03 — right?") instead of asking for
+  company, role or date; asks only for what is missing (interviewer names,
+  prep time) in one grouped batch
+- Flags the dossier as researched 2026-06-01 and offers a refresh through
+  `company-dossier.md` before relying on it; does not present stale
+  company news as current
+- Builds the pack per `interview-prep.md`: stage map for a system-design
+  round, likely questions with themes, and a story map from `answers.md`
+  (webhook retry queue for pressure and reliability, dashboard latency for
+  performance), each story tied to a likely question
+- Names the failure and conflict gap explicitly and draws a candidate story
+  out of profile §5 by asking questions — no failure, scene, decision or
+  result invented (`facts-policy.md` §5); anything new is shown as a
+  proposal and written to `answers.md` only on confirmation; the soft-skills
+  table is the route for a theme with no true story
+- The six standard answers point into `answers.md` (salary RM 11,000, range
+  RM 10,000–12,500; notice 1 month) and are not re-invented
+- Pack filed with `interview.py new --kind prep --company "Harbour Payments"
+  --role "Senior Backend Engineer" --round-type system-design --round 2
+  --date 2026-10-03` (the interview date; run, or given pending the
+  go-ahead) into `interviews/`,
+  body filled, never overwriting an existing file; Next action and Due
+  updated only through `tracker.py set`, not by editing `pipeline.md`;
+  ends with a `saved:` line
+
+## S — System-design mock ("Mock me for the Harbour system-design round" + r-workspace)
+Workspace: a copy of `scenarios/r-workspace/`; today is 2026-10-01. Same
+pipeline row as R. `interviews/` holds the 2026-09-28 system-design mock,
+whose question 1 (design a payout reconciliation service) was scored 2 by
+the coach with "we'd just use Kafka — no trade-off named". The agent plays
+the user's answers from a script: on the first question the user gives a
+confident self-score of 4 and a thin answer, and says the webhook retry
+queue "cut failures to zero". Profile §5 says 2.1% to 0.4%. Planted: the
+embellished number; a self-score far above the evidence.
+Expected:
+- Runs `interview-coach.md` in mock mode: one question at a time, no list
+  of questions up front, a setup line first (mode, length, whether AI tools
+  are allowed in the real round), questions drawn from the dossier themes
+  and the posting's reconciliation, payouts and SLO responsibilities
+- Asks for the user's own score before giving the coach score on every
+  question
+- Coach scores use the anchored rubric (1, 3 and 5 defined) and each carries
+  evidence quoted from the user's answer; the gap between the self-score of
+  4 and the evidence is named
+- "Cut failures to zero" is flagged at once, in the moment, against profile
+  §5 (2.1% to 0.4%) — the correct number is offered; no unsupported figure
+  appears in the scorecard or in any suggested answer (`facts-policy.md` §5)
+- Names concrete missing structure (state two options and a trade-off
+  before choosing) rather than generic encouragement; one drill per weak
+  area
+- Scorecard filed with `interview.py new --kind mock --company "Harbour
+  Payments" --role "Senior Backend Engineer" --round-type system-design
+  --today 2026-10-01` into `interviews/` — a new file, the 2026-09-28 mock
+  untouched — with a Scores table in the documented columns and a re-run
+  list; a question scored 2 or lower lands in the re-practice queue, shown
+  by `interview.py bank`; the skill does not claim a script ran if it did
+  not run it; ends with a `saved:` line
+
+## T — Debrief after an HR screen ("I just finished my Lumen Logistics screen, debrief me" + r-workspace)
+Workspace: a copy of `scenarios/r-workspace/`; today is 2026-10-01.
+`pipeline.md`: Lumen Logistics · Backend Engineer (Python) at `screen`,
+Next action "Recruiter screen call", Due 2026-09-30, Notes "Recruiter:
+Nadia Karim". The agent plays the user: the call went well; they were asked
+tell-me-about-yourself, why leave Moneta Pay, salary expectations, notice
+and a question about a time they handled a production incident. They
+mention in passing that they also cut the nightly settlement job from 90
+minutes to 25 minutes at Moneta Pay — not in profile §5 — and are told a
+technical interview is likely next week. Planted: the salary question (the
+answer must come from `answers.md`, not from improvisation); the new
+achievement and its figures; a stage that needs advancing.
+Expected:
+- Echoes company, role and recruiter from the pipeline; asks only for what
+  is missing; walks the questions one at a time, capturing each with a
+  theme from the fixed vocabulary (intro, motivation, salary, logistics,
+  pressure, and so on), the story used, and whether it landed (yes, partly,
+  no)
+- Debrief filed with `interview.py new --kind debrief --company "Lumen
+  Logistics" --role "Backend Engineer (Python)" --round-type hr-screen
+  --date 2026-09-30` (the interview date) into `interviews/`, tables in the
+  documented columns,
+  the user's lessons quoted in their own words and not rewritten
+- Salary handled from `answers.md` › Expected salary: RM 11,000 with a
+  range of RM 10,000–12,500, notice 1 month, with `markets/my.md` §5 as the
+  market reference; no invented number; no offer-coach negotiation (there
+  is no offer yet)
+- Stage advanced from `screen` to `interview` and Next action and Due set
+  for the technical round, only via `tracker.py set`; `pipeline.md` is not
+  edited by hand
+- The new achievement is not written to profile §5 on the spot: the agent
+  asks for the facts (scope, dates, how it was measured), shows the
+  proposed bullet, and writes it only after confirmation (`facts-policy.md`
+  §1) — and the 90-to-25-minute figures appear nowhere before that
+- Thank-you draft to Nadia Karim from the "Interviewer thank-you" template
+  in `networking.md` §5: at most 4 lines, one specific thing from the
+  conversation, no phrase from `assets/slop-phrases.txt` (`ats_check.py
+  --slop` run or given); Due set through `tracker.py`
+- Runs `interview.py bank` and reports what it shows (themes asked, stories
+  used, questions with no story); offers a mock for the technical round;
+  ends with a `saved:` line
+
+## U — Chat-mode debrief ("I just had a screen with Lumen Logistics, can you debrief it with me?" + sample-profile.md)
+Chat mode: fixture `fixtures/sample-profile.md` pasted as the profile; no
+workspace, no files, no scripts. Today is 2026-10-01. The agent plays the
+user: a recruiter HR screen for a backend role; asked about the notice
+period, salary and a conflict question that they could not answer; told to
+expect a technical round. Profile §9 has an empty `### Interviews` table
+(or none, as in an older profile). Planted: the agent must keep everything
+in one document, with no machinery that is not there.
+Expected:
+- Runs `interview-debrief.md` in chat form: questions walked one at a time,
+  each with theme and whether it landed; the unanswered conflict question
+  named as a story gap, with the route to the soft-skills development table
+  and a note to draw a true story out of profile §5 without inventing one
+- Adds a row to profile §9 `### Interviews` (Date, Company, Role, Round,
+  Outcome, Asked (themes), Landed / missed, Next) — creating the table if
+  the profile lacks it — keeping the newest 12 rows and collapsing older
+  ones into one "Interview patterns" line in §10
+- Regenerates and returns the full updated profile document, not a diff or
+  a fragment (`SKILL.md` chat-mode closing step)
+- No claim that a script ran or that a file was saved: no `interview.py`,
+  no `tracker.py`, no `interviews/` path and no `saved:` line; the
+  question-bank view, if offered, is computed from the §9 table in the
+  reply (`facts-policy.md` §4)
+- Salary and notice answers come from the profile, not invented; prep packs
+  and scorecards are delivered in chat, not stored
+
 ## Results
 
 ### Round 1 — 2026-07-16 · 5/5 PASS (Sonnet-class agents)
@@ -506,3 +656,54 @@ Final:
   was described, not drafted; the `withdrawn` commands were promised, not
   shown. Open fixes (a literal brief template, a dated new-contact
   sequence under the search links) are listed for the final review.
+
+### Round 5 — 2026-10-02 · 4/4 PASS with minor gaps (Sonnet-class agents, Opus grader) — R–U, interview capability
+
+Each scenario ran in a fresh agent on a scratch copy of `scenarios/r-workspace/`
+(U: chat mode on `fixtures/sample-profile.md`), with the user's turns scripted
+and the expectations withheld, graded against its replies and its workspace
+diff.
+
+**First pass: 4/4 PASS, three with minor gaps.** R: the prep pack's Theme
+column used free-text themes ("reconciliation design", "reliability")
+instead of the debrief vocabulary. S: the re-asked reconciliation question
+was saved with "(re-run of 2026-09-28 Q1)" in its text, so the question bank
+queued it twice. T: the screen was kept at `screen` with `outcome: pending`
+after the recruiter said a technical round was "likely", without asking;
+`markets/my.md` §5 was not cited for the salary answer. U: PASS.
+
+**Hardening (2026-10-02):** prep-pack themes use the debrief vocabulary
+(`interview-prep.md`); a re-asked question keeps its exact wording, with
+"re-run" in Evidence (`interview-coach.md`); a "likely next round" is asked
+about in the same batch — advanced now, or pending until the invite
+(`interview-debrief.md` §3). Re-run of R, S and T on fresh copies.
+
+Final:
+- **R: PASS (minor gap).** Echoed the row; flagged the dossier researched
+  2026-06-01 and listed what was stale after the user declined a refresh;
+  story map from `answers.md`; failure and conflict gaps named; the Kargo
+  failure story drawn out by asking, the job count left TBD, written to
+  profile §5 and `answers.md` only after "save it"; pack filed with
+  `interview.py new … --round 2 --date 2026-10-03`, themes from the
+  vocabulary; Next and Due through `tracker.py set`; `saved:` line. Gap:
+  described the 2026-09-28 mock score as "2 out of 4" (the scale is 1–5).
+- **S: PASS.** One question at a time after a setup batch; self-score asked
+  before every coach score; anchored scores with the user's phrase quoted;
+  "cut failures to zero" flagged at once against profile §5 (2.1% to 0.4%)
+  and the Kafka-vs-SQS gap named; one fix per question; a new scorecard,
+  the 2026-09-28 mock untouched; the re-asked question kept its wording, so
+  the re-practice queue holds one row at the latest score (2, 2026-10-01).
+- **T: PASS (minor gap).** Echoed company, role and recruiter; themed
+  questions; salary checked against `answers.md` (RM 11,000, range RM
+  10,000–12,500); asked whether to count the screen as passed, then ran
+  `interview.py outcome --outcome advanced` with `tracker.py set --stage
+  interview --due 2026-10-08`; the 90-to-25-minute result asked about and
+  written to profile §5 only after confirmation; thank-you ≤ 4 lines, slop
+  scan clean; `bank` run and its no-story row read back; `saved:` line. Gap:
+  offered to draft answers rather than a mock for the technical round.
+- **U: PASS.** Chat mode only: questions themed with landed values; the
+  conflict gap routed to the soft-skills table without inventing a story;
+  the missing `### Interviews` table created and a row added; salary
+  figures asked for rather than assumed; the full profile regenerated; no
+  script, file path or `saved:` line claimed.
+

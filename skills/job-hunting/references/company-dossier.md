@@ -35,6 +35,8 @@ Search in order of decision value:
 
 ## 3. The dossier (one page)
 
+Saved dossiers carry `_Researched: YYYY-MM-DD_` directly under the title.
+
 | | |
 |---|---|
 | Company / size / stage | |
@@ -57,6 +59,8 @@ Then three short sections:
   described?") — never generic ones a search could answer.
 
 ## 4. Feed forward
+
+Older than 30 days before an interview → refresh Health & news first.
 
 - Offer a mock for this round via `references/interview-coach.md`, sourcing
   questions from the dossier's themes.

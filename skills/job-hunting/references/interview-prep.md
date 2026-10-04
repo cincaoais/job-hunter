@@ -9,13 +9,29 @@ from the posting, not from assumptions.
 
 ## Step 0 — pin the round (one grouped batch)
 
+Echo the pipeline row first (stage, Next action, Due) — "Grab, recruiter
+screen, due Friday — right?" — and ask only for what it lacks:
+
 - **Company & role** — reuse the jd-match extraction and dossier if they
   exist; otherwise skim the posting now.
 - **Round** — which number, what format (call / video / panel / assessment
   centre), who's interviewing if known, and anything the coordinator said
   it covers. If they didn't say, tell the user it's normal to ask.
+- **Round type** — one of `hr-screen` `behavioral` `technical` `coding`
+  `system-design` `case` `assessment` `final`.
 - **Date** — how much prep time exists; prioritize accordingly.
 - **Language** — prep in the language the interview will run in.
+
+**Dossier freshness.** Read the dossier's `_Researched: YYYY-MM-DD_` line.
+Older than 30 days → refresh its news section via `/job-hunter:company`
+before prep. No dossier → offer one.
+
+**Workspace mode** — create the pack, then fill its sections in place:
+
+`python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py new --kind prep --company "<X>" --role "<Y>" --round-type <type> [--round N] --date <interview date>`
+
+**Chat mode** — deliver the pack in chat; nothing is stored but the
+closing step.
 
 ## Stage map — what each round is really testing
 
@@ -50,10 +66,33 @@ round covers — a normal question that removes guesswork.
    my range is around X if that helps") but have the number ready.
 6. **Availability / notice** — exact, no hedging.
 
+Items 1, 3 and 4 (and 5, 6) live in `answers.md` under those headings (chat
+mode: the profile §9 Answers section); the pack points to them rather than
+copying.
+
 Plus **3–5 STAR stories** from `answers.md` "STAR stories" (chat mode:
 the profile §9 Answers section) covering leadership, conflict, failure,
 pressure, and initiative. One story may serve two themes. Rehearsed aloud
 beats re-read silently.
+
+## Story map and gaps
+
+Map each likely question's theme to a story in `answers.md` (each carries
+`(themes: …)` tags; chat mode: the profile §9 Answers section). Themes in
+the pack use the debrief vocabulary (`interview-debrief.md` §1) so the
+question bank and the gaps line up.
+
+| Theme | Story | Strength |
+|---|---|---|
+| leadership | title, or "none" | strong / usable / weak |
+
+- **strong** — specific, recent, own actions clear, a number. **usable** —
+  real but vague on your part or the result. **weak** — thin or old.
+- Always check the five STAR themes — leadership, conflict, failure,
+  pressure, initiative — whatever the posting says.
+- Every gap (no story, or weak) gets one next step: draw a real event out
+  of profile §5 by asking (`facts-policy.md` §2), or, with no real event,
+  `soft-skills-coach.md`. Never script a story.
 
 ## Question banks
 
@@ -76,7 +115,7 @@ JD, not from a generic bank.
 
 **Curveballs & personal questions (SEA reality)** — age, marital status,
 family plans, race, and religion still get asked at local firms in MY and
-much of SEA; no law bars them in Malaysian private-sector hiring. Prep a
+much of SEA. Prep a
 calm one-line answer plus pivot ("Single, and fully mobile for this role —
 on the job itself…"). Declining gracefully is legitimate; note it may cost
 rapport at traditional firms, and let the user pick their comfort level. An
@@ -96,6 +135,17 @@ comp, asking benefit specifics is normal and expected in MY/SG. Anything
 promised verbally goes into the written offer before accepting
 (`offer-coach.md`).
 
+## Lessons to apply
+
+Before finalising the pack, read `interviews/question-bank.md` if it
+exists: repeat questions, "Questions with no story", and the re-practice
+queue feed the likely-questions list and the story gaps. If the
+workspace's parent folder holds `wiki/_index.md` (a career vault), also
+read `wiki/hot.md` and the index rows whose Topics include `interview` or
+this round type; cite them by article name, read-only. No bank, no vault
+or no matching rows → one line: "no lessons yet". Chat mode: compute repeats from the profile §9
+Interviews table on request.
+
 ## Market rights sheet — before signing
 
 Before signing, check the market's statutory floors and contract red flags:
@@ -105,21 +155,26 @@ plus a live search).
 ## After each interview
 
 1. **Same day** — thank-you email or message, 2–4 lines: thanks, one
-   specific point from the conversation, reaffirmed interest. Via the
+   specific point from the conversation, reaffirmed interest. Use the
+   Networker's "Interviewer thank-you" template in `networking.md`; via the
    recruiter if no direct address.
-2. **Self-debrief into the profile** — questions asked, answers that
-   wobbled, promises made, interviewer names. This feeds the next round's
-   mock.
+2. **Debrief within 24 hours** — `interview-debrief.md`: questions asked,
+   answers that wobbled, promises made, interviewer names. This feeds the
+   next round's mock.
 3. **Silence** — follow up at the stated timeline + 2–3 working days
    (or ~1 week if none was given). One polite nudge, then keep the
    pipeline moving — never park the search on one company.
-4. **Advanced** — ask what the next round covers; re-run the dossier's
-   themes and a targeted mock (`interview-coach.md`) on the weak areas
-   from the debrief.
+4. **Advanced** — ask what the next round covers; set the stage change and
+   `python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py outcome --outcome advanced`
+   (workspace mode); re-run the dossier's themes and a targeted mock
+   (`interview-coach.md`) on the weak areas from the debrief.
 5. **Rejected** — brief thanks + ask for feedback (sometimes answered);
-   log it in the tracker. Three rejections at the same stage → run the
-   funnel diagnosis (`pipeline.md` §5).
+   log it in the tracker with the stage change and
+   `interview.py outcome --outcome rejected`. Three rejections at the same
+   stage → run the funnel diagnosis (`pipeline.md` §5).
 6. **Offer** — switch to `offer-coach.md`.
 
-Close every prep session with the closing step for the storage mode
-(SKILL.md).
+Close every prep session — workspace mode:
+`python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" --role "<Y>" --next "<round_type> prep done — mock?" --due <date>`,
+then the closing step for the storage mode (SKILL.md). Chat mode: the
+closing step only.

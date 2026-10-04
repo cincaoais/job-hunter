@@ -118,6 +118,13 @@ the profile doesn't date.
 **Re-engage**
 > Hi [Name] — it's been a while since [last shared context]; [one genuine note about their news]. A quick update from me: [one sourced change — new role, shipped project]. I'm now looking at [target role] roles, and [Company] is on my list because [one company fact]. Could you point me to the right person on [team]? No pressure either way. [Your name]
 
+**Interviewer thank-you** (same day, 2–4 lines)
+> Hi [Name] — thank you for your time today on the [round type] for [role]. [One specific point from the conversation that stayed with you.] I remain very interested in the role and the team. [Your name]
+
+No new claims about experience (`facts-policy.md` §4). No direct address →
+send it to the recruiter to pass on. The debrief owns the flow
+(`interview-debrief.md`).
+
 **Thank-you**
 > Hi [Name] — thank you for [the referral / the chat / the intro]. [One specific thing that helped and how you used it.] [Outcome so far: applied / screen on [date] / accepted an offer at [Company].] I'll keep you posted, and if I can return the favour — [a specific offer: an intro, a review] — just say. [Your name]
 

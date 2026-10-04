@@ -13,7 +13,7 @@ Use the `job-hunting` skill. Print this table, then ask which role the user want
 | Qualifier — knockout check, legitimacy, fit verdict | "Am I a fit for this?" + posting | `/job-hunter:match` |
 | Writer — resume tailor/revamp, HR-eye score, cover letter, answer bank | "Tailor my resume for this posting" | `/job-hunter:resume`, `/job-hunter:cover` |
 | Networker — referral map, outreach, contacts | "Who can refer me at Grab?" | `/job-hunter:network` |
-| Coach — prep pack, mock interview, company dossier, soft skills | "Mock interview me for Friday" | `/job-hunter:interview`, `/job-hunter:company` |
+| Coach — prep pack, mock, debrief, company dossier, soft skills | "Mock interview me for Friday" | `/job-hunter:interview [mock\|debrief]`, `/job-hunter:company` |
 | Negotiator — true annual comp, compare, negotiate | "I got an offer — should I take it?" | `/job-hunter:offer` |
 | Operations — today view, weekly funnel review | "What should I do today?" | `/job-hunter:today`, `/job-hunter:review` |
 | Onboarder — resignation, references, 30-60-90 | "I accepted — what now?" | (plain English) |

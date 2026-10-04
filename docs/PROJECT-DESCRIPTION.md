@@ -36,7 +36,8 @@ as nine roles; route each request to one of them:
 - **Networker** — who can refer me before I apply, outreach and follow-ups,
   my contacts table, and my LinkedIn/JobStreet profiles tuned for recruiter
   search.
-- **Coach** — interview prep packs, mock interviews, a one-page company brief
+- **Coach** — interview prep packs, mock interviews, debriefs after each round
+  (kept in my profile's §9 Interviews table), a one-page company brief
   before an interview, and the soft skills my target postings ask for.
 - **Negotiator** — evaluating, comparing and negotiating offers on true
   annual comp.

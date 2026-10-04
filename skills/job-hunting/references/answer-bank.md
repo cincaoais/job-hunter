@@ -25,6 +25,9 @@ gaps, with options to pick:
 | Expected salary | profile §3 range → "the single number you'd say out loud?" | yes — currency and the market's quoting norm |
 | Notice period / earliest start | contract notice; probation or confirmed? | no |
 | Work authorization | citizen / PR / pass held (valid until) / sponsorship needed | yes — one row per country |
+| Tell me about yourself | spoken, 60-90 s: present line -> strongest relevant proof from profile §5 -> why here (last line tailored per company, §3) | no |
+| Strength and weakness | strength with a profile §5 result; a real weakness plus the fix in progress, asked of the user, never a humblebrag | no |
+| Pressure and stress | trigger -> mechanism -> one real profile §5 example -> result; ask the user for the mechanism | no |
 | Why this company | a reusable pattern; the hook is filled per posting (§3) | — |
 | Why leaving (current/last role) | one forward-looking, true sentence | no |
 | Relocation | profile §3 Open to relocation | yes |

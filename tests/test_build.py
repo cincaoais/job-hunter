@@ -1,4 +1,4 @@
-import pathlib, shutil, subprocess, sys, zipfile
+import fnmatch, pathlib, sys, zipfile
 import pytest
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import build
@@ -39,11 +39,25 @@ def _make_skill_with_n_lines(root, name, n):
     (d / "SKILL.md").write_text(header + body, encoding="utf-8", newline="\n")
     return d
 
-@pytest.mark.skipif(shutil.which("git") is None, reason="git not installed")
 def test_text_files_check_out_with_lf_everywhere():
-    out = subprocess.run(["git", "check-attr", "eol", "--", "skills/job-hunting/assets/slop-phrases.txt",
-                          "pytest.ini", ".gitignore"], cwd=ROOT, capture_output=True, text=True).stdout
-    assert out.count("eol: lf") == 3, out
+    def resolve(lines, path, attr):
+        value = None
+        for line in lines:
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            pattern, *attrs = line.split()
+            target = path if "/" in pattern else path.rsplit("/", 1)[-1]
+            if fnmatch.fnmatchcase(target, pattern.lstrip("/")):
+                for a in attrs:
+                    if a.startswith(attr + "="):
+                        value = a.split("=", 1)[1]
+        return value
+
+    assert resolve(["* eol=lf", "*.txt eol=crlf"], "a.txt", "eol") == "crlf"
+    lines = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
+    for path in ("skills/job-hunting/assets/slop-phrases.txt", "pytest.ini", ".gitignore"):
+        assert resolve(lines, path, "eol") == "lf", path
 
 def test_check_skill_line_count_boundary(tmp_path):
     ok_dir = _make_skill_with_n_lines(tmp_path, "ok", 500)

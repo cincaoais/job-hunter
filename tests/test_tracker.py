@@ -246,6 +246,33 @@ def test_today_command_and_json(filled, capsys):
     assert [c["Name"] for c in data["contacts_due"]] == ["Aisyah Rahman"]
 
 
+@pytest.mark.parametrize("due, debriefs, listed", [
+    ("2026-09-15", None, True),                                  # yesterday, no debrief
+    ("2026-09-15", {"apex-digital-backend-engineer": "2026-09-15"}, False),  # debriefed
+    ("2026-09-06", None, False),                                 # 10 days late: plain overdue
+])
+def test_today_data_debriefs_due(due, debriefs, listed):
+    row = {"Company": "Apex Digital", "Role": "Backend Engineer", "Stage": "interview",
+           "Due": due, "Last touch": "2026-09-01"}
+    data = tracker.today_data([row], [], DATE, debriefs=debriefs)
+    assert [r["Company"] for r in data["debriefs_due"]] == (["Apex Digital"] if listed else [])
+    assert [r["Company"] for r in data["overdue"]] == ([] if listed else ["Apex Digital"])
+
+
+def test_today_command_lists_debriefs_due(ws, capsys):
+    run(capsys, "add", "--company", "Apex Digital", "--role", "Backend Engineer",
+        "--stage", "interview", "--due", "2026-09-15", "--today", TODAY)
+    code, out = run(capsys, "today", "--today", TODAY)
+    assert code == 0
+    assert "**Debriefs due (1)**" in out and "Apex Digital" in out
+    assert "/job-hunter:interview debrief" in out and "**Overdue" not in out
+    folder = ws / "interviews" / "apex-digital-backend-engineer"
+    folder.mkdir(parents=True)
+    (folder / "2026-09-15-debrief-technical.md").write_text("x", encoding="utf-8")
+    code, out = run(capsys, "today", "--today", TODAY, "--json")
+    assert json.loads(out)["debriefs_due"] == []
+
+
 # --- funnel ------------------------------------------------------------------
 
 def test_funnel_channel_counts_match_hand_computed():

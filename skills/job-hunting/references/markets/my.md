@@ -155,7 +155,36 @@ contract offered; EPF/SOCSO missing from the payslip.
   here — search them live and label them.
 - Targeting Singapore as well: `markets/sg.md` §9 (EP and COMPASS).
 
-## 10. Interview curveballs & rights
+## 10. Interview process, curveballs & rights
+
+**Process** — no official Malaysian source sets interview norms, so the
+items below are practitioner norms; confirm locally with the recruiter.
+
+- **Rounds and order**: recruiter or HR screen, then hiring manager, then a
+  technical or panel round, then a final with a senior leader or HR; MNCs
+  and banks may add an assessment (practitioner norm — confirm locally).
+- **Timeline**: expect two to six weeks from first screen to offer; ask the
+  coordinator for the next step at the end of each round (practitioner norm
+  — confirm locally).
+- **Assessments**: aptitude, case or coding tests are common at banks, MNCs
+  and graduate programmes (practitioner norm — confirm locally).
+- **Salary expectation**: asked early, often at the HR screen. Give the
+  single number from `answers.md`, near the bottom of the true range, plus
+  "(negotiable)"; field mechanics in §5 (practitioner norm — confirm
+  locally).
+- **Notice talk**: state the notice exactly; what the contract or the
+  statutory default requires is in §7, not restated here (practitioner norm
+  — confirm locally).
+- **Language**: English for most tech and MNC rounds; Bahasa Malaysia or
+  Mandarin may appear at local firms — ask which language the round runs in
+  (practitioner norm — confirm locally).
+- **AI-tool policy**: set per company and round; ask before a coding or
+  take-home round whether AI assistance is allowed (practitioner norm —
+  confirm locally).
+- **Source**: none official for Malaysia; every bullet above is a practitioner
+  norm, not a verified rule.
+
+**Curveballs and rights**
 
 - Age, marital status, family plans, race and religion still get asked at
   local firms; no law bars them in Malaysian private-sector hiring. At

@@ -150,7 +150,39 @@ practice).
   new-EP criteria apply (verify on mom.gov.sg).
 - Not viable → a knockout (`jd-match.md`); say so and draft nothing.
 
-## 10. Interview curveballs & rights
+## 10. Interview process, curveballs & rights
+
+**Process** — only the TAFEP and Workplace Fairness Act points are
+verified; round structure and timing are practitioner norms.
+
+- **Rounds and order**: recruiter or HR screen, hiring manager, technical
+  or panel round, then a final; banks and MNCs may add an assessment
+  (practitioner norm — confirm locally).
+- **Timeline**: expect two to six weeks from first screen to offer; ask for
+  the next step at the end of each round (practitioner norm — confirm
+  locally).
+- **Assessments**: aptitude, case or coding tests at banks, MNCs and
+  graduate programmes (practitioner norm — confirm locally).
+- **Salary expectation**: TAFEP guidance says to avoid personal questions
+  unless job-related and to discuss salary expectations openly
+  (https://www.tal.sg/tafep/employment-practices/recruitment/conducting-job-interviews)
+  (verified). Answer with the number from `answers.md`; field mechanics in
+  §5. Giving a range versus a single number in the interview is a
+  practitioner norm — confirm locally.
+- **Notice talk**: state the notice exactly; the contract and statutory
+  default are in §7, not restated here (practitioner norm — confirm
+  locally).
+- **Language**: English in most rounds; Mandarin may appear at local firms
+  (practitioner norm — confirm locally).
+- **AI-tool policy**: set per company and round; ask before a coding or
+  take-home round (practitioner norm — confirm locally).
+- **Source**: TAFEP above; the Workplace Fairness Act 2025 was still
+  uncommenced as of 2026-09-29
+  (https://sso.agc.gov.sg/Act/WFA2025/Uncommenced/20250304073414?DocDate=20250213)
+  (verified), so check which provisions are in force before calling a
+  question unlawful (see below).
+
+**Curveballs and rights**
 
 - **Workplace Fairness Act**: passed 2025, expected in force around
   end-2027; covers recruitment, promotion, appraisal, training and
