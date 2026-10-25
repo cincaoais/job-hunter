@@ -60,9 +60,9 @@ What exists now:
 |---|---|
 | Plugin + build | `.claude-plugin/{plugin,marketplace}.json`, `build.py` (`--check`, zip to `dist/`, `--link [--force]`), `.github/workflows/ci.yml` (ubuntu + windows) |
 | Main skill | `skills/job-hunting/SKILL.md` (router, nine roles, storage modes) |
-| Verb skills | `skills/{search,match,resume,cover,network,interview,company,offer,today,review,help}/SKILL.md` |
+| Verb skills | `skills/{search,rank,match,resume,cover,network,interview,company,offer,today,review,help}/SKILL.md` |
 | Scripts | `skills/job-hunting/scripts/`: `_common.py`, `workspace.py`, `sources/{jobstreet,mcf,linkedin,hiredly,indeed}.py`, `search_jobs.py`, `fetch_posting.py`, `tracker.py`, `build_resume.py`, `ats_check.py` |
-| References | `references/`: `facts-policy`, `strategy`, `sourcing`, `jd-match`, `resume-builder`, `resume-revamp`, `answer-bank`, `networking`, `interview-prep`, `interview-coach`, `company-dossier`, `soft-skills-coach`, `offer-coach`, `post-offer`, `pipeline`, `profile-optimizer`, `application-guide`, `rxresume-mcp`, `markets/{_template,my,sg}.md` |
+| References | `references/`: `facts-policy`, `strategy`, `sourcing`, `jd-match`, `resume-builder`, `resume-revamp`, `answer-bank`, `networking`, `interview-prep`, `interview-coach`, `company-dossier`, `soft-skills-coach`, `offer-coach`, `post-offer`, `pipeline`, `profile-optimizer`, `application-guide`, `markets/{_template,my,sg}.md` |
 | Assets | `assets/{profile,pipeline,contacts,answers}-template.md`, `assets/templates/*.html` (5 resume templates), `assets/slop-phrases.txt` |
 | Tests | `tests/test_*.py`, `tests/fixtures/` incl. `recorded/` board responses |
 

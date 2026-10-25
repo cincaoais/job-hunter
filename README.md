@@ -1,5 +1,3 @@
-> **Work in progress — v6 revamp on branch `v6-revamp`.** All 17 tasks done on 2026-09-27; awaiting the merge decision. To resume on any machine, read [`docs/handoff/HANDOFF.md`](docs/handoff/HANDOFF.md) first. This banner is removed when v6 merges.
-
 # job-hunter
 
 job-hunter is a Claude skill that acts as a job-search agent and career coach
@@ -19,7 +17,7 @@ roles:
 |---|---|---|---|---|
 | 1 | Strategist | Target roles, positioning, career map, cadence and runway | "What roles should I aim for?" | (plain English) |
 | 2 | Scout | Fresh openings from the boards, daily digest, shortlist | "Find me fresh openings this week" | `/job-hunter:search` |
-| 3 | Qualifier | Knockout check, legitimacy check, fit score, apply / stretch / skip | "Am I a fit for this?" + posting | `/job-hunter:match` |
+| 3 | Qualifier | Knockout check, legitimacy check, fit score, apply / stretch / skip | "Am I a fit for this?" + posting | `/job-hunter:match`, `/job-hunter:rank` (batch shortlist) |
 | 4 | Writer | Resume tailor or revamp, HR-eye score, cover letter, screening answers | "Tailor my resume for this posting" | `/job-hunter:resume`, `/job-hunter:cover` |
 | 5 | Networker | Referral map before applying, outreach, contacts CRM | "Who can refer me at Grab?" | `/job-hunter:network` |
 | 6 | Coach | Interview prep pack, mock interview, debrief, company dossier, soft skills | "Mock interview me for Friday" | `/job-hunter:interview`, `/job-hunter:company` |
@@ -182,6 +180,7 @@ verification off.
 |---|---|---|
 | Daily | `/job-hunter:today` | Overdue and due follow-ups, interviews this week, stale rows, auto-cold candidates, contacts due; Claude drafts the follow-ups and asks before marking a row cold |
 | Daily | `/job-hunter:search` | New postings only (`--days 2` for the daily digest), knockouts applied, fit reasoning and a referral path per row |
+| Daily | `/job-hunter:rank` | Batch-triage the unseen backlog into a ranked shortlist: every posting fetched, knockout pre-check, fit score, deal-breaker vetoes; pick a row and `/job-hunter:match` runs in full |
 | Per posting | `/job-hunter:match <url>` | Saves the posting, runs the knockout pre-check, legitimacy check and fit score, gives an apply / stretch / skip verdict |
 | Before applying | `/job-hunter:network <company>` | Referral map (people searches as LinkedIn links), one outreach message, the touch logged in `contacts.md` |
 | To apply | `/job-hunter:resume tailor to <posting>`, `/job-hunter:cover <company and role>` | Resume: inline draft, then on approval a claims audit, banned-phrase scan and 6-second lint, `build_resume.py` and `ats_check.py`; the resume sent is recorded on the pipeline row. Cover letter: saved, claims-audited and scanned before you see it |
@@ -226,7 +225,7 @@ recurring digest, run `/loop 1d /job-hunter:search` in Claude Code.
 | `skills/job-hunting/references/` | One file per role or flow (including `interview-debrief.md`); `markets/` holds `my.md`, `sg.md` and `_template.md` for other countries |
 | `skills/job-hunting/scripts/` | The scripts (including `interview.py`: `new`, `outcome`, `bank`), `_common.py`, and `sources/` (one module per board) |
 | `skills/job-hunting/assets/` | Workspace and profile templates, `interview-*-template.md`, five resume HTML templates, `slop-phrases.txt` |
-| `skills/<verb>/SKILL.md` | The eleven verb skills: `company`, `cover`, `help`, `interview`, `match`, `network`, `offer`, `resume`, `review`, `search`, `today` |
+| `skills/<verb>/SKILL.md` | The twelve verb skills: `company`, `cover`, `help`, `interview`, `match`, `network`, `offer`, `rank`, `resume`, `review`, `search`, `today` |
 | `build.py` | `--check`, zip build to `dist/job-hunting.skill` (gitignored), `--link [--force]` |
 | `docs/PROJECT-DESCRIPTION.md` | Instructions to paste into a claude.ai Project |
 | `docs/superpowers/` | v6 design spec and implementation plan |

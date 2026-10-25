@@ -125,12 +125,6 @@ the shell differs.
 - Chat mode: fill the chosen gallery file by hand and render it with the
   pdf skill.
 
-**Or hand off to a real builder.** When the Reactive Resume MCP is
-connected — or the user is willing to set it up — offer the handoff in
-`references/rxresume-mcp.md`: 15 professionally designed templates with
-photo support and a live visual editor beat any generated file when the
-user wants to keep tweaking the design themselves.
-
 ### Photo decision matrix
 
 Never a photo in the ATS master, regardless of market. For the presentation

@@ -10,7 +10,7 @@ Use the `job-hunting` skill. Print this table, then ask which role the user want
 |---|---|---|
 | Strategist — positioning, career map, cadence | "What roles should I aim for?" | (plain English) |
 | Scout — fresh openings, daily digest | "Find me fresh openings this week" | `/job-hunter:search` |
-| Qualifier — knockout check, legitimacy, fit verdict | "Am I a fit for this?" + posting | `/job-hunter:match` |
+| Qualifier — knockout check, legitimacy, fit verdict | "Am I a fit for this?" + posting | `/job-hunter:match`, `/job-hunter:rank` (batch shortlist) |
 | Writer — resume tailor/revamp, HR-eye score, cover letter, answer bank | "Tailor my resume for this posting" | `/job-hunter:resume`, `/job-hunter:cover` |
 | Networker — referral map, outreach, contacts | "Who can refer me at Grab?" | `/job-hunter:network` |
 | Coach — prep pack, mock, debrief, company dossier, soft skills | "Mock interview me for Friday" | `/job-hunter:interview [mock\|debrief]`, `/job-hunter:company` |

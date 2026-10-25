@@ -7,7 +7,7 @@
       "name": "job-hunter",
       "source": "./",
       "description": "Personal job-search agent and career coach (MY/SG first).",
-      "version": "6.0.0"
+      "version": "6.1.0"
     }
   ]
 }
