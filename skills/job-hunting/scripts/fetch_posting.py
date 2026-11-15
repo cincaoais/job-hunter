@@ -6,8 +6,8 @@
   python3 fetch_posting.py --stdin --company Acme --title "Backend Engineer" --save
 
 Known boards go through their own detail API (`sources/`), which gives the
-real description instead of a scraped page: JobStreet ids, LinkedIn job ids,
-MyCareersFuture uuids (screening questions included) and Hiredly slugs. Any
+real description instead of a scraped page: JobStreet ids, LinkedIn job ids
+and MyCareersFuture uuids (screening questions included). Any
 other URL is fetched and reduced to the largest `<main>`/`<article>` block.
 When a site answers with a bot challenge the stealth browser
 (`pip install cloakbrowser`) is used if it is installed.
@@ -63,7 +63,7 @@ BROWSER_MARKER_SPAN = 2000  # a challenge states itself at the top of the page
 FRONTMATTER_KEYS = ("source", "url", "company", "title", "location", "salary",
                     "posted", "fetched", "screening_questions")
 # Fallback country when the host does not say which market a board id is from.
-BOARD_DEFAULT_COUNTRY = {"jobstreet": "MY", "linkedin": "MY", "mcf": "SG", "hiredly": "MY"}
+BOARD_DEFAULT_COUNTRY = {"jobstreet": "MY", "linkedin": "MY", "mcf": "SG"}
 
 
 # --- classify ----------------------------------------------------------------
@@ -73,7 +73,6 @@ _JOBSTREET_RE = re.compile(r"jobstreet\.com(?:\.[a-z]{2})?/(?:[\w.-]+/)*job/(\d+
 # just the id; both are the trailing digits of the path segment.
 _LINKEDIN_RE = re.compile(r"linkedin\.com/jobs/view/[^/?#]*?(\d{6,})(?:[/?#]|$)", re.I)
 _MCF_RE = re.compile(r"mycareersfuture\.gov\.sg/job/.*([0-9a-f]{32})", re.I)
-_HIREDLY_RE = re.compile(r"hiredly\.com/jobs/([\w-]+)", re.I)
 
 _BARE_ID_RE = re.compile(r"^\d{5,}$")
 _BARE_UUID_RE = re.compile(r"^[0-9a-f]{32}$", re.I)
@@ -90,8 +89,6 @@ def _country_of(url: str) -> str:
     host = _host(url)
     if "mycareersfuture" in host:
         return "SG"
-    if "hiredly" in host:
-        return "MY"
     for domain, code in (("jobstreet.com.sg", "SG"), ("jobstreet.com.my", "MY")):
         if host == domain or host.endswith("." + domain):
             return code
@@ -114,7 +111,7 @@ def classify(target: str) -> tuple[str, str, str]:
     if _BARE_UUID_RE.match(text):
         return "mcf", text.lower(), "SG"
     for source, pattern in (("jobstreet", _JOBSTREET_RE), ("linkedin", _LINKEDIN_RE),
-                            ("mcf", _MCF_RE), ("hiredly", _HIREDLY_RE)):
+                            ("mcf", _MCF_RE)):
         m = pattern.search(text)
         if m:
             # MCF uuids are hex: the api is case-sensitive, the url is not.
@@ -289,37 +286,49 @@ def _source_module(name: str):
         return None
 
 
-def fetch_board(source: str, job_id: str, country: str, *, detail_fetch=None) -> dict | None:
-    """One board's detail API as a posting dict, or None when it has no job."""
+def fetch_board(source: str, job_id: str, country: str,
+                *, detail_fetch=None) -> tuple[dict | None, str]:
+    """`(job, "")` from one board's detail API, or `(None, reason)`.
+
+    A board that is down must not look like a job that is gone: a failed
+    detail call or a recorded warning gives an `"unavailable: ..."` reason,
+    while a 404/410 (or a clean empty answer) means `"not found: ..."`.
+    """
     module = _source_module(source)
     if module is None:
-        return None
+        return None, f"unavailable: the {source} module could not be loaded"
     fetch_fn = detail_fetch or default_fetch
     try:
         got = module.detail(job_id, country=country or BOARD_DEFAULT_COUNTRY.get(source, "MY"),
                             fetch=fetch_fn)
-    except Exception:  # never a traceback for a network or payload surprise
-        return None
+    except Exception as exc:  # never a traceback for a network or payload surprise
+        return None, (f"unavailable: {source} failed ({type(exc).__name__}: {exc})"
+                      " — try again later or paste the posting text")
     if not got:
-        return None
+        warnings = [str(w) for w in (getattr(module, "LAST_WARNINGS", []) or [])]
+        if warnings and not all("HTTP 404" in w or "HTTP 410" in w for w in warnings):
+            return None, ("unavailable: " + "; ".join(warnings)
+                          + " — try again later or paste the posting text")
+        return None, f"not found: {source} has no job {job_id}"
     job = dict(got)
     job["source"] = source
-    return job
+    return job, ""
 
 
 def fetch(target: str, *, get=None, detail_fetch=None) -> tuple[dict | None, str]:
     """`(job, "")` for a posting, or `(None, reason)`.
 
-    `reason` is `"blocked"` when only a bot challenge came back, or
+    `reason` is `"blocked"` when only a bot challenge came back,
+    `"unavailable: ..."` when the board failed (it is down, not the job), or
     `"not found: ..."` when the board has no such job / the page would not
     load. Pure apart from the injected `get` (generic HTTP) and
     `detail_fetch` (the board APIs).
     """
     source, job_id, country = classify(target)
     if source != "generic":
-        job = fetch_board(source, job_id, country, detail_fetch=detail_fetch)
+        job, reason = fetch_board(source, job_id, country, detail_fetch=detail_fetch)
         if job is None:
-            return None, f"not found: {source} has no job {job_id}"
+            return None, reason
         job.setdefault("url", "")
         if not job["url"] and "://" in target:
             job["url"] = target
@@ -340,6 +349,10 @@ def fetch(target: str, *, get=None, detail_fetch=None) -> tuple[dict | None, str
             return None, "blocked"
         if got and len(got["text"]) > len(extracted["text"]):
             extracted = {"title": got["title"] or extracted["title"], "text": got["text"]}
+    # A thin page that still trips a challenge marker is a challenge page, not
+    # a posting: never let its text through as a job description.
+    if blocked and len(extracted["text"]) < MIN_GENERIC_TEXT:
+        return None, "blocked"
     if not extracted["text"]:
         if blocked:
             return None, "blocked"

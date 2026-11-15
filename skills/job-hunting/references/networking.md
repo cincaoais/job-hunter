@@ -68,12 +68,12 @@ Days are absolute, counted from the first touch (0, 2, 5, 12).
 
 ## 4. Log every touch
 
-Workspace mode — upsert the row after each touch and set the next date;
+Upsert the row after each touch and set the next date;
 list what is due:
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py contact --name "Aisyah Rahman" --company Nimbus --relationship alumni --target "Backend Engineer" --status c --next-touch 2026-09-27 --note "commented on post"
-python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py contacts
+sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py contact --name "Aisyah Rahman" --company Nimbus --relationship alumni --target "Backend Engineer" --status c --next-touch 2026-09-27 --note "commented on post"
+sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py contacts
 ```
 
 - `contact` matches by name (+ `--company` when one name is at two
@@ -83,18 +83,16 @@ python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py contacts
 - **Status**: the last touch sent (`c`, `k`, `m`, `f`) while the sequence
   runs; `replied`, `referred`, `no reply` or `thanked` when it ends — then
   clear Next touch with `--next-touch ""` so it drops off the due list.
-- Chat mode: edit the Contacts table in profile §9 (same columns) and read
-  the due Next touch dates by hand.
 - Each week, send the number of touches on profile §8 "Weekly outreach
   target:" (`strategy.md` §5); check it at the weekly review
   (`pipeline.md` §4).
 
 ## 5. Templates — ≤ 150 words, fill every [placeholder] from the profile
 
-Scan every drafted message with `ats_check.py --slop` (workspace mode; chat
-mode: read it against `assets/slop-phrases.txt`) and replace every hit. Before
-showing a referral ask, check it has exactly one result from profile §5 and
-one question — a second result or an 'or …?' alternative is a hit; fix it.
+Scan every drafted message with `ats_check.py --slop` and replace every
+hit. Before showing a referral ask, check it has exactly one result from
+profile §5 and one question — a second result or an 'or …?' alternative is
+a hit; fix it.
 
 **Referral ask**
 > Hi [Name] — [shared context]. I'm applying for [role] on [team] at [Company] ([link]). I've spent [n] years on [Y] — for example, [one sourced result from profile §5, as stated], which lines up with [one line from the posting]. Would you be open to referring me? I've attached my resume and a three-line summary you can forward as-is, so it takes two minutes. If the timing is wrong, no problem at all — thank you either way. [Your name]
@@ -158,5 +156,4 @@ Recruiters search "Open to Work" plus recent activity as intent signals
 recruiters-only setting; the public banner only when openness is safe.
 Headline and settings: `profile-optimizer.md`.
 
-Record: workspace mode ends with the `saved:` line (contacts +N); chat
-mode regenerates the profile block.
+Record: end with the `saved:` line (contacts +N).

@@ -14,7 +14,7 @@ entries `Title — Company, City · MM/YYYY – Present` and `-` bullets).
   --pdf    that HTML rendered to A4 by headless Chromium (playwright, else
            cloakbrowser); with neither, the .html is written instead and a
            "PDF skipped" line says how to get the PDF
-  --json   JSON Resume v1 (for the Reactive Resume MCP import)
+  --json   JSON Resume v1 (portable resume data)
 
 Templates: chicago (default), executive, corporate-sidebar, accent-band,
 creative-sidebar. --photo goes into the presentation copy only; the .docx

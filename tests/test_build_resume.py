@@ -305,7 +305,7 @@ def md_copy(tmp_path):
 
 def test_cli_writes_next_to_input(md_copy, capsys):
     assert br.main([str(md_copy), "--docx", "--html", "--json", "--template", "accent-band"]) == 0
-    printed = capsys.readouterr().out.split()
+    printed = [l.strip() for l in capsys.readouterr().out.splitlines()]
     stem = md_copy.with_suffix("")
     for ext in (".docx", ".html", ".json"):
         path = stem.with_suffix(ext)

@@ -28,15 +28,15 @@ Offers do get withdrawn — 18% of Huntr users had an offer withdrawn
       day if resigning today and the earliest start (first working day after
       it).
 
-Set the Offers table Status to `accepted` (workspace: the `## Offers` table
-in `pipeline.md`; chat mode: profile §9).
+Set the Offers table Status to `accepted` (the `## Offers` table in
+`pipeline.md`).
 
 ## 2. Resign
 
 Tell the manager first, in a meeting or call, then send the letter the same
 day. No reasons, no criticism, no new employer's name unless the user wants
-to share it. Save the letter as `letters/resignation-<company>.md`
-(workspace) or deliver it inline (chat). Fill both dates: effective = the
+to share it. Save the letter as `letters/resignation-<company>.md`.
+Fill both dates: effective = the
 planned resignation day (today if none given); last working day computed
 from the contract notice. Say they move if a buyout or new start date is
 agreed.
@@ -92,7 +92,7 @@ handover." Use a counter as leverage only if it is real (facts-policy §6).
   on file → ask for names and permission in the same batch and give the
   brief with [placeholders].
 - Ask each referee's permission before giving their details; record it in
-  the References table of `answers.md` (chat mode: the Answers section).
+  the References table of `answers.md`.
   The current manager only after resigning, and only if the user chooses.
 - Brief each referee in one message: the role and company, when to expect
   the call, and two points they can speak to from the user's real work
@@ -128,7 +128,7 @@ or the pasted JD) and the dossier through three phases:
 | Days 61–90 — **own** | an area end to end | an outcome agreed with the manager | the outcome vs the agreed target |
 
 Share it with the manager in week one and adjust. Save as
-`dossiers/<company>-30-60-90.md` (workspace) or deliver it inline (chat).
+`dossiers/<company>-30-60-90.md`.
 
 ## 8. Probation review
 
@@ -142,26 +142,24 @@ Share it with the manager in week one and adjust. Save as
 
 ## 9. Close the pipeline
 
-Workspace mode — the `withdrawn` line only after that withdrawal is sent:
+The `withdrawn` line only after that withdrawal is sent:
 
 ```
-python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "X" --stage accepted --next "Serve notice; start at X" --due <start-date>
-python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "Y" --stage withdrawn --note "withdrew after accepting X"
+sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py set --company "X" --stage accepted --next "Serve notice; start at X" --due <start-date>
+sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py set --company "Y" --stage withdrawn --note "withdrew after accepting X"
 ```
 
 Draft a withdrawal for every other open process now; send each once the
 background check clears and the start date is agreed in writing, then set
-`withdrawn` (chat mode: set Stage in the profile §9 pipeline table by hand).
-Scan every drafted message with `ats_check.py --slop` (workspace mode; chat
-mode: read it against `assets/slop-phrases.txt`) and replace every hit.
+`withdrawn`.
+Scan every drafted message with `ats_check.py --slop` and replace every hit.
 
 > Hi [Name], thank you for your time on the [role] process. I've accepted another offer and am withdrawing my application. I enjoyed [one specific thing], and I'd be glad to stay in touch. [Your name]
 
 - Thank referrers and helpful contacts (`networking.md` §5), then set
   their Status to `thanked` and clear Next touch
-  (`tracker.py contact --name … --status thanked --next-touch ""`; chat
-  mode: the Contacts table).
+  (`tracker.py contact --name … --status thanked --next-touch ""`).
 - Update profile §1 (current title, Search status) and profile §5 (the
-  new role); stop any recurring `/loop` or `/schedule` search digest.
-- Workspace mode ends with the `saved:` line; chat mode regenerates the
-  profile block.
+  new role); if you set up a recurring search (for example with `/loop` or
+  `/schedule`), stop it.
+- End with the `saved:` line (SKILL.md closing step).

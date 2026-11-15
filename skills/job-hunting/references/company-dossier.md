@@ -67,7 +67,6 @@ Older than 30 days before an interview → refresh Health & news first.
 - Hand the salary intel to `references/offer-coach.md` when an offer
   follows.
 - Save the dossier's one-line takeaway and any red flags to the pipeline
-  row's Notes — workspace mode: the dossier as `dossiers/<company>.md` and
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" [--role "<Y>"] --note "…"`;
-  chat mode: the profile §9 Pipeline row. Then the closing step for the
-  storage mode (SKILL.md).
+  row's Notes — the dossier as `dossiers/<company>.md` and
+  `sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py set --company "<X>" [--role "<Y>"] --note "…"`.
+  Then the closing step (SKILL.md).

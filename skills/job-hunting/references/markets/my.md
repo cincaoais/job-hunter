@@ -13,10 +13,12 @@ suggest a qualified professional (SKILL.md).
 |---|---|---|---|
 | JobStreet by SEEK | volume | The default apply channel at every level | `jobstreet` |
 | LinkedIn | mid-senior | Mid-senior roles, recruiter sourcing, referral paths | `linkedin` (guest search) |
-| Hiredly | niche | Junior–mid and startup roles; also a hybrid board/headhunter | `hiredly` |
+| Hiredly | niche | Junior–mid and startup roles; also a hybrid board/headhunter | — (search by hand) |
 | Glints | niche | Tech and startup roles | — (scoped web search) |
 | MYFutureJobs | government | Government job portal — not in the compiled notes (unverified) | — |
 | MauKerja, JobStore | skip | Lowyat forum users rate them poorly | — |
+
+- **Automated boards**: the job hunter queries JobStreet and LinkedIn automatically; Hiredly, Glints and MYFutureJobs can be searched by hand.
 
 - **JobStreet vs LinkedIn**: JobStreet is the apply channel at every level;
   LinkedIn skews mid-to-senior and serves networking, vetting and recruiter

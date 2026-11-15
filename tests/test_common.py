@@ -79,6 +79,20 @@ def test_write_then_read_table_round_trips_pipe_in_cell():
     assert c.read_table(out)[1][1]["Notes"] == "A|B"
 
 
+def test_read_table_keeps_raw_pipe_in_last_cell():
+    md = "| A | B |\n|---|---|\n| x | note with | pipe |\n"
+    cols, rows = c.read_table(md)
+    assert cols == ["A", "B"]
+    assert rows == [{"A": "x", "B": "note with | pipe"}]
+
+
+def test_read_write_read_table_round_trips_raw_pipe_in_last_cell():
+    md = "| A | B |\n|---|---|\n| x | note with | pipe |\n"
+    cols, rows = c.read_table(md)
+    out = c.write_table(md, cols, rows)
+    assert c.read_table(out)[1][0]["B"] == "note with | pipe"
+
+
 # --- http helpers ------------------------------------------------------------
 
 class _FakeResp:
@@ -232,6 +246,13 @@ def test_first_two_ints():
     assert c.first_two_ints("Undisclosed") == (None, None)
     assert c.first_two_ints("") == (None, None)
 
+def test_to_monthly():
+    assert c.to_monthly(120000, 120000, "RM 120,000 per year") == (10000, 10000)
+    assert c.to_monthly(50, 50, "50 per hour") == (8650, 8650)
+    assert c.to_monthly(8000, 12000, "MYR8,000 - MYR12,000 per month") == (8000, 12000)
+    assert c.to_monthly(None, None, "") == (None, None)
+
+
 def test_loads_or_empty_and_shape_guards():
     assert c.loads_or_empty(b'{"a": 1}') == {"a": 1}
     assert c.loads_or_empty("not json") == {}
@@ -247,3 +268,23 @@ def test_finish_detail_drops_empty_records():
     assert c.finish_detail(c.detail_record()) is None
     assert c.finish_detail(c.detail_record(title="Dev"))["title"] == "Dev"
     assert c.finish_detail(c.detail_record(description_md="long text")) is not None
+
+
+def test_write_text_atomic_writes_and_overwrites(tmp_path):
+    path = tmp_path / "nested" / "pipeline.md"
+    c.write_text_atomic(path, "# Pipeline\n")
+    assert path.read_text(encoding="utf-8") == "# Pipeline\n"
+    c.write_text_atomic(path, "# Pipeline\n| A | B |\n")
+    assert path.read_text(encoding="utf-8") == "# Pipeline\n| A | B |\n"
+
+
+def test_write_text_atomic_leaves_no_extra_files(tmp_path):
+    path = tmp_path / "pipeline.md"
+    c.write_text_atomic(path, "text\n")
+    assert sorted(p.name for p in tmp_path.iterdir()) == ["pipeline.md"]
+
+
+def test_write_text_atomic_uses_lf_newlines(tmp_path):
+    path = tmp_path / "review.md"
+    c.write_text_atomic(path, "a\nb\n")
+    assert path.read_bytes() == b"a\nb\n"

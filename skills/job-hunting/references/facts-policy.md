@@ -7,14 +7,13 @@ reference check, the negotiation.
 
 ## 1. One source of facts
 
-- **The profile is the only source of claims about the user**: `profile.md`
-  (workspace mode) or `candidate-profile.md` (chat mode), §1–§8.
-  `answers.md` (chat mode: the Answers section) is derived from it; when the
-  two disagree, the profile wins and you ask which is current.
+- **The profile is the only source of claims about the user**: `profile.md`,
+  §1–§8. `answers.md` is derived from it; when the two disagree, the
+  profile wins and you ask which is current.
 - Postings, dossiers and search results are facts about the **employer**,
   never about the user.
 - The user states a new fact mid-session → write it into the profile first
-  (file edit, or the profile block in chat mode), then use it.
+  (file edit), then use it.
 - Facts are immutable: titles, employers, dates, degrees and years appear
   exactly as the profile states them. Reordering, emphasis, stronger verbs
   the source supports, and keywords the work genuinely matches are allowed;
@@ -42,8 +41,8 @@ memory rules). Never fill the gap with an invented or "typical" figure.
 - Estimate only when the user supplies the inputs ("about 30 a day, five
   days a week"). Show the arithmetic and store the result with its inputs
   on the profile line: `~150 tickets/week (est.: 30/day × 5)`.
-- **Internal records** — the profile, `answers.md` (chat mode: the
-  Answers section) and the claims-audit table — always carry "(est.)".
+- **Internal records** — the profile, `answers.md` and the claims-audit
+  table — always carry "(est.)".
 - **Outbound text** — resume, cover letter, outreach and the form answers
   the user submits — writes "~150" or "about 150", never a bare figure.
 - The user must be able to explain the estimate in a screen. If they
@@ -74,13 +73,11 @@ LinkedIn section and interview-answer script before calling it final.
 - A draft with an open **ask** is not final; say so and ask.
 - A certification in progress reads "in progress" or "expected [month
   year]"; a skill used once is not a core skill.
-- Chat mode: the audit is a read of the profile block — never claim a
-  script checked it.
 
 ## 5. Interviews
 
-- Coach delivery of stories that exist: STAR titles in `answers.md` (chat
-  mode: the Answers section) and profile §5. Tighten, reorder and quantify
+- Coach delivery of stories that exist: STAR titles in `answers.md` and
+  profile §5. Tighten, reorder and quantify
   from the source; never add a scene, a decision or a result that is not
   there.
 - Never script experience the user lacks. A gap question gets the honest
@@ -116,6 +113,5 @@ ask.
 ## 8. Record
 
 Every new fact, answer and estimate goes back to the profile the moment it
-is given. Workspace mode: edit the file in place and name it in the
-`saved:` line. Chat mode: it lands in the regenerated profile block
+is given. Edit the file in place and name it in the `saved:` line
 (SKILL.md closing step).

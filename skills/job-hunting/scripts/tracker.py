@@ -16,8 +16,9 @@ daily view, the weekly funnel and the weekly review file.
 
 Every write sets `Last touch` to today unless `--last-touch` is given, and
 `--today YYYY-MM-DD` overrides the clock for every command. Exit codes: 0 on
-success — including "no workspace found", because the today/review skills run
-this inline and a non-zero exit would abort them — and 2 for bad input.
+success — read commands also exit 0 when no workspace is found, because the
+today/review skills run them inline and a non-zero exit would abort them — 2 for
+bad input, and 2 for a write command that found no workspace.
 """
 from __future__ import annotations
 
@@ -31,7 +32,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _common import (  # noqa: E402
-    read_table, slugify, today as today_iso, use_utf8_output, workspace_dir, write_table)
+    read_table, slugify, today as today_iso, use_utf8_output, workspace_dir, write_table,
+    write_text_atomic)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 
@@ -57,6 +59,9 @@ SENT_OPEN_STAGES = frozenset({"applied", "screen", "interview", "final", "offer"
 # "never replied" and "without response" out of the response count.
 REPLY_NOTE_RE = re.compile(r"(?<!no )(?<!never )(?<!without )(reply|replied|response|rejected by)",
                            re.I)
+# A closed row remembers how far it got in a `reached: <stage>` Notes marker,
+# written by `set --stage rejected` (see _reached and the funnel --help).
+REACHED_RE = re.compile(r"\breached:?\s*(screen|interview|final|offer)\b", re.I)
 
 PIPELINE_COLUMNS = ["Company", "Role", "Source", "Channel", "Applied", "Stage",
                     "Next action", "Due", "Last touch", "Resume", "Notes"]
@@ -91,6 +96,9 @@ counting rules:
               response" are not
   Interviews  Stage in interview/final/offer/accepted
   Offers      Stage in offer/accepted
+  Closed rows (rejected/withdrawn/cold) count for the stages named by a
+              "reached: <stage>" note, which `set --stage rejected` adds
+              automatically when the row was at screen/interview/final/offer
 Leak diagnosis: fewer than 10 sent -> too small to diagnose; otherwise the
 first failing stage — response % < 10 -> targeting; responses >= 3 and
 interviews == 0 -> screen performance; interviews >= 3 and offers == 0 ->
@@ -110,6 +118,15 @@ def _cell(row: dict, key: str) -> str:
 def _stage(row: dict) -> str:
     """The row's stage, lowercased; a blank stage reads as `saved`."""
     return _cell(row, "Stage").lower() or "saved"
+
+
+def _reached(row: dict) -> str:
+    """The furthest stage the row got to, even after it was closed."""
+    stage = _stage(row)
+    if stage in RESPONSE_STAGES or stage in ("applied", "saved"):
+        return stage
+    matches = REACHED_RE.findall(_cell(row, "Notes"))
+    return matches[-1].lower() if matches else stage
 
 
 def parse_date(value: str | None) -> datetime.date | None:
@@ -166,8 +183,7 @@ def _read(path: Path, columns: list[str]) -> tuple[list[str], list[dict]]:
 def _write(path: Path, columns: list[str], rows: list[dict]) -> None:
     md = path.read_text(encoding="utf-8") if path.exists() else ""
     out = write_table(md, columns, rows)
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(out)
+    write_text_atomic(path, out)
 
 
 def pipeline_path(ws: Path) -> Path:
@@ -206,8 +222,7 @@ def set_review_line(ws: Path, iso: str) -> None:
         out = (md.rstrip("\n") + "\n\n" + line + "\n") if md.strip() else line + "\n"
     if not out.endswith("\n"):
         out += "\n"
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(out)
+    write_text_atomic(path, out)
 
 
 # --- today view (pure) -------------------------------------------------------
@@ -301,10 +316,12 @@ def today_report(rows: list[dict], contacts_rows: list[dict], date,
     out += _section("Overdue", [
         line(r, f"due {_cell(r, 'Due')} ({_days(_age(r, 'Due', day))} late) · {_next_action(r)}")
         for r in data["overdue"]])
+    # The Due on an interview-stage row is usually the interview date, but it
+    # may be any next action — so show that action instead of assuming.
     out += _section("Debriefs due", [
-        line(r, f"interviewed {_cell(r, 'Due')} ({_days(_age(r, 'Due', day))} ago) "
-                f"→ run `/job-hunter:interview debrief`")
-        for r in data["debriefs_due"]], note="interviewed, no debrief written yet")
+        line(r, f"due {_cell(r, 'Due')} ({_days(_age(r, 'Due', day))} ago) · {_next_action(r)} "
+                f"· no debrief yet → if this was the interview, run `/job-hunter:interview debrief`")
+        for r in data["debriefs_due"]], note="past due on an interview-stage row with no debrief file")
     out += _section("Due today", [line(r, _next_action(r)) for r in data["due_today"]])
     out += _section("Interviews within 7 days", [
         line(r, f"{_cell(r, 'Due')} (in {_days(-_age(r, 'Due', day))}) · {_next_action(r)}")
@@ -332,7 +349,7 @@ def today_report(rows: list[dict], contacts_rows: list[dict], date,
 
 def _is_response(row: dict) -> bool:
     stage = _stage(row)
-    if stage in RESPONSE_STAGES:
+    if _reached(row) in RESPONSE_STAGES:
         return True
     return stage == "rejected" and bool(REPLY_NOTE_RE.search(_cell(row, "Notes")))
 
@@ -340,8 +357,8 @@ def _is_response(row: dict) -> bool:
 def _bucket(key: str, rows: list[dict]) -> dict:
     sent = [r for r in rows if _stage(r) != "saved"]
     responses = [r for r in sent if _is_response(r)]
-    interviews = [r for r in sent if _stage(r) in INTERVIEWED_STAGES]
-    offers = [r for r in sent if _stage(r) in OFFER_STAGES]
+    interviews = [r for r in sent if _reached(r) in INTERVIEWED_STAGES]
+    offers = [r for r in sent if _reached(r) in OFFER_STAGES]
     return {
         "key": key, "rows": len(rows), "sent": len(sent), "responses": len(responses),
         "interviews": len(interviews), "offers": len(offers),
@@ -477,8 +494,12 @@ def _apply_fields(row: dict, args, touch: str, *, creating: bool) -> None:
         if value is not None:
             row[column] = value
     stage = getattr(args, "stage", None)
+    previous = _stage(row)
     if stage:
         row["Stage"] = stage.lower()
+        if (previous in ("screen", "interview", "final", "offer")
+                and _stage(row) in ("rejected", "withdrawn", "cold")):
+            row["Notes"] = _append_note(_cell(row, "Notes"), f"reached: {previous}")
     notes = getattr(args, "notes", None)
     if notes is not None:
         row["Notes"] = notes if creating else _append_note(_cell(row, "Notes"), notes)
@@ -625,15 +646,13 @@ def cmd_digest(ws: Path, args, date: datetime.date) -> int:
         f"# Weekly review — {iso}",
         "",
         funnel_report(rows, date),
-        today_report(rows, contacts_rows, date),
+        today_report(rows, contacts_rows, date, debrief_dates(ws)),
         "_Next: apply the one recommended change, then set this week's application cap "
         "and outreach target._",
         "",
     ])
     out = ws / "reviews" / f"{iso}.md"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(text)
+    write_text_atomic(out, text)
     set_review_line(ws, iso)
     print(f"Wrote {out}\nLast weekly review in pipeline.md is now {iso}.")
     return 0
@@ -722,8 +741,8 @@ def main(argv=None) -> int:
 
     ws = workspace_dir()
     if not _has_workspace(ws):
-        print(f"No workspace found — run: python3 {SCRIPT_DIR / 'workspace.py'} init")
-        return 0
+        print(f"No workspace found — run: sh {SCRIPT_DIR / 'jh'} workspace.py init")
+        return 2 if args.cmd in WRITERS else 0
 
     problem = _bad_dates(args) or _bad_stage(getattr(args, "stage", None))
     if problem:

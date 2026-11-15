@@ -1,6 +1,6 @@
 {
   "name": "job-hunter",
-  "version": "6.1.0",
+  "version": "7.0.0",
   "description": "Personal job-search agent and career coach: sourcing, fit checks, resumes, networking, interviews, offers, pipeline — MY/SG first, market-agnostic.",
   "author": { "name": "Johannes Tang" },
   "repository": "https://github.com/cincaoais/job-hunter",

@@ -28,4 +28,4 @@ _Pointers into answers.md (tell me about yourself, why this company, strength an
 
 ## Lessons to apply
 
-_From interviews/question-bank.md and, when this workspace sits in a career vault, the wiki playbooks for this round type._
+_From interviews/question-bank.md._

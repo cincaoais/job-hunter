@@ -3,7 +3,7 @@
 
 Reads search criteria from the workspace `profile.md` (§1–§3), queries the
 board sources in `sources/`, drops stale postings, applies dealbreaker /
-salary / must-have knockouts, dedupes against `seen-jobs.json` and prints a
+salary knockouts, dedupes against `seen-jobs.json` and prints a
 ranked markdown table (or JSON).
 
   python3 search_jobs.py --markdown
@@ -31,30 +31,25 @@ from _common import (  # noqa: E402
 
 # Board priority: which board wins when the same posting shows up twice, and
 # the last tie-break when ranking.
-SOURCE_PRIORITY = ("jobstreet", "mcf", "linkedin", "hiredly", "indeed")
+SOURCE_PRIORITY = ("jobstreet", "mcf", "linkedin")
 # Sources that only serve one market; everything else is tried for either.
-SOURCE_COUNTRIES = {"mcf": {"SG"}, "hiredly": {"MY"}}
+SOURCE_COUNTRIES = {"mcf": {"SG"}}
 # Sources queried when neither the flags nor the profile name any.
-DEFAULT_SOURCES = ("jobstreet", "mcf", "linkedin", "hiredly")
+DEFAULT_SOURCES = ("jobstreet", "mcf", "linkedin")
 # Profile board names ("JobStreet MY") matched by substring.
 BOARD_ALIASES = (
     ("jobstreet", "jobstreet"), ("linkedin", "linkedin"),
     ("mycareersfuture", "mcf"), ("mcf", "mcf"),
-    ("hiredly", "hiredly"), ("indeed", "indeed"),
 )
 
 # The currency a floor with no stated currency is read in: the search market's.
 MARKET_CURRENCY = {"MY": "MYR", "SG": "SGD"}
-MISSING_MUST_HAVE = "missing must-have"
-# The soft bucket can run into the hundreds on a broad query; the table is a
-# digest, so only the top rows are printed (--json carries all of them).
-NEEDS_LOOK_ROWS = 10
 COLUMNS = ["#", "Posted", "Source", "Company", "Role", "Location / mode", "Salary", "Link"]
 
 _FIELD_RE = re.compile(r"^\s*[-*]\s*\*\*(?P<label>[^*]+?)\*\*\s*:?\s*(?P<value>.*)$")
 _SPLIT_RE = re.compile(r"[,;]")
 _DATE_RE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
-_NUM_RE = re.compile(r"(\d[\d,]*)\s*([kK])?")
+_NUM_RE = re.compile(r"(\d[\d,]*(?:\.\d+)?)\s*([kK])?")
 _ANNUAL_RE = re.compile(r"per\s*(?:year|annum)|annually|annual|yearly|/\s*yr|\bp\.?\s?a\.?\b")
 _MONTHLY_RE = re.compile(r"per\s*month|monthly|/\s*mo|\bp\.?\s?m\.?\b|a month")
 _CURRENCY_RE = re.compile(r"\b(?:(rm|myr|ringgit)|(s\$|sg\$|sgd))(?![a-z])")
@@ -68,13 +63,6 @@ _CATEGORY_TAILS = {
     "industry", "industries", "sector", "sectors", "company", "companies",
     "firm", "firms", "business", "businesses", "space", "field",
 }
-# Words carried by must-have phrases that say nothing about a posting.
-_STOPWORDS = {
-    "a", "an", "and", "any", "are", "as", "at", "be", "but", "by", "for", "from",
-    "have", "in", "is", "it", "its", "must", "no", "not", "of", "on", "or", "posting",
-    "postings", "primarily", "role", "roles", "that", "the", "to", "with", "within",
-}
-
 
 # --- criteria ----------------------------------------------------------------
 
@@ -121,17 +109,24 @@ def _salary_floor(value: str) -> int | None:
     """Monthly floor from a salary expectation line.
 
     The first number worth >= 1000 wins, so leading noise ("up to 8 months
-    bonus") is skipped. A `k`/`K` suffix multiplies by 1000 ("RM9k" -> 9000),
-    and a line that says per year / annual / p.a. / yr — and does not also say
-    per month — is divided by 12 ("RM 120,000 per year" -> 10000).
+    bonus") is skipped. A `k`/`K` suffix multiplies by 1000 ("RM9k" -> 9000,
+    "RM 1.5k" -> 1500). A line that says per year / annual / p.a. / yr — and
+    does not also say per month — is divided by 12 ("RM 120,000 per year" ->
+    10000). When the line states both an annual and a monthly figure, the
+    monthly one wins ("RM 120,000 per year (RM 10,000/month)" -> 10000).
     """
     text = (value or "").lower()
-    annual = bool(_ANNUAL_RE.search(text)) and not _MONTHLY_RE.search(text)
+    annual = bool(_ANNUAL_RE.search(text))
+    monthly = bool(_MONTHLY_RE.search(text))
+    nums = []
     for raw, suffix in _NUM_RE.findall(text):
-        n = int(raw.replace(",", "")) * (1000 if suffix else 1)
+        n = float(raw.replace(",", "")) * (1000 if suffix else 1)
         if n >= 1000:
-            return round(n / 12) if annual else n
-    return None
+            nums.append(n)
+    if not nums:
+        return None
+    n = min(nums) if (annual and monthly) else nums[0]
+    return round(n / 12) if (annual and not monthly) else round(n)
 
 
 def _salary_currency(value: str) -> str:
@@ -172,7 +167,6 @@ def read_criteria(profile_md: str) -> dict:
         "country": _country_of(f.get("job market / country i'm hunting in", "")) or "MY",
         "salary_min": _salary_floor(f.get("salary expectation", "")),
         "salary_currency": _salary_currency(f.get("salary expectation", "")),
-        "must_have": _split(f.get("must-haves in a posting", "")),
         "dealbreakers": _split(f.get("dealbreakers (must avoid)", "")),
         "boards": _boards(f.get("job boards to search", "")),
     }
@@ -226,16 +220,6 @@ def _dealbreaker_res(phrase: str) -> list[re.Pattern]:
     return out
 
 
-def _must_have_tokens(phrases) -> set[str]:
-    """Significant words of the must-have entries ("hybrid or remote" -> both)."""
-    tokens = set()
-    for phrase in phrases or []:
-        for word in _WORD_RE.findall(str(phrase).lower()):
-            if word not in _STOPWORDS and len(word) > 1:
-                tokens.add(word)
-    return tokens
-
-
 def _floor_currency(criteria: dict) -> str:
     """The floor's currency: stated in the profile, else the search market's ("" if neither)."""
     stated = str(criteria.get("salary_currency") or "").upper()
@@ -260,11 +244,8 @@ def _is_floor_comparable(job: dict, criteria: dict) -> bool:
 def knockout(job: dict, criteria: dict) -> str | None:
     """Why this posting is out, or None to keep it.
 
-    Dealbreakers are matched against title + company + teaser, must-haves
-    against title + teaser only (a must-have is about the work, not the
-    employer). The salary floor only applies to pay in its own currency.
-    "missing must-have" is soft: callers put those rows in a "needs a look"
-    list instead of dropping them.
+    Dealbreakers are matched against title + company + teaser. The salary
+    floor only applies to pay in its own currency.
     """
     haystack = " ".join(str(job.get(k) or "") for k in ("title", "company", "teaser")).lower()
     for phrase in criteria.get("dealbreakers") or []:
@@ -276,13 +257,6 @@ def knockout(job: dict, criteria: dict) -> str | None:
     if (floor and isinstance(top, (int, float)) and top < floor
             and _is_floor_comparable(job, criteria)):
         return "salary below floor"
-
-    tokens = _must_have_tokens(criteria.get("must_have"))
-    if tokens:
-        text = " ".join(str(job.get(k) or "") for k in ("title", "teaser")).lower()
-        words = set(_WORD_RE.findall(text))
-        if not (tokens & words):
-            return MISSING_MUST_HAVE
     return None
 
 
@@ -320,15 +294,16 @@ def rank(jobs: list[dict]) -> list[dict]:
 
 
 def _pair_key(job: dict) -> str:
-    return slugify(f"{job.get('company') or ''} {job.get('title') or ''}")
+    city = (job.get("location") or "").split(",")[0].strip()
+    return slugify(f"{job.get('company') or ''} {job.get('title') or ''} {city}")
 
 
 def dedupe(jobs: list[dict], seen: dict, *, today: str | None = None,
            keep_seen: bool = False) -> tuple[list[dict], dict]:
     """Collapse duplicates and drop postings seen on an earlier run.
 
-    Duplicate ids and same-company-same-title pairs across boards collapse to
-    one row (the highest-priority board wins). Returns the kept rows plus a
+    Duplicate ids and same-company-same-title-same-city triples across boards
+    collapse to one row (the highest-priority board wins). Returns the kept rows plus a
     copy of `seen` with `seen[id] = first_seen_date` for every row that was
     not already in it; the caller's dict is left alone.
     """
@@ -433,7 +408,7 @@ def _is_fresh(job: dict, days, today: str) -> bool:
 
 def run(criteria: dict, *, sources: dict, seen: dict, today: str | None = None,
         all_: bool = False) -> dict:
-    """Search every source and split the results into new / needs-look / out.
+    """Search every source and split the results into new / out.
 
     Pure apart from the injected source modules: `sources` maps a name to
     anything with the `search()` signature, so tests use stubs.
@@ -442,17 +417,11 @@ def run(criteria: dict, *, sources: dict, seen: dict, today: str | None = None,
     raw, stats = _gather(criteria, sources)
     fresh = [j for j in raw if _is_fresh(j, criteria.get("days"), stamp)]
 
-    # Rows are marked by object identity: dedupe/rank pass the same dicts
-    # through, and nothing is written into the records themselves.
-    soft_rows: set[int] = set()
     knocked: list[tuple[dict, str]] = []
     kept: list[dict] = []
     for job in fresh:
         reason = knockout(job, criteria)
         if reason is None:
-            kept.append(job)
-        elif reason == MISSING_MUST_HAVE:
-            soft_rows.add(id(job))
             kept.append(job)
         else:
             knocked.append((job, reason))
@@ -463,12 +432,9 @@ def run(criteria: dict, *, sources: dict, seen: dict, today: str | None = None,
     # posting is never written to `seen` and is re-evaluated on the next run
     # once the profile's dealbreakers or salary floor change.
     survivors, updated = dedupe(kept, seen or {}, today=stamp, keep_seen=all_)
-    ranked = rank(survivors)
-    new = [j for j in ranked if id(j) not in soft_rows]
-    needs_look = [j for j in ranked if id(j) in soft_rows]
+    new = rank(survivors)
     return {
         "new": new,
-        "needs_look": needs_look,
         "knocked_out": [[job, reason] for job, reason in knocked],
         "sources": stats,
         "seen": updated,
@@ -515,7 +481,7 @@ def _table(jobs: list[dict]) -> str:
 
 
 def _sources_line(sources: dict | None) -> str:
-    """"Sources: jobstreet 42 · indeed skipped: pip install python-jobspy"."""
+    """"Sources: jobstreet 42 · mcf skipped: SG only"."""
     parts = []
     for name in sorted(sources or {}, key=lambda n: (_priority({"source": n}), n)):
         stat = (sources or {}).get(name) or {}
@@ -531,26 +497,17 @@ def _sources_line(sources: dict | None) -> str:
     return "Sources: " + (" · ".join(parts) if parts else "none")
 
 
-def render_markdown(jobs: list[dict], knocked: list, *, needs_look=(), sources=None,
+def render_markdown(jobs: list[dict], knocked: list, *, sources=None,
                     seen_before: int = 0) -> str:
-    """The shortlist: headline, ranked table, needs-a-look, knockouts, sources."""
-    needs_look = list(needs_look or [])
+    """The shortlist: headline, ranked table, knockouts, sources."""
     knocked = list(knocked or [])
     count = len(jobs)
     noun = "posting" if count == 1 else "postings"
     headline = f"{count} new {noun}" if count else "0 new since last run"
-    tail = (f"{len(knocked)} knocked out, {len(needs_look)} needs a look, "
-            f"{seen_before} seen before")
+    tail = f"{len(knocked)} knocked out, {seen_before} seen before"
     out = [f"## {headline} ({tail})", ""]
     if jobs:
         out += [_table(jobs), ""]
-    if needs_look:
-        shown = needs_look[:NEEDS_LOOK_ROWS]
-        out += ["### Needs a look", "",
-                "Missing every must-have from the profile — check before skipping.", "",
-                _table(shown), ""]
-        if len(needs_look) > len(shown):
-            out += [f"… and {len(needs_look) - len(shown)} more (--json for the rest).", ""]
     if knocked:
         out += ["### Knocked out", ""]
         for job, reason in knocked:
@@ -565,7 +522,7 @@ def render_markdown(jobs: list[dict], knocked: list, *, needs_look=(), sources=N
 # --- CLI ---------------------------------------------------------------------
 
 def default_sources(country: str) -> list[str]:
-    """The default board list for a market (Indeed only when asked for)."""
+    """The default board list for a market."""
     c = (country or "").upper()
     return [n for n in DEFAULT_SOURCES if not _source_skip(n, c)]
 
@@ -654,11 +611,11 @@ def main(argv=None) -> int:
     result = run(criteria, sources=get_sources(names), seen=seen, all_=args.all_)
 
     if args.as_json:
-        print(json.dumps({k: result[k] for k in ("new", "needs_look", "knocked_out", "sources")},
+        print(json.dumps({k: result[k] for k in ("new", "knocked_out", "sources")},
                          indent=2))
     else:
         print(render_markdown(result["new"], result["knocked_out"],
-                              needs_look=result["needs_look"], sources=result["sources"],
+                              sources=result["sources"],
                               seen_before=result["seen_before"]), end="")
 
     if not args.no_seen and ws.exists():

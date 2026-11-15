@@ -101,11 +101,20 @@ def test_outcome_updates_only_the_newest_debrief(ws, capsys):
     assert meta(ws / FOLDER / "2026-09-12-debrief-hr-screen.md")["outcome"] == "advanced"
 
 
-@pytest.mark.parametrize("argv", [("bank",), ("outcome", "--company", COMPANY, "--role", ROLE, "--outcome", "offer")])
-def test_no_workspace_is_not_an_error(tmp_path, monkeypatch, capsys, argv):
+def test_bank_with_no_workspace_is_not_an_error(tmp_path, monkeypatch, capsys):
+    monkeypatch.setenv("JOB_HUNT_DIR", str(tmp_path))
+    code, out = run(capsys, "bank")
+    assert code == 0 and "No workspace found — run: sh" in out
+
+
+@pytest.mark.parametrize("argv", [
+    ("new", "--kind", "prep", "--company", COMPANY, "--role", ROLE, "--round-type", "final"),
+    ("outcome", "--company", COMPANY, "--role", ROLE, "--outcome", "offer"),
+])
+def test_write_with_no_workspace_exits_two(tmp_path, monkeypatch, capsys, argv):
     monkeypatch.setenv("JOB_HUNT_DIR", str(tmp_path))
     code, out = run(capsys, *argv)
-    assert code == 0 and "No workspace found — run: python3" in out
+    assert code == 2 and "No workspace found — run: sh" in out
 
 
 def fill(path, heading, columns, rows):

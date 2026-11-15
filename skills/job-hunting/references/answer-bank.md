@@ -7,9 +7,7 @@ the user submits. Every answer follows `facts-policy.md`.
 
 ## 1. Where the answers live
 
-- Workspace mode: `answers.md` (created from `assets/answers-template.md`).
-- Chat mode: the `### Answers` section in profile §9
-  (`candidate-profile.md`), with the same headings.
+- `answers.md` (created from `assets/answers-template.md`).
 - Each answer traces to a profile line: salary → profile §3, notice and
   work authorization → profile §1, relocation → profile §3, years and
   stories → profile §5. On a conflict the profile wins; ask which is
@@ -53,9 +51,10 @@ market sources in `markets/<cc>.md` — never from memory.
 - **Salary**: the single number for that market; a range only where free
   text allows.
 - Respect field limits; plain text, no formatting, paste-ready.
-- Log what was stated so the offer stage matches:
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "X" --note "answers: [salary]; notice [n]"`
-  (chat mode: the pipeline row's Notes).
+- Log what was stated so the offer stage matches — only when a pipeline row
+  for that company and role already exists; if there is no row yet, skip the
+  tracker note:
+  `sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py set --company "X" --note "answers: [salary]; notice [n]"`
 
 ## 4. Knockout questions — answer honestly
 
@@ -85,15 +84,13 @@ the background check.
 | Workday | Expect an account per employer. The resume parse pre-fills fields — check every parsed title and date against the profile before saving. Paste answers as plain text. |
 | Greenhouse / Lever | One page; custom questions follow the standard fields. Optional fields stay optional; voluntary demographic questions are the user's call. |
 | JobStreet (MY / SG) | The expected-salary field takes **one number**: set it near the bottom of the true range so band-matching does not exclude the user; add "(negotiable)" where free text allows; leave it blank when optional and the user prefers (`markets/my.md`). seekAI ranks applicants on resume + JD + the employer's past behaviour, and profile completeness feeds its approachability signal — keep the profile complete (`profile-optimizer.md`). |
-| MyCareersFuture | Workspace mode: `python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_posting.py <url> --save` writes the employer's questions to `screening_questions:` in the posting's frontmatter — answer each from `answers.md`, in order, before applying. The posted min/max band sanity-checks the salary number. Chat mode: ask the user to paste the questions from the apply page. |
+| MyCareersFuture | `sh ${CLAUDE_SKILL_DIR}/scripts/jh fetch_posting.py <url> --save` writes the employer's questions to `screening_questions:` in the posting's frontmatter — answer each from `answers.md`, in order, before applying. The posted min/max band sanity-checks the salary number. |
 | LinkedIn Easy Apply | Prefer the direct posting (`sourcing.md` §4); if Easy Apply is the only route, reuse the same answers. |
 
 ## 6. Never auto-submit
 
 The skill drafts; the user reviews, pastes and presses submit. No logging
-in to boards, no form-filling, no submitting on the user's behalf. In chat
-mode never claim a posting was fetched or a form was read — ask for the
-paste.
+in to boards, no form-filling, no submitting on the user's behalf.
 
 ## 7. Keep it current
 
@@ -103,5 +100,5 @@ paste.
 - A new market → add a row to each per-market table.
 - Before each use, echo the load-bearing answers in one line ("RM [n],
   1 month notice, Malaysian citizen — still right?").
-- Workspace mode: edit `answers.md` in place and name it in the `saved:`
-  line. Chat mode: regenerate the profile block.
+- Edit `answers.md` in place; end with the `saved:` line (SKILL.md closing
+  step).

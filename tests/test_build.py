@@ -1,5 +1,4 @@
-import fnmatch, pathlib, sys, zipfile
-import pytest
+import fnmatch, json, pathlib, re, sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import build
 
@@ -68,33 +67,6 @@ def test_check_skill_line_count_boundary(tmp_path):
     bad_problems = build.check_skill(bad_dir)
     assert any("lines" in p for p in bad_problems)
 
-def test_link_skills_refuses_real_dir(tmp_path, monkeypatch):
-    monkeypatch.setattr(build.Path, "home", lambda: tmp_path)
-    dest = tmp_path / ".claude" / "skills" / "job-hunting"
-    dest.mkdir(parents=True)
-    marker = dest / "keep-me.txt"
-    marker.write_text("hello", encoding="utf-8")
-
-    build.link_skills()
-    assert marker.exists()
-    assert not dest.is_symlink()
-
-    build.link_skills(force=True)
-    if sys.platform == "win32":
-        assert dest.is_symlink() or (dest.is_dir() and (dest / "SKILL.md").exists())
-    else:
-        assert dest.is_symlink()
-
-def test_build_zip_is_lf_and_deterministic(tmp_path):
-    out1 = build.build_zip(SKILL, tmp_path / "a.skill")
-    out2 = build.build_zip(SKILL, tmp_path / "b.skill")
-    assert out1.read_bytes() == out2.read_bytes()
-    with zipfile.ZipFile(out1) as z:
-        names = z.namelist()
-        assert "job-hunting/SKILL.md" in names
-        assert not any(n.endswith(".DS_Store") or "__pycache__" in n for n in names)
-        assert b"\r\n" not in z.read("job-hunting/SKILL.md")
-
 def test_check_ok_line_counts_only_skill_directories(tmp_path, monkeypatch, capsys):
     for name in ("alpha", "beta"):
         _make_skill_with_n_lines(tmp_path, name, 10)
@@ -103,10 +75,29 @@ def test_check_ok_line_counts_only_skill_directories(tmp_path, monkeypatch, caps
     assert build.main(["--check"]) == 0
     assert "OK: 2 skills pass checks" in capsys.readouterr().out
 
-@pytest.mark.parametrize("verb, command", [("today", "today"), ("review", "funnel")])
-def test_inline_tracker_command_falls_back_to_python(verb, command):
-    text = (ROOT / "skills" / verb / "SKILL.md").read_text(encoding="utf-8")
-    body = text.split("\n---\n", 1)[1]
-    first = next(line for line in body.splitlines() if line.strip())
-    assert first.startswith("!`") and "command -v python3 || command -v python" in first
-    assert first.endswith(f"tracker.py {command}`")
+def test_command_skills_use_the_launcher():
+    for skill in sorted((ROOT / "skills").iterdir()):
+        text = (skill / "SKILL.md").read_text(encoding="utf-8")
+        assert re.search(r"python3?\s+\S*scripts/", text) is None, skill.name
+        assert "command -v python" not in text, skill.name
+        assert re.search(r"(?:python3?|sh|bash|py -3)\s+\S*scripts/(?!jh )[a-z_]+\.py", text) is None, skill.name
+
+def test_references_use_the_launcher():
+    refs = sorted((SKILL / "references").rglob("*.md"))
+    assert refs
+    patterns = (r"python3?\s+\S*scripts/", r"(?:python3?|sh|bash|py -3)\s+\S*scripts/(?!jh )[a-z_]+\.py")
+    for p in refs:
+        text = p.read_text(encoding="utf-8")
+        assert "command -v python" not in text, str(p.relative_to(ROOT))
+        for pattern in patterns:
+            m = re.search(pattern, text)
+            assert m is None, f"{p.relative_to(ROOT)}:{text.count(chr(10), 0, m.start()) + 1}: {m.group(0)}"
+
+def test_versions_agree():
+    plugin = json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+    market = json.loads((ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8"))
+    entry = next(p for p in market["plugins"] if p["name"] == "job-hunter")
+    text = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+    m = re.search(r'^\s+version:\s*"([^"]+)"', text, re.M)
+    assert m, "metadata.version missing from skills/job-hunting/SKILL.md"
+    assert plugin["version"] == entry["version"] == m.group(1)

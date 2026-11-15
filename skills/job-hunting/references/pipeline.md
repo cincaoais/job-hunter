@@ -6,7 +6,7 @@ the search like a sales pipeline, not a pile of sent emails.
 
 ## 1. Schema
 
-`pipeline.md` (workspace) or profile §9 (chat mode) — one row per
+`pipeline.md` — one row per
 company + role:
 
 | Company | Role | Source | Channel | Applied | Stage | Next action | Due | Last touch | Resume | Notes |
@@ -38,13 +38,13 @@ company + role:
 - Rejections count as responses only when a human replied: put "rejected by
   email", "replied" or "response" in Notes; "no reply" / "never replied" /
   "without response" are not responses.
+- A row closed with `tracker.py set --stage rejected|withdrawn|cold` from
+  screen, interview, final or offer gets `reached: <stage>` in Notes, and the
+  funnel counts it for every stage it reached. When closing a row by hand,
+  add that note yourself.
 - Every write sets Last touch to today (`--last-touch` overrides).
 - Contacts: `tracker.py contacts` lists touches due (Next touch ≤ today);
   `tracker.py contact --name … --next-touch …` upserts a row.
-- A Gmail MCP connector, when present, may be used to spot recruiter replies
-  and log them — opportunistic, never required.
-- A Calendar MCP connector, when present, may be used to pick up interview
-  dates into Due — opportunistic, never required.
 
 ## 3. The today view — `tracker.py today`
 
@@ -66,15 +66,12 @@ When every section is empty it prints
 `Nothing due — run search_jobs.py --days 2 for fresh postings.`
 — that is the cue to source and to do outreach, not to rest.
 
-Chat mode: compute the same sections from the profile's tables by hand,
-in the same order.
-
 ## 4. The weekly review ritual — Monday
 
-1. `tracker.py digest` (the `review` skill runs `tracker.py funnel` inline
-   first) — writes `reviews/<date>.md` with the funnel and today view and
-   updates `_Last weekly review: <date>_` in `pipeline.md`. Chat mode: record
-   the date in the profile.
+1. `tracker.py digest` (the `/job-hunter:today week` skill runs
+   `tracker.py funnel` inline first) — writes `reviews/<date>.md` with the
+   funnel and today view and updates `_Last weekly review: <date>_` in
+   `pipeline.md`.
 2. Read the two tables (by Channel, by Source) and the `Leak:` line.
 3. Apply **one** change this week — the fix the leak names, or the user's
    own refinement of it. One change, so next week's numbers mean something.
@@ -101,7 +98,7 @@ The script picks the first failing stage and prints one recommended change:
 |---|---|---|
 | too small | sent < 10 | Pipeline too small to diagnose (n<10) — keep logging |
 | targeting | sent ≥ 10 and response % < 10 | Tighten targeting: re-run the knockout pre-check on the last 10 applications and move to referral-first outreach (networking.md) |
-| screen | responses ≥ 3 and interviews == 0 | Screens aren't converting: run a mock recruiter screen (interview-coach.md) and rework the six prepared answers |
+| screen performance | responses ≥ 3 and interviews == 0 | Screens aren't converting: run a mock recruiter screen (interview-coach.md) and rework the six prepared answers |
 | close | interviews ≥ 3 and offers == 0 | Onsites aren't closing: debrief each final round, run the offer-stage questions, and rehearse negotiation (offer-coach.md) |
 | healthy | none of the above | No clear leak — hold the cadence: keep 10–20 targeted applications and 60/40 outreach per week |
 
@@ -135,6 +132,5 @@ at that stage's coach file; a targeting leak goes to `strategy.md`.
 
 ## 7. Record
 
-Workspace mode: every change is a `tracker.py` call or an in-place edit;
-end with the `saved:` line. Chat mode: regenerate the profile block
-(SKILL.md closing step).
+Every change is a `tracker.py` call or an in-place edit; end with the
+`saved:` line.

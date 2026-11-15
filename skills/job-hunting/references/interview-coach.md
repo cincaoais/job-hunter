@@ -78,12 +78,11 @@ short enough to be interrupted.
 - **coding** — talk-through first: clarify → approach → complexity → tests.
   Score the reasoning said aloud, not syntax. Then offer an optional **run
   it** step (no new dependency):
-  - Workspace mode: save the user's solution to a scratch file in the system
-    temp folder, never in the job-hunt workspace or `interviews/`; run it
-    only with an already-installed toolchain (`python3`, `node`, `go`,
-    `java`, …), never install anything; if missing, say so and stay with
-    the talk-through. Delete the file afterwards. Chat mode: Python only,
-    and only if code execution is available.
+  - Save the user's solution to a scratch file in the system temp folder,
+    never in the job-hunt workspace or `interviews/`; run it only with an
+    already-installed toolchain (`python3`, `node`, `go`, `java`, …), never
+    install anything; if missing, say so and stay with the talk-through.
+    Delete the file afterwards.
   - Write 3–5 test cases first from the constraints discussed (empty,
     boundary, large), show them, run them; report pass/fail and observed
     output per case, then discuss complexity.
@@ -108,18 +107,15 @@ End every mock with:
 2. **Weak areas** — each with one concrete drill (e.g. "rewrite the outage
    story as STAR with the 0.4% number up front; we re-run it next session").
 3. **Save** —
-   - Workspace mode: create the scorecard with
-     `python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py new --kind mock --company "<X>" --role "<Y>" --round-type <mode>`;
+   - Create the scorecard with
+     `sh ${CLAUDE_SKILL_DIR}/scripts/jh interview.py new --kind mock --company "<X>" --role "<Y>" --round-type <mode>`;
      fill `## Scores` (`# | Question | Theme | Self | Coach | Evidence`),
      Strengths, Drills and the Re-run list; then run
-     `python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py bank` to refresh the
+     `sh ${CLAUDE_SKILL_DIR}/scripts/jh interview.py bank` to refresh the
      re-practice queue.
    - STAR edits go to `answers.md` "STAR stories" only after the user
      confirms the wording; weak areas to profile §10 Notes.
-   - Chat mode: deliver the scorecard in chat only, STAR stories to the
-     profile §9 Answers section, weak areas to §10 — no script ran, so
-     never say one did.
-   - Then the closing step for the storage mode (SKILL.md).
+   - Then the closing step (SKILL.md).
 4. Offer to re-run just the weak questions.
 
 ## Honesty

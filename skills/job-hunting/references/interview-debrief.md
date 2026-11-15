@@ -7,12 +7,12 @@ template is in `networking.md` §5, and offer work is `offer-coach.md`.
 Debrief within 24 hours: questions are recalled verbatim only while they are
 fresh, and the lessons feed every later round.
 
-## 1. Workspace flow
+## 1. Flow
 
 1. Echo the pipeline row (company, role, stage, Next, Due) so the user
    confirms which process this is.
 2. Create the file with the interview date:
-   `python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py new --kind debrief --company "<X>" --role "<Y>" --round-type <type> [--round N] --date <interview date>`
+   `sh ${CLAUDE_SKILL_DIR}/scripts/jh interview.py new --kind debrief --company "<X>" --role "<Y>" --round-type <type> [--round N] --date <interview date>`
 3. Fill the sections from the user's account:
    - **Questions asked** — `# | Question | Theme | Story used | Landed`, one
      row per question as close to verbatim as the user remembers. Theme is
@@ -35,15 +35,14 @@ guess a name and never record personal details about an interviewer.
 
 | Need during a debrief | Goes to | Mechanism |
 |---|---|---|
-| Stage, Next action, Due, Notes | Operations | `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company … --role … --stage/--next/--due/--note` — the only writer of `pipeline.md` |
-| Company research | Coach `/job-hunter:company` | `company-dossier.md` → `dossiers/<company>.md` |
+| Stage, Next action, Due, Notes | Operations | `sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py set --company … --role … --stage/--next/--due/--note` — the only writer of `pipeline.md` |
+| Company research | Coach `/job-hunter:interview company <name>` | `company-dossier.md` → `dossiers/<company>.md` |
 | "What are your salary expectations?" | Writer's answer bank, then Negotiator | `answers.md` › Expected salary and `markets/<cc>.md` §5; never invent a number; an offer → `offer-coach.md` |
 | Thank-you and follow-up messages | Networker templates | "Interviewer thank-you" in `networking.md` §5; `ats_check.py --slop`; Due via `tracker.py` |
 | New or reworked STAR story | `answers.md` STAR stories | Proposal shown; written on confirm; no added scene, decision or result (`facts-policy.md` §5) |
 | New achievement surfaced in a debrief | Profile §5 | `facts-policy.md` §1: ask, write the profile first, then use it |
-| Theme with no true story | Soft Skills Coach | `soft-skills-coach.md`, §9 Soft skills development table |
+| Theme with no true story | Soft Skills Coach | `soft-skills-coach.md`, profile.md Soft skills development table |
 | Third rejection at one stage | Operations funnel | `pipeline.md` §5 diagnosis |
-| Durable lessons | Career vault (other repo) | The vault reads debriefs in place; it never writes `job-hunt/` |
 
 ## 3. Outcome
 
@@ -52,14 +51,12 @@ whether to record it as advanced now (stage `interview`, Due = the expected
 date) or keep `pending` until the invite arrives.
 
 When the result is known, now or weeks later, record it twice together:
-`python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py outcome --company "<X>" --role "<Y>" --outcome advanced|rejected|offer|withdrawn`
-and the matching `tracker.py set --company … --role … --stage <stage>`. The
-career vault's harvest waits for a settled outcome, so a debrief left at
-`pending` is never learned from.
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh interview.py outcome --company "<X>" --role "<Y>" --outcome pending|advanced|rejected|offer|withdrawn`
+and the matching `tracker.py set --company … --role … --stage <stage>`.
 
 ## 4. Question bank and thank-you
 
-- Run `python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py bank`. Read the
+- Run `sh ${CLAUDE_SKILL_DIR}/scripts/jh interview.py bank`. Read the
   "Questions with no story" section back to the user as story gaps: each is
   a theme to answer with a true story (Soft Skills Coach) or to prepare
   honestly as a gap.
@@ -68,19 +65,9 @@ career vault's harvest waits for a settled outcome, so a debrief left at
   via the recruiter when there is no direct address. Log the follow-up with
   `tracker.py set --due <date>`.
 
-## 5. Chat mode (claude.ai) — no files, no scripts
+## 5. File contract
 
-- Append one row to profile §9 `### Interviews`:
-  `Date | Company | Role | Round | Outcome | Asked (themes) | Landed / missed | Next`.
-- Keep the newest 12 rows. Fold older rows into one "Interview patterns"
-  line in §10 so the document stays small.
-- Compute a question bank from that table only when the user asks. Never say
-  a script ran; say the table was read by hand.
-- Close by regenerating the profile block (SKILL.md closing step).
-
-## 6. File contract
-
-The career vault depends on this layout, so treat it as an interface.
+`tracker.py` and `interview.py` read this layout, so treat it as an interface.
 
 ```
 job-hunt/interviews/
@@ -97,11 +84,9 @@ job-hunt/interviews/
   technical coding system-design case assessment final` (`assessment` is not
   a mock mode); outcome `pending advanced rejected offer withdrawn`; landed
   `yes partly no`; themes as in §1.
-- No wikilinks in interview files.
 - A breaking change to any of this bumps `contract`.
 
-## 7. Record
+## 6. Record
 
-Workspace mode: every change is an `interview.py` or `tracker.py` call or an
-in-place edit of the debrief; end with the `saved:` line. Chat mode:
-regenerate the profile block.
+Every change is an `interview.py` or `tracker.py` call or an in-place edit
+of the debrief; end with the `saved:` line.

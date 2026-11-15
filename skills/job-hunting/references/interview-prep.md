@@ -23,15 +23,12 @@ screen, due Friday — right?" — and ask only for what it lacks:
 - **Language** — prep in the language the interview will run in.
 
 **Dossier freshness.** Read the dossier's `_Researched: YYYY-MM-DD_` line.
-Older than 30 days → refresh its news section via `/job-hunter:company`
-before prep. No dossier → offer one.
+Older than 30 days → refresh its news section via
+`/job-hunter:interview company <name>` before prep. No dossier → offer one.
 
-**Workspace mode** — create the pack, then fill its sections in place:
+Create the pack, then fill its sections in place:
 
-`python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py new --kind prep --company "<X>" --role "<Y>" --round-type <type> [--round N] --date <interview date>`
-
-**Chat mode** — deliver the pack in chat; nothing is stored but the
-closing step.
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh interview.py new --kind prep --company "<X>" --role "<Y>" --round-type <type> [--round N] --date <interview date>`
 
 ## Stage map — what each round is really testing
 
@@ -66,21 +63,18 @@ round covers — a normal question that removes guesswork.
    my range is around X if that helps") but have the number ready.
 6. **Availability / notice** — exact, no hedging.
 
-Items 1, 3 and 4 (and 5, 6) live in `answers.md` under those headings (chat
-mode: the profile §9 Answers section); the pack points to them rather than
-copying.
+Items 1, 3 and 4 (and 5, 6) live in `answers.md` under those headings; the
+pack points to them rather than copying.
 
-Plus **3–5 STAR stories** from `answers.md` "STAR stories" (chat mode:
-the profile §9 Answers section) covering leadership, conflict, failure,
-pressure, and initiative. One story may serve two themes. Rehearsed aloud
-beats re-read silently.
+Plus **3–5 STAR stories** from `answers.md` "STAR stories" covering
+leadership, conflict, failure, pressure, and initiative. One story may serve
+two themes. Rehearsed aloud beats re-read silently.
 
 ## Story map and gaps
 
 Map each likely question's theme to a story in `answers.md` (each carries
-`(themes: …)` tags; chat mode: the profile §9 Answers section). Themes in
-the pack use the debrief vocabulary (`interview-debrief.md` §1) so the
-question bank and the gaps line up.
+`(themes: …)` tags). Themes in the pack use the debrief vocabulary
+(`interview-debrief.md` §1) so the question bank and the gaps line up.
 
 | Theme | Story | Strength |
 |---|---|---|
@@ -139,12 +133,8 @@ promised verbally goes into the written offer before accepting
 
 Before finalising the pack, read `interviews/question-bank.md` if it
 exists: repeat questions, "Questions with no story", and the re-practice
-queue feed the likely-questions list and the story gaps. If the
-workspace's parent folder holds `wiki/_index.md` (a career vault), also
-read `wiki/hot.md` and the index rows whose Topics include `interview` or
-this round type; cite them by article name, read-only. No bank, no vault
-or no matching rows → one line: "no lessons yet". Chat mode: compute repeats from the profile §9
-Interviews table on request.
+queue feed the likely-questions list and the story gaps. No bank or no
+matching rows → one line: "no lessons yet".
 
 ## Market rights sheet — before signing
 
@@ -165,8 +155,8 @@ plus a live search).
    (or ~1 week if none was given). One polite nudge, then keep the
    pipeline moving — never park the search on one company.
 4. **Advanced** — ask what the next round covers; set the stage change and
-   `python3 ${CLAUDE_SKILL_DIR}/scripts/interview.py outcome --outcome advanced`
-   (workspace mode); re-run the dossier's themes and a targeted mock
+   `sh ${CLAUDE_SKILL_DIR}/scripts/jh interview.py outcome --company "<X>" --role "<Y>" --outcome advanced`;
+   re-run the dossier's themes and a targeted mock
    (`interview-coach.md`) on the weak areas from the debrief.
 5. **Rejected** — brief thanks + ask for feedback (sometimes answered);
    log it in the tracker with the stage change and
@@ -174,7 +164,6 @@ plus a live search).
    stage → run the funnel diagnosis (`pipeline.md` §5).
 6. **Offer** — switch to `offer-coach.md`.
 
-Close every prep session — workspace mode:
-`python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" --role "<Y>" --next "<round_type> prep done — mock?" --due <date>`,
-then the closing step for the storage mode (SKILL.md). Chat mode: the
-closing step only.
+Close every prep session:
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py set --company "<X>" --role "<Y>" --next "<round_type> prep done — mock?" --due <date>`,
+then the closing step (SKILL.md).

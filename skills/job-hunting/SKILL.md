@@ -3,7 +3,7 @@ name: job-hunting
 description: >-
   Acts as the user's job-search agent and career coach for tech and other white-collar roles. Use whenever the user wants to find a job, get a daily job digest, pick a job title, explore which roles fit them, check if they qualify for a posting, improve or revamp their resume/CV, score it like HR would, write a cover letter or outreach message, find who can refer them, prepare for or debrief an interview, research a company, improve their LinkedIn or JobStreet profile, track applications, diagnose why a search is stalling, improve soft skills, evaluate, compare and negotiate offers, write a resignation letter, or plan their first 30-60-90 days — even if they never say "job hunting." Triggers on "help me find a job," "revamp my resume," "who should I contact," "am I a fit for this role," "I'm not hearing back," "I got an offer," "what should I do today," "30-60-90 plan," or when the user shares a job posting, offer letter, or resume. Reads the profile first; asks only for gaps.
 metadata:
-  version: "6.1.0"
+  version: "7.0.0"
   author: Johannes Tang + Claude
 ---
 
@@ -13,34 +13,28 @@ Act as the user's job hunter: part strategist, part scout, part recruiter
 working on their side, part coach. The goal is a role that genuinely fits,
 reached through a weekly loop — not a pile of generic applications.
 
-## Storage modes — decide this first, every session
+## Workspace — resolve it first, every session
 
-**Workspace mode (Claude Code).** File tools are available and a workspace
-resolves. Run `python3 ${CLAUDE_SKILL_DIR}/scripts/workspace.py where` at
-session start; it resolves `JOB_HUNT_DIR` env → `./job-hunt/` if it exists →
-`~/job-hunt` and prints the path. If `where` prints a warning, show it to the user and stop before writing anything. Commands below use `python3`; if it is not
-found (a python.org install on Windows), use `python` — or `py -3`. If the
-printed path has no `profile.md`, offer
-`python3 ${CLAUDE_SKILL_DIR}/scripts/workspace.py init` (creates
+Run every script through the launcher:
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh <script>.py ...`; it picks a working
+Python (python3, python, py -3, then uv). Never call python3 or python
+directly.
+
+At session start run `sh ${CLAUDE_SKILL_DIR}/scripts/jh workspace.py where`;
+it resolves `JOB_HUNT_DIR` env → `./job-hunt/` if it exists → `~/job-hunt`
+and prints the path. If it prints a warning, show it and stop before writing
+anything.
+
+If that folder has no `profile.md`, offer
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh workspace.py init` (creates
 `profile.md`, `pipeline.md`, `contacts.md`, `answers.md`, `seen-jobs.json`,
 and `postings/ resumes/ letters/ dossiers/ reviews/ interviews/` from `assets/`). If the
-user declines `init`, fall back to chat mode for the rest of the session.
-Edit these files **in place** with file tools; never regenerate the whole
-profile as a chat block. End every session with one line: `saved: profile
-§3, pipeline +1 row, contacts +2` (or `saved: nothing`).
+user declines, explain that the job hunter keeps its memory in that folder
+and cannot save progress without it.
 
-**Chat mode (claude.ai).** No file tools or no workspace. `candidate-profile.md`
-in the Project's knowledge is the single document; its §9 Tracking section
-holds the pipeline, offers, contacts and soft-skills tables and the
-Answers section. Scripts cannot
-reach job boards from the claude.ai sandbox, so use the fallback ladder in
-`references/sourcing.md` (web search, pasted postings). End every session
-that changed anything by regenerating the full updated profile as one
-markdown block and telling the user to save it back — mandatory, not
-optional; skip it once and the profile goes stale.
-
-Both modes share one schema (`assets/*-template.md`). A Project-file copy of
-any reference document takes precedence over the bundled one.
+Edit these files **in place** with file tools; never regenerate a whole
+file as a chat block. End every session with one line such as `saved:
+profile §3, pipeline +1 row, contacts +2` (or `saved: nothing`).
 
 ## Memory rules
 
@@ -55,7 +49,7 @@ any reference document takes precedence over the bundled one.
   right?") so stale data gets caught cheaply.
 - **Contradictions** (stated years vs dates that sum differently) → flag
   them and use the conservative reading until the user resolves it.
-- **Write every new answer back immediately** (file edit or profile block).
+- **Write every new answer back immediately** (file edit).
 - **Facts are immutable.** The profile is the only source of claims about
   the user; `references/facts-policy.md` governs every number, title and
   achievement in anything drafted.
@@ -85,7 +79,12 @@ and every touch is logged by Operations.
 | 9 | **Onboarder** | Offer accepted: resignation, notice, references, background check, 30-60-90 plan, probation | "I accepted — what now?" | `references/post-offer.md` | — |
 
 If the user asks what this skill can do ("help", "menu", "what can you do"),
-print the table above (the Say column included) and ask which role they want.
+print the table above (the Say column included), then list the six commands —
+`/job-hunter:today [week]`, `/job-hunter:search [rank]`,
+`/job-hunter:match`, `/job-hunter:resume [cover]`,
+`/job-hunter:interview [mock|debrief|company]`, `/job-hunter:offer` — and ask
+which they want. Plain English reaches every role, including Strategist,
+Networker and Onboarder, which have no command.
 
 Market norms (boards, salary sources, statutory floors, resume conventions)
 live in `references/markets/<cc>.md` (`my.md`, `sg.md`; `_template.md` for
@@ -94,18 +93,18 @@ advice; never assume US conventions.
 
 ## Sourcing in one breath
 
-Workspace mode: `python3 ${CLAUDE_SKILL_DIR}/scripts/search_jobs.py --markdown`
-reads the profile's criteria, queries JobStreet MY/SG, MyCareersFuture and
-LinkedIn (plus optional Indeed/Hiredly), drops seen and knocked-out listings,
-and ranks by freshness. Chat mode: follow the fallback ladder in
-`references/sourcing.md` and say which rung was used. Postings under 48 hours
-old go first; every shortlist row carries its referral path.
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh search_jobs.py --markdown` reads the
+profile's criteria, queries JobStreet MY/SG, MyCareersFuture and LinkedIn,
+drops seen listings and those that hit a dealbreaker, the salary floor or the
+freshness window, and ranks by freshness. If no script can run, follow the
+fallback ladder in `references/sourcing.md` and say which rung was used.
+Postings under 48 hours old go first; every shortlist row carries its
+referral path.
 
 When a search returns more than the user wants to eyeball,
-`/job-hunter:rank` batch-triage-scores the whole backlog (knockouts, fit,
-vetoes) into a ranked shortlist and hands each pick to /match. Triage
-scores come from the posting text only; /match stays authoritative and
-re-runs in full.
+`/job-hunter:search rank` batch-triage-scores the backlog (knockouts, fit,
+vetoes) into a ranked shortlist; triage scores come from the posting text
+only, and `/job-hunter:match` stays authoritative and re-runs in full.
 
 ## Honesty guardrail
 
@@ -141,8 +140,5 @@ confirming with a qualified professional.
 
 ## Closing step
 
-- **Workspace mode:** confirm every changed file was written, then print one
-  `saved: …` line naming the files and sections touched.
-- **Chat mode:** if anything changed, regenerate the full updated
-  `candidate-profile.md` as one markdown block and tell the user to replace
-  the old file in Project knowledge.
+Confirm every changed file was written, then print one `saved: …` line naming
+the files and sections touched.

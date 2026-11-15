@@ -73,28 +73,26 @@ def test_read_criteria_reads_the_sample_profile():
     assert c["boards"] == ["jobstreet", "linkedin"]
     assert "gambling industry" in c["dealbreakers"]
     assert "6-day work week" in c["dealbreakers"]
-    assert c["must_have"] == ["backend role primarily in Go or Python", "hybrid or remote"]
 
 
 def test_read_criteria_on_the_unfilled_template_yields_defaults():
     c = search_jobs.read_criteria(TEMPLATE_PROFILE)
     assert c["keywords"] == []
-    assert c["must_have"] == []
     assert c["dealbreakers"] == []
     assert c["salary_min"] is None
-    assert c["boards"] == ["jobstreet", "mcf", "linkedin", "hiredly"]
+    assert c["boards"] == ["jobstreet", "mcf", "linkedin"]
 
 
 def test_read_criteria_country_and_board_variants():
     md = "\n".join([
         "- **Job market / country I'm hunting in:** Singapore",
         "- **Location:** Singapore",
-        "- **Job boards to search:** MyCareersFuture, Indeed, Craigslist",
+        "- **Job boards to search:** MyCareersFuture, Glassdoor, Craigslist",
         "- **Salary expectation:** up to 8 months bonus, SGD 7,500 / month",
     ])
     c = search_jobs.read_criteria(md)
     assert c["country"] == "SG"
-    assert c["boards"] == ["mcf", "indeed"]
+    assert c["boards"] == ["mcf"]
     assert c["salary_min"] == 7500
 
 
@@ -104,6 +102,8 @@ SALARY_CASES = [
     ("k suffix", "RM9k/month", 9000),
     ("annual", "RM 120,000 per year", 10000),
     ("annual k", "SGD 96k p.a.", 8000),
+    ("annual plus monthly", "RM 120,000 per year (RM 10,000/month)", 10000),
+    ("decimal k", "RM 1.5k / month", 1500),
     ("unset", "", None),
 ]
 
@@ -116,6 +116,11 @@ def test_read_criteria_salary_floor(value, floor):
     assert c["salary_min"] == floor
 
 
+def test_salary_floor_prefers_the_monthly_figure_and_reads_decimal_k():
+    assert search_jobs._salary_floor("RM 120,000 per year (RM 10,000/month)") == 10000
+    assert search_jobs._salary_floor("RM 1.5k / month") == 1500
+
+
 def test_read_criteria_falls_back_to_first_two_letters():
     c = search_jobs.read_criteria("- **Job market / country I'm hunting in:** Indonesia")
     assert c["country"] == "IN"
@@ -125,7 +130,6 @@ def test_read_criteria_falls_back_to_first_two_letters():
 
 CRITERIA = {
     "salary_min": 9000,
-    "must_have": ["backend role primarily in Go or Python", "hybrid or remote"],
     "dealbreakers": ["6-day work week", "fully onsite", "gambling industry"],
 }
 
@@ -141,8 +145,6 @@ KNOCKOUT_CASES = [
     ("absent dealbreaker", {"teaser": "hybrid Python role"}, None),
     ("below floor", {"salary_min": 4000, "salary_max": 6000}, "salary below floor"),
     ("no salary", {"salary_min": None, "salary_max": None}, None),
-    ("no must-have", {"title": "Warehouse Supervisor", "teaser": "shift rosters, stock counts"},
-     "missing must-have"),
 ]
 
 
@@ -224,6 +226,25 @@ def test_dedupe_keeps_different_postings_from_the_same_company():
     assert len(out) == 2
 
 
+def test_dedupe_keeps_same_title_in_different_cities():
+    jobs = [
+        job(id="fake:1", location="Kuala Lumpur"),
+        job(id="fake:2", location="Penang"),
+    ]
+    out, _ = search_jobs.dedupe(jobs, {}, today="2026-09-22")
+    assert [j["id"] for j in out] == ["fake:1", "fake:2"]
+
+
+def test_dedupe_collapses_same_title_and_city_across_boards_by_priority():
+    jobs = [
+        job(id="linkedin:9", source="linkedin", location="Kuala Lumpur"),
+        job(id="jobstreet:9", source="jobstreet",
+            location="Kuala Lumpur, Federal Territory of Kuala Lumpur"),
+    ]
+    out, _ = search_jobs.dedupe(jobs, {}, today="2026-09-22")
+    assert [j["source"] for j in out] == ["jobstreet"]
+
+
 # --- rank --------------------------------------------------------------------
 
 def test_rank_orders_by_freshness_then_salary_then_source():
@@ -232,7 +253,7 @@ def test_rank_orders_by_freshness_then_salary_then_source():
         job(id="b", posted="", salary_max=99000),
         job(id="c", posted="2026-09-20", salary_max=12000, source="linkedin"),
         job(id="d", posted="2026-09-20", salary_max=12000, source="jobstreet"),
-        job(id="e", posted="2026-09-20", salary_max=20000, source="hiredly"),
+        job(id="e", posted="2026-09-20", salary_max=20000, source="mcf"),
     ]
     assert [j["id"] for j in search_jobs.rank(jobs)] == ["e", "d", "c", "a", "b"]
 
@@ -249,27 +270,35 @@ def test_rank_puts_unknown_salary_after_a_known_one_on_the_same_day():
 
 BASE = {
     "keywords": ["backend engineer"], "location": "Kuala Lumpur", "country": "MY",
-    "salary_min": 9000, "must_have": ["Go or Python"],
+    "salary_min": 9000,
     "dealbreakers": ["gambling industry"], "boards": ["fake"], "days": None, "pages": 1,
 }
 
 
-def test_run_splits_new_knocked_and_needs_look():
+def test_run_splits_new_and_knocked():
     stub = StubSource("fake", [
         job(id="fake:1"),
         job(id="fake:2", company="Royal Gambling Bhd", title="Go Engineer"),
-        job(id="fake:3", title="Warehouse Supervisor", teaser="shift rosters"),
     ])
     out = search_jobs.run(BASE, sources={"fake": stub}, seen={}, today="2026-09-22")
     assert [j["id"] for j in out["new"]] == ["fake:1"]
-    assert [j["id"] for j in out["needs_look"]] == ["fake:3"]
+    assert "needs_look" not in out
     assert [(j["id"], reason) for j, reason in out["knocked_out"]] == [
         ("fake:2", "dealbreaker: gambling industry"),
     ]
-    assert out["sources"]["fake"]["count"] == 3
-    assert out["seen"] == {"fake:1": "2026-09-22", "fake:3": "2026-09-22"}
+    assert out["sources"]["fake"]["count"] == 2
+    assert out["seen"] == {"fake:1": "2026-09-22"}
     assert stub.calls[0]["keywords"] == "backend engineer"
     assert stub.calls[0]["country"] == "MY"
+
+
+def test_run_keeps_a_posting_without_any_must_have_words():
+    stub = StubSource("fake", [
+        job(id="fake:1", title="Warehouse Supervisor", teaser="shift rosters, stock counts"),
+    ])
+    out = search_jobs.run(BASE, sources={"fake": stub}, seen={}, today="2026-09-22")
+    assert [j["id"] for j in out["new"]] == ["fake:1"]
+    assert out["knocked_out"] == []
 
 
 def test_run_does_not_mark_knocked_out_postings_as_seen():
@@ -346,10 +375,10 @@ def test_run_skips_a_source_that_does_not_serve_the_country():
 
 
 def test_run_reports_an_unavailable_optional_source():
-    stub = StubSource("indeed", [])
-    stub.UNAVAILABLE_REASON = "pip install python-jobspy"
-    out = search_jobs.run(BASE, sources={"indeed": stub}, seen={}, today="2026-09-22")
-    assert out["sources"]["indeed"]["skipped"] == "pip install python-jobspy"
+    stub = StubSource("fakeboard", [])
+    stub.UNAVAILABLE_REASON = "needs an API key"
+    out = search_jobs.run(BASE, sources={"fakeboard": stub}, seen={}, today="2026-09-22")
+    assert out["sources"]["fakeboard"]["skipped"] == "needs an API key"
 
 
 def test_run_returns_ranked_new_jobs():
@@ -366,30 +395,26 @@ def test_run_returns_ranked_new_jobs():
 def test_render_markdown_has_the_table_sections_and_sources_line():
     jobs = [job(id="fake:1")]
     knocked = [(job(id="fake:2", company="Gambling Bhd"), "dealbreaker: gambling industry")]
-    needs = [job(id="fake:3", title="Warehouse Supervisor")]
     stats = {
         "jobstreet": {"count": 42, "warnings": [], "skipped": ""},
         "linkedin": {"count": 0, "warnings": ["linkedin: HTTP 429 at page 2, stopped"],
                      "skipped": ""},
-        "indeed": {"count": 0, "warnings": [], "skipped": "pip install python-jobspy"},
+        "fakeboard": {"count": 0, "warnings": [], "skipped": "needs an API key"},
     }
-    md = search_jobs.render_markdown(jobs, knocked, needs_look=needs, sources=stats,
-                                     seen_before=4)
-    assert md.startswith("## 1 new posting (1 knocked out, 1 needs a look, 4 seen before)")
+    md = search_jobs.render_markdown(jobs, knocked, sources=stats, seen_before=4)
+    assert md.startswith("## 1 new posting (1 knocked out, 4 seen before)")
     assert "| # | Posted | Source | Company | Role | Location / mode | Salary | Link |" in md
-    assert "### Needs a look" in md
     assert "### Knocked out" in md
     assert "- Gambling Bhd — Backend Engineer: dealbreaker: gambling industry" in md
     assert "jobstreet 42" in md
     assert "429 at page 2, stopped" in md
-    assert "indeed skipped: pip install python-jobspy" in md
+    assert "fakeboard skipped: needs an API key" in md
 
 
-def test_render_markdown_caps_the_needs_a_look_table():
-    needs = [job(id=f"fake:{i}", title=f"Role {i}") for i in range(14)]
-    md = search_jobs.render_markdown([], [], needs_look=needs, sources={})
-    assert "Role 9" in md and "Role 10" not in md
-    assert "… and 4 more (--json for the rest)." in md
+def test_render_markdown_has_no_soft_bucket():
+    md = search_jobs.render_markdown([job(title="Warehouse Supervisor")], [], sources={})
+    assert "Needs a look" not in md
+    assert "needs a look" not in md
 
 
 def test_render_markdown_says_zero_new_since_last_run():
@@ -431,7 +456,7 @@ def test_main_json_output(workspace, monkeypatch, capsys):
     monkeypatch.setattr(search_jobs, "get_sources", lambda names: {"jobstreet": stub})
     assert search_jobs.main(["--json"]) == 0
     payload = json.loads(capsys.readouterr().out)
-    assert set(payload) == {"new", "needs_look", "knocked_out", "sources"}
+    assert set(payload) == {"new", "knocked_out", "sources"}
     assert payload["new"][0]["id"] == "jobstreet:1"
 
 
@@ -478,7 +503,7 @@ def test_main_without_keywords_explains_itself(tmp_path, monkeypatch, capsys):
 
 
 def test_default_sources_follow_the_country():
-    assert search_jobs.default_sources("MY") == ["jobstreet", "linkedin", "hiredly"]
+    assert search_jobs.default_sources("MY") == ["jobstreet", "linkedin"]
     assert search_jobs.default_sources("SG") == ["jobstreet", "mcf", "linkedin"]
 
 
@@ -506,7 +531,7 @@ FLOOR_CURRENCY_CASES = [
 )
 def test_salary_floor_applies_only_in_its_own_currency(fields, reason):
     assert RM_FLOOR["salary_currency"] == "MYR"
-    assert search_jobs.knockout(job(**fields), dict(RM_FLOOR, must_have=[])) == reason
+    assert search_jobs.knockout(job(**fields), dict(RM_FLOOR)) == reason
 
 
 @pytest.mark.parametrize("value,currency", [

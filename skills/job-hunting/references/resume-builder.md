@@ -16,35 +16,29 @@ Every claim is the strongest **true** form of a profile fact —
    the assumption instead. Write answers back to the profile.
 3. **Draft inline** in the chat as markdown and ask for reactions. Iterate
    here — it's cheap. Never jump straight to a generated .docx/PDF. Once
-   approved, workspace mode saves the draft as
-   `resumes/<company>-<role>-vN.md` (a letter under `letters/`; Versioning
-   below) — the file every gate and the build read (a cover letter is
-   saved and gated before it is shown — see Cover letters).
-4. **Claims audit** (below) on the approved draft (a cover letter: on the
-   saved draft, before it is shown) — a fresh critical read before any file
-   exists.
+   approved, save the draft as `resumes/<company>-<role>-vN.md` (a letter
+   under `letters/`; Versioning below) — the markdown file every gate and
+   the build read (a cover letter is saved and gated before it is shown —
+   see Cover letters).
+4. **Claims audit** (below) on the saved markdown draft — a fresh critical
+   read before any .docx/PDF is generated.
    - 4.5 **Anti-slop gate** (below).
    - 4.6 **6-second lint** (below) — resumes only.
 5. **Generate the file.** Default to **.docx** — safest for ATS portals and
    JobStreet/LinkedIn apply flows; offer **PDF** when the reader is human
    (email to a person, referral, print). Ask once, record the preference in
    the profile.
-   - Workspace mode:
-     `python3 ${CLAUDE_SKILL_DIR}/scripts/build_resume.py resumes/<file>.md --docx [--pdf --template <name>]`
+   - `sh ${CLAUDE_SKILL_DIR}/scripts/jh build_resume.py resumes/<file>.md --docx [--pdf --template <name>]`
      — templates are the gallery in `resume-revamp.md` Step 3.
-   - Chat mode: the Anthropic docx / pdf skills, from the same approved
-     markdown.
 6. **ATS text-layer check** (below) on the generated file:
-   `python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --posting postings/<slug>.md --lint --text`.
+   `sh ${CLAUDE_SKILL_DIR}/scripts/jh ats_check.py <file> --posting postings/<slug>.md --lint --text`.
 7. **Run the pre-delivery check** below before handing the file over.
-8. **Record the version** sent: workspace mode
-   `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py set --company "<X>" --role "<Y>" --resume resumes/<company>-<role>-vN.md`;
-   chat mode, the Resume cell of the profile §9 Pipeline row. Then the
-   closing step for the storage mode (SKILL.md).
+8. **Record the version** sent:
+   `sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py set --company "<X>" --role "<Y>" --resume resumes/<company>-<role>-vN.md`;
+   then the closing step (SKILL.md).
 
 Gates run in this order and none that applies is skipped: claims audit →
-anti-slop gate → 6-second lint → file → ATS text-layer check. Chat mode:
-say which checks ran by reading and which script checks could not run.
+anti-slop gate → 6-second lint → file → ATS text-layer check.
 
 ## Claims audit (step 4)
 
@@ -71,22 +65,21 @@ nothing did). Only re-open the inline-draft loop if something material moved.
 
 - **Cover letters** need at least one **user-supplied story** — a specific
   event the user tells, or picks from options drawn from profile §5 and the
-  STAR stories in `answers.md` (chat mode: the profile §9 Answers section) —
+  STAR stories in `answers.md` —
   and at least one **company-specific fact** from the saved posting or the
   dossier (`company-dossier.md`). Check both before drafting a letter and
   confirm them here: no story or no fact → no letter; ask, or build the
   dossier.
-- **Every draft** gets the banned-phrase scan: workspace mode
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <draft.md> --slop`; the
+- **Every draft** gets the banned-phrase scan:
+  `sh ${CLAUDE_SKILL_DIR}/scripts/jh ats_check.py <draft.md> --slop`; the
   list lives in `assets/slop-phrases.txt`. Replace each hit with a
-  specific — a number, a named system, a result — never a synonym. Chat
-  mode: read the draft against the same list and say the scan was a read.
+  specific — a number, a named system, a result — never a synonym.
 
 ## 6-second lint (step 4.6)
 
 A recruiter's first skim is 6–10 seconds on name, current title and
 employer, dates, previous title, education and the first bullet of the
-latest role (Huntr/Careerflow). Before any file exists, the draft passes:
+latest role (Huntr/Careerflow). The draft passes:
 
 - The title line under the name matches the target role, truthfully.
 - The first bullet of the latest role has a number.
@@ -95,24 +88,21 @@ latest role (Huntr/Careerflow). Before any file exists, the draft passes:
 - Progression is visible (title or scope grows across roles).
 - At most 2 pages (market norms: `markets/<cc>.md` §4).
 
-Workspace mode:
-`python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <draft.md> --lint --target-title "<target role>"`
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh ats_check.py <draft.md> --lint --target-title "<target role>"`
 checks contact email and phone as literal text, a date near the top, a
 number in the first experience bullet, length, and the title words in the
 first lines when `--target-title` is given. Single column, dates on every
-role and visible progression are checked by reading. Chat mode: all six by
-reading, and say so.
+role and visible progression are checked by reading.
 
 ## ATS text-layer check (step 6)
 
 An ATS reads the file's extracted text, not the rendered page — and
 generation can silently produce files whose text layer differs from the
 draft. After generating, extract the file's raw text and verify what a
-parser actually sees. Workspace mode:
-`python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --posting postings/<slug>.md --lint --text`
+parser actually sees:
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh ats_check.py <file> --posting postings/<slug>.md --lint --text`
 (no saved posting: `--keywords "a,b"` with the `jd-match.md` §3 mirror
-list). Chat mode: extract it in the analysis sandbox (e.g. python-docx /
-pypdf) where one exists.
+list).
 
 - Contact details present as literal text; no garbled or missing characters.
 - Reading order is sane — sections in sequence, no interleaved lines.
@@ -148,7 +138,7 @@ available:
   appears verbatim somewhere.
 - Bullets lead with results; no invented numbers; estimates read "~N".
 - The claims-audit line was reported, the slop scan is clean and the
-  6-second lint passed — or each was declared as a read in chat mode.
+  6-second lint passed.
 - No parser-breaking formatting; headings are standard words.
 - Length, photo, and personal details match the market's norms.
 - Contact details present and current.
@@ -218,12 +208,11 @@ proof already leads above.]
 ## Cover letters
 
 Same flow, with the gates before the user sees text: read → ask → draft →
-save as `letters/<company>-<role>-vN.md` (workspace mode) → claims audit
+save as `letters/<company>-<role>-vN.md` → claims audit
 (`facts-policy.md` §4) and anti-slop gate (`ats_check.py <file> --slop`;
 replace every hit) → show it inline with the one-line audit result and the
 scan result → approve → deliver. Iterating overwrites the same file and
-re-runs both gates; chat mode runs both by reading and says so (the
-6-second lint is resume-only). Always tailored to one specific posting —
+re-runs both gates (the 6-second lint is resume-only). Always tailored to one specific posting —
 if none is named, ask which job this letter is for.
 
 - Beats, length, and rules come from the Application Guide's "Cover letter"

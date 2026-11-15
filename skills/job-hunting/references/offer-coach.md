@@ -85,10 +85,10 @@ tighten, one drill to re-run.
 
 ## 6. Record
 
-Log every offer in the Offers table — `pipeline.md` `## Offers`
-(workspace) or profile §9 Offers (chat mode): company, base, bonus type,
+Log every offer in the Offers table — `pipeline.md` `## Offers`:
+company, base, bonus type,
 true annual comp, probation/notice, deadline, status — and run the closing
-step for the storage mode (SKILL.md). On acceptance, update the pipeline
+step (SKILL.md). On acceptance, update the pipeline
 stage and make the notice-period countdown the next action
 (`post-offer.md`).
 

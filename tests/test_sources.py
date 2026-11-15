@@ -1,4 +1,4 @@
-"""Fixture-driven tests for the five board source modules.
+"""Fixture-driven tests for the board source modules.
 
 Every parser here is pure: it is handed recorded bytes from
 tests/fixtures/recorded/ and must never touch the network. The only network
@@ -16,7 +16,7 @@ SCRIPTS = ROOT / "skills" / "job-hunting" / "scripts"
 FIXTURES = pathlib.Path(__file__).resolve().parent / "fixtures" / "recorded"
 sys.path.insert(0, str(SCRIPTS))
 
-from sources import hiredly, indeed, jobstreet, linkedin, mcf  # noqa: E402
+from sources import jobstreet, linkedin, mcf  # noqa: E402
 
 JOB_KEYS = {
     "id", "source", "title", "company", "location", "mode",
@@ -50,7 +50,6 @@ SEARCH_CASES = [
     ("jobstreet-sg", jobstreet, "jobstreet_sg_search.json", "SG", 5),
     ("mcf", mcf, "mcf_search.json", "SG", 5),
     ("linkedin", linkedin, "linkedin_search.html", "MY", 10),
-    ("hiredly", hiredly, "hiredly_kl.html", "MY", 30),
 ]
 
 
@@ -158,70 +157,46 @@ def test_linkedin_parse_search_fields():
     assert first["applicants"] is None
 
 
-def test_hiredly_parse_search_fields():
-    jobs = hiredly.parse_search(fx("hiredly_kl.html"), country="MY")
-    first = jobs[0]
-    assert first["id"] == "hiredly:jobs-malaysia-aim-coffee-m-sdn-bhd-job-key-account-executive"
-    assert first["title"] == "Key Account Executive"
-    assert first["company"] == "AIM COFFEE (M) SDN BHD"
-    assert first["location"] == "Kuala Lumpur"
-    assert (first["salary_min"], first["salary_max"]) == (3500, 4999)
-    assert first["currency"] == "MYR"
-    assert first["posted"] == "2026-09-03"
-    assert first["url"] == (
-        "https://my.hiredly.com/jobs/"
-        "jobs-malaysia-aim-coffee-m-sdn-bhd-job-key-account-executive"
+def _linkedin_card(title="Engineer", company="Acme", salary=None):
+    salary_html = (
+        f'<span class="job-search-card__salary-info">{salary}</span>' if salary else "")
+    return (
+        '<li><a class="base-card__full-link" '
+        'href="https://www.linkedin.com/jobs/view/1234567890?refId=abc">x</a>'
+        f'<h3 class="base-search-card__title">{title}</h3>'
+        f'<h4 class="base-search-card__subtitle">{company}</h4>'
+        f'{salary_html}</li>'
     )
-    assert "Prospect" in first["teaser"] and "&amp;" not in first["teaser"]
-    undisclosed = [j for j in jobs if j["salary_label"] == "Undisclosed"]
-    assert undisclosed and undisclosed[0]["salary_min"] is None
 
 
-def test_indeed_parse_search_maps_rows():
-    rows = [
-        {
-            "id": "in-abc123",
-            "title": "Backend Engineer",
-            "company": "Acme",
-            "location": "Kuala Lumpur, Malaysia",
-            "date_posted": "2026-09-14",
-            "min_amount": 9000.0,
-            "max_amount": 12000.0,
-            "currency": "MYR",
-            "job_url": "https://my.indeed.com/viewjob?jk=abc123",
-            "description": "<p>Build <b>services</b></p>" + ("x" * 400),
-        },
-        {
-            "title": "Data Engineer",
-            "company": "Beta",
-            "location": "",
-            "date_posted": None,
-            "min_amount": None,
-            "max_amount": None,
-            "currency": None,
-            "job_url": "https://my.indeed.com/viewjob?jk=def456",
-            "description": None,
-        },
-    ]
-    jobs = indeed.parse_search(rows, country="MY")
-    assert len(jobs) == 2
-    for job in jobs:
-        assert set(job) == JOB_KEYS
-        assert job["source"] == "indeed"
-    assert jobs[0]["id"] == "indeed:in-abc123"
-    assert (jobs[0]["salary_min"], jobs[0]["salary_max"]) == (9000, 12000)
-    assert jobs[0]["currency"] == "MYR"
-    assert jobs[0]["posted"] == "2026-09-14"
-    assert "<" not in jobs[0]["teaser"] and len(jobs[0]["teaser"]) <= 300
-    assert jobs[1]["id"] == "indeed:def456"
-    assert jobs[1]["posted"] == "" and jobs[1]["currency"] == ""
+@pytest.mark.parametrize("country,label,expected", [
+    ("MY", "SGD 5,000.00 - SGD 6,000.00", "SGD"),
+    ("SG", "MYR8,000.00 - MYR12,000.00", "MYR"),
+])
+def test_linkedin_currency_comes_from_card_label(country, label, expected):
+    jobs = linkedin.parse_search(_linkedin_card(salary=label), country=country)
+    assert jobs[0]["currency"] == expected
 
 
-def test_indeed_search_without_jobspy_is_unavailable(monkeypatch):
-    monkeypatch.setattr(indeed, "optional_import", lambda name: None)
-    assert indeed.search("swe", "Kuala Lumpur", country="MY") == []
-    assert indeed.UNAVAILABLE_REASON == "pip install python-jobspy"
-    assert indeed.LAST_WARNINGS and "jobspy" in indeed.LAST_WARNINGS[0]
+def test_linkedin_no_salary_has_no_currency():
+    jobs = linkedin.parse_search(_linkedin_card(), country="MY")
+    assert jobs[0]["currency"] == ""
+
+
+def test_linkedin_card_without_title_is_skipped():
+    raw = _linkedin_card(title="", salary="SGD 5,000.00") + _linkedin_card()
+    jobs = linkedin.parse_search(raw, country="MY")
+    assert len(jobs) == 1
+    assert jobs[0]["title"] == "Engineer"
+
+
+def test_linkedin_search_warns_when_cards_found_but_none_parsed():
+    broken = (
+        b'<li><a class="base-card__full-link" '
+        b'href="https://www.linkedin.com/jobs/view/1234567890">x</a></li>')
+    jobs = linkedin.search("swe", "KL", country="MY", fetch=fetcher(200, broken))
+    assert jobs == []
+    assert any("cards found but none parsed" in w for w in linkedin.LAST_WARNINGS)
 
 
 # --- parse_detail -------------------------------------------------------------
@@ -272,8 +247,7 @@ def test_linkedin_parse_detail():
 
 
 def test_parse_detail_on_junk_returns_empty_record():
-    for mod, raw in ((jobstreet, b"{}"), (mcf, b"{}"), (linkedin, b"<html></html>"),
-                     (hiredly, b"<html></html>"), (indeed, b"{}")):
+    for mod, raw in ((jobstreet, b"{}"), (mcf, b"{}"), (linkedin, b"<html></html>")):
         got = mod.parse_detail(raw, country="MY")
         assert set(got) == DETAIL_KEYS
         assert got["description_md"] == "" and got["screening_questions"] == []
@@ -282,6 +256,17 @@ def test_parse_detail_on_junk_returns_empty_record():
 
 
 # --- salary parsing -----------------------------------------------------------
+
+def test_jobstreet_parse_salary_annual_label_is_monthly():
+    payload = json.dumps({"data": [{
+        "id": "1", "title": "Dev", "companyName": "Acme",
+        "salaryLabel": "RM 120,000 - RM 144,000 per year",
+        "listingDate": "2026-09-01T00:00:00Z", "locations": [{"label": "KL"}],
+    }]})
+    job = jobstreet.parse_search(payload, country="MY")[0]
+    assert (job["salary_min"], job["salary_max"]) == (10000, 12000)
+    assert job["salary_label"] == "RM 120,000 - RM 144,000 per year"
+
 
 @pytest.mark.parametrize("label,expected", [
     ("RM 15,000 – RM 20,000 per month", (15000, 20000)),
@@ -295,6 +280,14 @@ def test_jobstreet_parse_salary(label, expected):
     assert jobstreet.parse_salary(label) == expected
 
 
+def test_linkedin_parse_search_annual_card_is_monthly():
+    jobs = linkedin.parse_search(
+        _linkedin_card(salary="SGD 96,000.00 per annum"), country="SG")
+    job = jobs[0]
+    assert (job["salary_min"], job["salary_max"]) == (8000, 8000)
+    assert job["salary_label"] == "SGD 96,000.00 per annum"
+
+
 @pytest.mark.parametrize("label,expected", [
     ("MYR8,000.00 - MYR12,000.00", (8000, 12000)),
     ("SGD5,500.00", (5500, 5500)),
@@ -302,16 +295,6 @@ def test_jobstreet_parse_salary(label, expected):
 ])
 def test_linkedin_parse_salary_ignores_decimals(label, expected):
     assert linkedin.parse_salary(label) == expected
-
-
-@pytest.mark.parametrize("label,expected", [
-    ("3500 - 4999", (3500, 4999)),
-    ("500", (500, 500)),
-    ("Undisclosed", (None, None)),
-    ("", (None, None)),
-])
-def test_hiredly_parse_salary(label, expected):
-    assert hiredly.parse_salary(label) == expected
 
 
 # --- search(): request shape, fetch injection, warnings -----------------------
@@ -371,19 +354,6 @@ def test_linkedin_search_pages_and_stops_on_429():
     assert any("429" in w for w in linkedin.LAST_WARNINGS)
 
 
-def test_hiredly_search_filters_by_keyword_client_side():
-    calls = []
-    jobs = hiredly.search("marketing", "Kuala Lumpur", country="MY",
-                          fetch=fetcher(200, fx("hiredly_kl.html"), calls))
-    assert jobs and all("marketing" in j["title"].lower() for j in jobs)
-    assert calls[0]["url"] == "https://my.hiredly.com/jobs?state=Kuala+Lumpur"
-
-
-def test_hiredly_search_is_my_only():
-    assert hiredly.search("swe", "Singapore", country="SG", fetch=fetcher(200, b"")) == []
-    assert any("MY" in w for w in hiredly.LAST_WARNINGS)
-
-
 def test_detail_uses_injected_fetch():
     calls = []
     got = jobstreet.detail("94655291", country="MY",
@@ -408,12 +378,12 @@ def test_detail_uses_injected_fetch():
 
 
 def test_detail_returns_none_on_http_error():
-    for mod in (jobstreet, mcf, linkedin, hiredly):
+    for mod in (jobstreet, mcf, linkedin):
         assert mod.detail("1", country="MY", fetch=fetcher(500, b"")) is None
 
 
 def test_every_source_exposes_the_same_interface():
-    for mod in (jobstreet, mcf, linkedin, hiredly, indeed):
+    for mod in (jobstreet, mcf, linkedin):
         assert isinstance(mod.NAME, str) and mod.NAME
         assert isinstance(mod.LAST_WARNINGS, list)
         for fn in ("search", "parse_search", "detail", "parse_detail"):
@@ -425,7 +395,6 @@ def test_fixtures_are_verbatim_recordings():
     assert json.loads(fx("jobstreet_my_search.json"))["totalCount"] > 0
     assert json.loads(fx("jobstreet_detail.json"))["data"]["jobDetails"]["job"]["id"] == "94655291"
     assert json.loads(fx("mcf_search.json"))["total"] > 0
-    assert b"__NEXT_DATA__" in fx("hiredly_kl.html")
 
 
 # --- never-raise guards -------------------------------------------------------
@@ -443,23 +412,9 @@ def test_json_parse_search_survives_malformed_payloads(mod, country, container):
         assert mod.parse_search(raw, country=country) == []
 
 
-def test_hiredly_parse_search_survives_malformed_payloads():
-    embedded = b'<script id="__NEXT_DATA__" type="application/json">%s</script>'
-    for raw in MALFORMED + [embedded % b'{"props": {"pageProps": {"jobs": "oops"}}}',
-                            embedded % b'{"props": "oops"}',
-                            embedded % b'{"props": {"pageProps": {"jobs": [1, null]}}}']:
-        assert hiredly.parse_search(raw, country="MY") == []
-
-
-def test_indeed_parse_search_survives_malformed_payloads():
-    for raw in MALFORMED + [b'{"jobs": "oops"}', None, [None, 3]]:
-        assert indeed.parse_search(raw, country="MY") == []
-
-
 def test_search_survives_malformed_bodies_without_raising():
     assert jobstreet.search("swe", "KL", country="MY", fetch=fetcher(200, b"not json")) == []
     assert mcf.search("swe", "SG", country="SG", fetch=fetcher(200, b"not json")) == []
-    assert hiredly.search("swe", "KL", country="MY", fetch=fetcher(200, b"<html>")) == []
     assert linkedin.search("swe", "KL", country="MY", fetch=fetcher(200, b"<html>"),
                            sleep=lambda s: None) == []
 
@@ -524,8 +479,7 @@ def test_mcf_mode_mapping(arrangements, expected):
 # --- warnings hygiene ---------------------------------------------------------
 
 def test_detail_clears_stale_warnings():
-    for mod, country in ((jobstreet, "MY"), (mcf, "SG"), (linkedin, "MY"), (hiredly, "MY"),
-                         (indeed, "MY")):
+    for mod, country in ((jobstreet, "MY"), (mcf, "SG"), (linkedin, "MY")):
         mod.LAST_WARNINGS.append("stale")
         mod.detail("1", country=country, fetch=fetcher(500, b""))
         assert "stale" not in mod.LAST_WARNINGS

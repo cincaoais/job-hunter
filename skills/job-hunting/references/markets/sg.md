@@ -20,7 +20,9 @@ slower processes and keep the pipeline wide.
 | LinkedIn | mid-senior | Mid-senior roles, networking, recruiter sourcing | `linkedin` (guest search) |
 | NodeFlair | niche | Tech roles, with salary data | — (scoped web search) |
 | Glints | niche | Tech and startup roles | — (scoped web search) |
-| Indeed | volume | Aggregator | `indeed` (needs `python-jobspy`) |
+| Indeed | volume | Aggregator | — (search by hand) |
+
+- **Automated boards**: the job hunter queries JobStreet, MyCareersFuture and LinkedIn automatically; NodeFlair, Glints and Indeed can be searched by hand.
 
 - **MCF reach**: used by ~1 in 3 fresh graduates and young PMETs; ~6 in 10
   found jobs within six months (MOM PQ reply, Sep 2025).
@@ -37,7 +39,7 @@ slower processes and keep the pipeline wide.
   job-search activity (2026-09 notes — verify). Check eligibility first —
   the scheme has prior-income and housing caps. Then log every application,
   touch and interview: the tracker doubles as the activity evidence
-  (`pipeline.md`; chat mode: profile §9).
+  (`pipeline.md`).
 
 ## 2. Agencies
 

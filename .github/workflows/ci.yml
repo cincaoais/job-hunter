@@ -1,6 +1,6 @@
 name: ci
 on:
-  push: { branches: ["**"], tags: ["v*"] }
+  push: { branches: ["**"] }
   pull_request:
 permissions:
   contents: read
@@ -16,18 +16,3 @@ jobs:
       - run: python -m pip install pytest
       - run: python -m pytest -q -m "not network"
       - run: python build.py --check
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
-      - run: python build.py
-      - uses: actions/upload-artifact@v4
-        with: { name: job-hunting.skill, path: dist/job-hunting.skill }
-      - if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with: { files: dist/job-hunting.skill }

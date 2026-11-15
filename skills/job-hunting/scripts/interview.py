@@ -9,8 +9,9 @@
 Files are interviews/<slug>/<date>-<kind>-<round_type>.md, one folder per
 pipeline row, frontmatter `contract: 1` (references/interview-debrief.md).
 `new` never overwrites; `bank` rewrites interviews/question-bank.md from the
-debriefs and mock scorecards. Exit codes follow tracker.py: 0 on success and
-on "no workspace found", 2 for bad input.
+debriefs and mock scorecards. Exit codes follow tracker.py: 0 on success (and
+`bank` with no workspace found), 2 for bad input or a `new`/`outcome` write with
+no workspace.
 """
 from __future__ import annotations
 
@@ -22,7 +23,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _common import read_table, slugify, today, use_utf8_output, workspace_dir, write_table  # noqa: E402
+from _common import (  # noqa: E402
+    read_table, slugify, today, use_utf8_output, workspace_dir, write_table, write_text_atomic)
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ASSETS = SCRIPT_DIR.parent / "assets"
@@ -98,14 +100,12 @@ def render(kind: str, row: dict, round_type: str, round_no: int | None, date: st
 
 
 def _write(path: Path, text: str) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8", newline="\n") as fh:
-        fh.write(text)
+    write_text_atomic(path, text)
 
 
 def _no_row(args) -> int:
     print(f"No pipeline row for {args.company!r} / {args.role!r} — add it first: "
-          f"python3 {SCRIPT_DIR / 'tracker.py'} add --company \"{args.company}\" --role \"{args.role}\"")
+          f"sh {SCRIPT_DIR / 'jh'} tracker.py add --company \"{args.company}\" --role \"{args.role}\"")
     return 2
 
 
@@ -145,7 +145,7 @@ def cmd_outcome(ws: Path, args) -> int:
     debriefs = [r for r in records(ws, "debrief") if r[2].parent == folder]
     if not debriefs:
         print(f"No debrief yet for {row['Company']} / {row['Role']} — create one with: "
-              f"python3 {SCRIPT_DIR / 'interview.py'} new --kind debrief …")
+              f"sh {SCRIPT_DIR / 'jh'} interview.py new --kind debrief …")
         return 2
     _, text, path = debriefs[-1]
     match = _FRONTMATTER_RE.match(text)
@@ -248,8 +248,8 @@ def main(argv=None) -> int:
         return 2
     ws = workspace_dir()
     if not (ws / "pipeline.md").exists():
-        print(f"No workspace found — run: python3 {SCRIPT_DIR / 'workspace.py'} init")
-        return 0
+        print(f"No workspace found — run: sh {SCRIPT_DIR / 'jh'} workspace.py init")
+        return 2 if args.cmd in ("new", "outcome") else 0
     for value in (getattr(args, "date", None), args.today_):
         if _bad_date(value):
             print(f"Bad date {value!r} — use YYYY-MM-DD")

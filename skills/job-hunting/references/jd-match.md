@@ -7,15 +7,13 @@ optimize → record.
 
 ## 0. Fetch
 
-- **Workspace mode, a URL given:** run
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_posting.py <url> --save` and
+- **A URL given:** run
+  `sh ${CLAUDE_SKILL_DIR}/scripts/jh fetch_posting.py <url> --save` and
   read the saved `postings/<slug>.md` — score the full posting, never a
   search teaser. Pasted text goes on file the same way:
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_posting.py --stdin --company "<X>" --title "<role>" --save`
+  `sh ${CLAUDE_SKILL_DIR}/scripts/jh fetch_posting.py --stdin --company "<X>" --title "<role>" --save`
   (add `--url <url>` when there is one). Exit 3 means the page is blocked
   — `sourcing.md` §1, rung 4.
-- **Chat mode:** work from the pasted text; given only a URL, ask for the
-  text rather than claiming the posting was read.
 
 ## 1. Extract
 
@@ -154,9 +152,9 @@ the pattern across postings tells you what the market is pricing.
 4. **Route and record.** Soft-skill gaps — mentoring, stakeholder
    communication, and similar people skills, wherever the posting lists
    them — go to `references/soft-skills-coach.md`, not this heatmap. Write the chosen
-   goals and artifacts into the profile (the §9 "Soft skills development"
-   table for soft skills, a learning-goals note under §8 for technical
-   ones) and end with the closing step for the storage mode (SKILL.md).
+   goals and artifacts into the profile (the profile.md Soft skills
+   development table for soft skills, a learning-goals note under §8 for
+   technical ones) and end with the closing step (SKILL.md).
 
 A gap closes by learning and proof, never by wording — the heatmap becomes
 resume content only once the artifact exists (`facts-policy.md`).
@@ -165,12 +163,9 @@ resume content only once the artifact exists (`facts-policy.md`).
 
 Record every posting the user will pursue — any verdict except skip.
 
-- **Workspace mode:** the posting is already in `postings/` (§0). Add the
-  row:
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/tracker.py add --company "<X>" --role "<Y>" --stage saved --source <board or page> --url <url>`
+- The posting is already in `postings/` (§0). Add the row:
+  `sh ${CLAUDE_SKILL_DIR}/scripts/jh tracker.py add --company "<X>" --role "<Y>" --stage saved --source <board or page> --url <url>`
   and set its Next action and Due in the same call (`--next "…" --due
   YYYY-MM-DD`, `pipeline.md` §2); put the verdict in `--notes` ("fit 7/10,
   stretch: repost 45 days").
-- **Chat mode:** add the same row to the profile §9 Pipeline table (Stage
-  `saved`, URL and verdict in Notes).
-- Then the closing step for the storage mode (SKILL.md).
+- Then the closing step (SKILL.md).

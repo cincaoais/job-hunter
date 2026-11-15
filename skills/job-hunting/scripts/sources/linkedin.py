@@ -20,6 +20,7 @@ if _SCRIPTS not in sys.path:
 
 from _common import (  # noqa: E402
     default_fetch, detail_record, finish_detail, first_two_ints, html_to_text, job_record,
+    to_monthly,
 )
 
 NAME = "linkedin"
@@ -50,6 +51,8 @@ _MARKUP_RE = re.compile(r'<div class="show-more-less-html__markup[^"]*"[^>]*>', 
 _DETAIL_FLAVOR_RE = re.compile(
     r'<span class="([^"]*topcard__flavor--bullet[^"]*)"[^>]*>(.*?)</span>', re.S)
 _DECIMALS_RE = re.compile(r"\.\d+")
+_LABEL_MYR_RE = re.compile(r"(?<![A-Za-z])(?:MYR|RM)(?![A-Za-z])", re.I)
+_LABEL_SGD_RE = re.compile(r"SGD|S\$", re.I)
 
 
 def _text(html: str) -> str:
@@ -58,9 +61,22 @@ def _text(html: str) -> str:
     return re.sub(r"\s+", " ", html_mod.unescape(s)).strip()
 
 
+def _label_currency(label: str) -> str:
+    """Currency claimed by the card's own salary label ("" when unknown)."""
+    text = label or ""
+    if _LABEL_MYR_RE.search(text):
+        return "MYR"
+    if _LABEL_SGD_RE.search(text):
+        return "SGD"
+    return ""
+
+
 def parse_salary(label: str) -> tuple[int | None, int | None]:
-    """Guest cards show e.g. "MYR8,000.00 - MYR12,000.00"; no digits -> (None, None)."""
-    return first_two_ints(_DECIMALS_RE.sub("", label or ""))
+    """Guest cards show e.g. "MYR8,000.00 - MYR12,000.00"; no digits -> (None, None).
+
+    Decimals are noise in the figures, but the label's period still counts:
+    an annual or hourly figure comes back converted to monthly."""
+    return to_monthly(*first_two_ints(_DECIMALS_RE.sub("", label or "")), label)
 
 
 def _job_id(url: str) -> str:
@@ -100,15 +116,19 @@ def parse_search(raw: bytes | str, *, country: str) -> list[dict]:
         company_match = _COMPANY_RE.search(block)
         location_match = _LOCATION_RE.search(block)
         date_match = _DATE_RE.search(block)
+        title = _text(title_match.group(1)) if title_match else ""
+        company = _text(company_match.group(1)) if company_match else ""
+        if not title or not company:
+            continue
         jobs.append(job_record(
             NAME, country,
             id=f"{NAME}:{job_id}",
-            title=_text(title_match.group(1)) if title_match else "",
-            company=_text(company_match.group(1)) if company_match else "",
+            title=title,
+            company=company,
             location=_text(location_match.group(1)) if location_match else "",
             salary_min=low,
             salary_max=high,
-            currency=CURRENCIES.get(country, "") if (low or high) else "",
+            currency=_label_currency(label) if (low or high) else "",
             salary_label=label,
             posted=date_match.group(1) if date_match else "",
             url=url,
@@ -128,6 +148,8 @@ def search(keywords: str, location: str, *, country: str, days: int | None = Non
     country = (country or "").upper()
     fetch = fetch or default_fetch
     jobs: list[dict] = []
+    succeeded = False
+    cards_seen = False
     for page in range(min(max(1, pages), MAX_PAGES)):
         if page:
             sleep(PAGE_DELAY)
@@ -139,10 +161,16 @@ def search(keywords: str, location: str, *, country: str, days: int | None = Non
         if status != 200:
             LAST_WARNINGS.append(f"{NAME}: HTTP {status} at page {page + 1}, stopped")
             break
+        succeeded = True
+        if _LINK_RE.search(_as_text(body)):
+            cards_seen = True
         page_jobs = parse_search(body, country=country)
         jobs.extend(page_jobs)
         if not page_jobs:
             break
+    if succeeded and not jobs and cards_seen:
+        LAST_WARNINGS.append(
+            f"{NAME}: cards found but none parsed \u2014 the page format may have changed")
     return jobs
 
 

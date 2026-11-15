@@ -49,8 +49,8 @@ CLASSIFY_CASES = [
     ("mcf", f"https://www.mycareersfuture.gov.sg/job/information-technology/"
             f"software-engineer-creative-labs-{MCF_UUID}",
      ("mcf", MCF_UUID, "SG")),
-    ("hiredly", "https://my.hiredly.com/jobs/job-senior-backend-engineer-kl",
-     ("hiredly", "job-senior-backend-engineer-kl", "MY")),
+    ("generic-lever", "https://jobs.lever.co/acme/4567890",
+     ("generic", "https://jobs.lever.co/acme/4567890", "")),
     ("generic", "https://boards.greenhouse.io/acme/jobs/4567890",
      ("generic", "https://boards.greenhouse.io/acme/jobs/4567890", "")),
 ]
@@ -272,6 +272,43 @@ def test_board_detail_miss_is_not_found():
     job, reason = fp.fetch("https://my.jobstreet.com/job/1", detail_fetch=detail_fetch)
     assert job is None
     assert reason.startswith("not found")
+
+
+def test_board_detail_404_is_not_found():
+    def detail_fetch(url, headers=None, method="GET", payload=None):
+        return 404, b"{}"
+
+    job, reason = fp.fetch_board("jobstreet", "1", "MY", detail_fetch=detail_fetch)
+    assert job is None
+    assert reason.startswith("not found:")
+
+
+def test_board_detail_warning_is_unavailable():
+    def detail_fetch(url, headers=None, method="GET", payload=None):
+        return 500, b"{}"
+
+    job, reason = fp.fetch_board("jobstreet", "1", "MY", detail_fetch=detail_fetch)
+    assert job is None
+    assert reason.startswith("unavailable:")
+    assert "HTTP 500" in reason
+
+
+def test_board_detail_exception_is_unavailable():
+    def detail_fetch(url, headers=None, method="GET", payload=None):
+        raise RuntimeError("connection reset")
+
+    job, reason = fp.fetch_board("jobstreet", "1", "MY", detail_fetch=detail_fetch)
+    assert job is None
+    assert reason.startswith("unavailable:")
+
+
+def test_board_detail_empty_without_warnings_is_not_found():
+    def detail_fetch(url, headers=None, method="GET", payload=None):
+        return 200, b"{}"
+
+    job, reason = fp.fetch_board("jobstreet", "1", "MY", detail_fetch=detail_fetch)
+    assert job is None
+    assert reason.startswith("not found:")
 
 
 def test_main_exit_4_when_the_board_has_no_such_job(monkeypatch, capsys):
@@ -579,6 +616,18 @@ def test_a_200_page_that_says_access_denied_is_still_parsed(monkeypatch):
     job, reason = fp.fetch("https://acme.com/jobs/security-engineer")
     assert reason == ""
     assert "Access Denied rules" in job["description_md"]
+
+
+def test_a_short_challenge_page_is_never_a_posting(monkeypatch):
+    challenge = (b"<html><head><title>Just a moment...</title></head>"
+                 b"<body><p>Checking your browser before accessing the site.</p>"
+                 b"</body></html>")
+    monkeypatch.setattr(fp, "browse", lambda url, **kwargs: None)
+    monkeypatch.setattr(fp, "http_get", getter(200, challenge))
+    assert fp.looks_blocked(200, challenge) is True
+    job, reason = fp.fetch("https://jobs.example.com/roles/7")
+    assert job is None
+    assert reason == "blocked"
 
 
 def test_classify_lowercases_an_uppercase_mcf_uuid():

@@ -34,10 +34,10 @@ For each gap skill, produce:
 
 ## 3. Track
 
-Record goals in the profile §9 "Soft skills development" table: skill, why
+Record goals in the profile.md Soft skills development table: skill, why
 it matters (which postings ask for it), actions, status, and evidence. New
-STAR stories go to `answers.md` "STAR stories" (chat mode: the profile §9
-Answers section). When the table looks stale (untouched for a few
-weeks), ask for a one-line progress update — a nudge, not a lecture.
+STAR stories go to `answers.md` "STAR stories". When the table looks
+stale (untouched for a few weeks), ask for a one-line progress update — a
+nudge, not a lecture.
 As evidence accumulates, feed it back into the resume, letters, and
 interview prep.

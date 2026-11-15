@@ -10,34 +10,31 @@ worth more than ten week-old ones.
 Work down this ladder and state the rung in the first line of the shortlist
 ("Source: search_jobs.py, 3 boards, --days 2").
 
-1. **`search_jobs.py`** (workspace mode). Reads profile §1–§3 (location,
-   market, keywords, boards, salary, must-haves, dealbreakers), queries
-   JobStreet MY/SG, MyCareersFuture (SG), LinkedIn guest search, Hiredly
-   (MY) — Indeed only when `python-jobspy` is installed and the profile
-   lists it — dedupes against `seen-jobs.json`, applies knockouts, and ranks
-   by freshness:
+1. **`search_jobs.py`**. Reads profile §1–§3 (location,
+   market, keywords, boards, salary, dealbreakers), queries
+   JobStreet MY/SG, MyCareersFuture (SG) and LinkedIn guest search, dedupes
+   against `seen-jobs.json`, applies knockouts, and ranks by freshness:
 
    ```
-   python3 ${CLAUDE_SKILL_DIR}/scripts/search_jobs.py --markdown --days 2
-   python3 ${CLAUDE_SKILL_DIR}/scripts/search_jobs.py --keywords "data engineer" --country SG --days 7
+   sh ${CLAUDE_SKILL_DIR}/scripts/jh search_jobs.py --markdown --days 2
+   sh ${CLAUDE_SKILL_DIR}/scripts/jh search_jobs.py --keywords "data engineer" --country SG --days 7
    ```
 
    Flags: `--keywords --location --country MY|SG --days --salary-min
    --sources --pages --all --no-seen --json`. Defaults come from the
    profile; flags override. A second run the same day prints
    `0 new since last run` — add `--all` to see everything again.
-2. **Connected MCP job tools** — a Reactive Resume tracker, a LinkedIn MCP,
-   Workopia or similar. Use them when the user connected them; label rows
-   with that source.
-3. **Scoped web search** — `site:my.jobstreet.com <role> <city>`,
+2. **Scoped web search** — `site:my.jobstreet.com <role> <city>`,
    `site:sg.jobstreet.com …`, `site:mycareersfuture.gov.sg …`,
    `site:linkedin.com/jobs …`. Web search sees public listing pages only,
    never a logged-in feed; say so.
-4. **The user pastes** postings or URLs. Save each with
-   `python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_posting.py <url> --save`
-   (workspace) so the Qualifier has the full text; `--stdin` accepts pasted
-   text; exit 3 means the page is blocked — ask for the text or suggest
-   `pip install cloakbrowser`.
+3. **The user pastes** postings or URLs. Save each with
+   `sh ${CLAUDE_SKILL_DIR}/scripts/jh fetch_posting.py <url> --save`
+   so the Qualifier has the full text; `--stdin` accepts pasted text; exit 3
+   means the page is blocked — ask for the text or suggest
+   `pip install cloakbrowser`. Exit 4 with a message starting `unavailable:`
+   means the board did not answer (try later or paste the text), while
+   `not found:` means the job is gone.
 
 Never answer from memory: listings and salaries change daily.
 
@@ -45,30 +42,29 @@ Never answer from memory: listings and salaries change daily.
 
 `search_jobs.py --markdown` prints:
 
-- `## N new postings (M knocked out, K needs a look, S seen before)`
+- `## N new postings (M knocked out, S seen before)`
 - the main table `# | Posted | Source | Company | Role | Location / mode |
   Salary | Link` — fresh first, then by salary, then by board priority
-- `### Needs a look` — rows that matched none of the profile's must-have
-  words. The teaser is short, so this list is noisy: skim it, do not skip it.
-  The table shows at most 10 rows; `--json` carries the rest.
 - `### Knocked out` — `Company — Role: reason`, where the reason is
   `dealbreaker: <phrase>` or `salary below floor` (checked only against pay
-  in the floor's currency — the profile's, else the market's); rows missing
-  a must-have go to "Needs a look" instead.
+  in the floor's currency — the profile's, else the market's).
   Postings older than `--days` are dropped silently before this step and
   never listed. Knocked-out rows are not remembered as seen, so they
   reappear if the criteria change.
 - `Sources: jobstreet 42 · mcf 10 · linkedin 12 (HTTP 429 at page 2,
-  stopped) · indeed skipped: pip install python-jobspy` — count first,
-  warnings in parentheses. Read this line every time; a board that stopped
-  early means the shortlist is partial.
+  stopped) · mcf skipped: SG only` — count first, warnings in parentheses.
+  Read this line every time; a board that stopped early means the shortlist
+  is partial. A source line that says "cards found but none parsed — the
+  page format may have changed" means that board's results are missing this
+  run; tell the user rather than reporting a quiet market.
 
 ## 3. Freshness and cadence
 
 - Daily: `--days 2`. Weekly sweep: `--days 7`. Postings under 48 hours old
   go first; anything older than 30 days is a repost until proven otherwise.
-- Recurring digest: `/loop 1d /job-hunter:search` in Claude Code, or a
-  `/schedule` routine; each run only shows what is new since the last one.
+- Optional: a recurring digest with Claude Code's
+  `/loop 1d /job-hunter:search` or a `/schedule` routine; each run shows
+  only what is new since the last.
 - Weekly cap: 10–20 targeted applications. 11–20 applications → ~9%
   interview rate, 100+ → ~2.6% (Huntr Q1 2026, 140k applications); the
   freed time goes to outreach (`networking.md`).
@@ -119,7 +115,7 @@ high-fit dozen beats a noisy fifty, with one or two stretch targets:
   person was found and never fetch the result pages.
 - Offer to save chosen rows (`tracker.py add --company X --role Y --source S
   --channel cold --stage saved`) and to fetch the full posting for the
-  Qualifier (`python3 ${CLAUDE_SKILL_DIR}/scripts/fetch_posting.py <url>
+  Qualifier (`sh ${CLAUDE_SKILL_DIR}/scripts/jh fetch_posting.py <url>
   --save`).
 
 ## 7. Feed forward
@@ -131,8 +127,7 @@ high-fit dozen beats a noisy fifty, with one or two stretch targets:
 - A search that keeps returning the same knockouts or an empty main table is
   a targeting signal — hand it to `strategy.md`, not to more searching.
 - Keep politeness: every host is rate-limited to about one request per
-  second (`_common._rate_limit`; Indeed goes through `python-jobspy`'s own
-  client). LinkedIn additionally pauses 2.5 s between pages and stops at 3
+  second. LinkedIn additionally pauses 2.5 s between pages and stops at 3
   pages, so `--pages` above 3 has no effect there. Board APIs and a
   posting's first fetch attempt identify as `job-hunter-skill`; LinkedIn's
   guest pages and the generic-page retry send a browser User-Agent, because

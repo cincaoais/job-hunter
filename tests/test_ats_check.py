@@ -506,7 +506,7 @@ def test_cli_posting_lint_text_prints_all_three_parts(sample_docx, capsys):
 
 
 def test_step6_invocations_ask_for_lint_and_text():
-    invocation = ("python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --posting "
+    invocation = ("sh ${CLAUDE_SKILL_DIR}/scripts/jh ats_check.py <file> --posting "
                   "postings/<slug>.md --lint --text")
     builder = (ROOT / "skills" / "job-hunting" / "references" / "resume-builder.md").read_text(encoding="utf-8")
     assert builder.count(invocation) == 2

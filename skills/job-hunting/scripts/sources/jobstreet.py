@@ -18,7 +18,7 @@ if _SCRIPTS not in sys.path:
 
 from _common import (  # noqa: E402
     default_fetch, detail_record, dict_at, finish_detail, first_two_ints, html_to_text,
-    job_record, loads_or_empty, rows_of,
+    job_record, loads_or_empty, rows_of, to_monthly,
 )
 
 NAME = "jobstreet"
@@ -48,8 +48,11 @@ _MODES = {"hybrid": "Hybrid", "remote": "Remote", "on-site": "Onsite", "on site"
 
 
 def parse_salary(label: str) -> tuple[int | None, int | None]:
-    """"RM 15,000 - RM 20,000 per month" -> (15000, 20000); no digits -> (None, None)."""
-    return first_two_ints(label)
+    """"RM 15,000 - RM 20,000 per month" -> (15000, 20000); no digits -> (None, None).
+
+    The label may state any period ("RM 120,000 per year", "50 per hour");
+    the returned pair is always monthly."""
+    return to_monthly(*first_two_ints(label), label)
 
 
 def _country(country: str) -> str:

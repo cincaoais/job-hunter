@@ -273,6 +273,29 @@ def test_today_command_lists_debriefs_due(ws, capsys):
     assert json.loads(out)["debriefs_due"] == []
 
 
+def test_debriefs_due_line_shows_the_next_action(ws, capsys):
+    # A past-due interview-stage row may carry a non-interview action; it must stay visible.
+    run(capsys, "add", "--company", "Apex Digital", "--role", "Backend Engineer",
+        "--stage", "interview", "--due", "2026-09-15", "--next", "Email recruiter for update",
+        "--today", TODAY)
+    code, out = run(capsys, "today", "--today", TODAY)
+    assert code == 0
+    line = next(l for l in out.splitlines() if "Apex Digital" in l)
+    assert "Email recruiter for update" in line and "/job-hunter:interview debrief" in line
+
+
+def test_digest_respects_debrief_files(ws, capsys):
+    run(capsys, "add", "--company", "Apex Digital", "--role", "Backend Engineer",
+        "--stage", "interview", "--due", "2026-09-15", "--today", TODAY)
+    folder = ws / "interviews" / "apex-digital-backend-engineer"
+    folder.mkdir(parents=True)
+    (folder / "2026-09-15-debrief-technical.md").write_text("x", encoding="utf-8")
+    code, _ = run(capsys, "digest", "--today", TODAY)
+    assert code == 0
+    review = (ws / "reviews" / f"{TODAY}.md").read_text(encoding="utf-8")
+    assert "Debriefs due" not in review
+
+
 # --- funnel ------------------------------------------------------------------
 
 def test_funnel_channel_counts_match_hand_computed():
@@ -317,6 +340,32 @@ def test_funnel_counts_a_rejection_as_a_response_only_when_a_human_answered(note
              "Stage": "rejected", "Notes": notes}]
     total = tracker.funnel(rows)["total"]
     assert (total["sent"], total["responses"]) == (1, int(counts_as_response))
+
+
+def test_funnel_counts_stages_a_rejected_row_reached():
+    rows = [{"Company": f"C{i}", "Role": "R", "Source": "S", "Channel": "cold",
+             "Stage": "rejected", "Notes": "reached: final" if i < 5 else "no reply"}
+            for i in range(12)]
+    f = tracker.funnel(rows)
+    assert f["total"]["interviews"] == 5
+    assert f["total"]["responses"] >= 5
+    assert tracker.diagnose(f)[0] != "targeting"
+
+
+def test_set_rejected_records_the_stage_it_reached(ws, capsys):
+    run(capsys, "add", "--company", "Apex", "--role", "Backend Engineer",
+        "--stage", "interview", "--today", TODAY)
+    code, out = run(capsys, "set", "--company", "Apex", "--stage", "rejected", "--today", TODAY)
+    assert code == 0, out
+    assert "reached: interview" in pipeline_rows(ws)[0]["Notes"]
+
+
+def test_set_rejected_from_applied_adds_no_reached_note(ws, capsys):
+    run(capsys, "add", "--company", "Apex", "--role", "Backend Engineer",
+        "--stage", "applied", "--today", TODAY)
+    code, out = run(capsys, "set", "--company", "Apex", "--stage", "rejected", "--today", TODAY)
+    assert code == 0, out
+    assert "reached:" not in pipeline_rows(ws)[0]["Notes"]
 
 
 def test_funnel_report_has_both_tables_benchmarks_and_leak(filled, capsys):
@@ -464,23 +513,33 @@ def test_contact_same_name_different_company_is_a_new_row(ws, capsys):
 
 @pytest.mark.parametrize("argv", [
     ["today"], ["funnel"], ["contacts"], ["digest"],
+])
+def test_no_workspace_read_commands_exit_zero(tmp_path, monkeypatch, capsys, argv):
+    monkeypatch.setenv("JOB_HUNT_DIR", str(tmp_path / "missing"))
+    code, out = run(capsys, *argv)
+    assert code == 0, out
+    assert "No workspace found — run: sh" in out
+    assert "workspace.py init" in out
+
+
+@pytest.mark.parametrize("argv", [
     ["add", "--company", "Apex", "--role", "BE"],
     ["set", "--company", "Apex", "--stage", "applied"],
     ["contact", "--name", "Sam Tan"],
 ])
-def test_no_workspace_prints_hint_and_exits_zero(tmp_path, monkeypatch, capsys, argv):
+def test_no_workspace_write_commands_exit_two(tmp_path, monkeypatch, capsys, argv):
     monkeypatch.setenv("JOB_HUNT_DIR", str(tmp_path / "missing"))
     code, out = run(capsys, *argv)
-    assert code == 0, out
-    assert "No workspace found — run: python3" in out
+    assert code == 2, out
+    assert "No workspace found — run: sh" in out
     assert "workspace.py init" in out
 
 
 def test_no_workspace_beats_bad_input(tmp_path, monkeypatch, capsys):
     monkeypatch.setenv("JOB_HUNT_DIR", str(tmp_path / "missing"))
     code, out = run(capsys, "set", "--company", "Apex", "--stage", "ghosted", "--due", "nope")
-    assert code == 0, out
-    assert "No workspace found — run: python3" in out
+    assert code == 2, out
+    assert "No workspace found — run: sh" in out
 
 
 def test_cli_runs_as_a_subprocess(filled):

@@ -17,6 +17,7 @@ import os
 import re
 import ssl
 import sys
+import tempfile
 import time
 import urllib.error
 import urllib.request
@@ -33,6 +34,23 @@ def use_utf8_output() -> None:
     for stream in (sys.stdout, sys.stderr):
         if hasattr(stream, "reconfigure"):
             stream.reconfigure(encoding="utf-8", errors="replace")
+
+
+def write_text_atomic(path: Path, text: str) -> None:
+    """Write UTF-8 text with LF newlines via a temp file in the same folder, then os.replace."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as fh:
+            fh.write(text)
+        os.replace(tmp, path)
+    except BaseException:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def workspace_dir() -> Path:
@@ -223,6 +241,35 @@ def first_two_ints(label: str) -> tuple[int | None, int | None]:
     return nums[0], nums[1]
 
 
+_YEARLY_RE = re.compile(
+    r"per\s*(?:year|annum)|annually|annual|yearly|/\s*yr|\bp\.?\s?a\.?\b")
+_HOURLY_RE = re.compile(r"per\s*hour|hourly|/\s*hr")
+_DAILY_RE = re.compile(r"per\s*day|daily")
+_WEEKLY_RE = re.compile(r"per\s*week|weekly")
+
+
+def to_monthly(low: int | None, high: int | None,
+               label: str) -> tuple[int | None, int | None]:
+    """Convert a pay pair stated in `label`'s period to monthly figures.
+
+    Yearly labels are divided by 12, hourly multiplied by 173, daily by 22 and
+    weekly by 52/12; monthly (or no stated period) passes through unchanged.
+    """
+    text = (label or "").lower()
+    if _YEARLY_RE.search(text):
+        factor = 1 / 12
+    elif _HOURLY_RE.search(text):
+        factor = 173
+    elif _DAILY_RE.search(text):
+        factor = 22
+    elif _WEEKLY_RE.search(text):
+        factor = 52 / 12
+    else:
+        return low, high
+    return (None if low is None else round(low * factor),
+            None if high is None else round(high * factor))
+
+
 def loads_or_empty(raw: bytes | str):
     """Decode JSON from bytes or str, returning {} for anything unparseable."""
     if isinstance(raw, bytes):
@@ -369,6 +416,8 @@ def read_table(md: str, heading: str | None = None) -> tuple[list[str], list[dic
     rows = []
     for line in lines[start + 2 : end + 1]:
         cells = _split_row(line)
+        if columns and len(cells) > len(columns):
+            cells = cells[: len(columns) - 1] + [" | ".join(cells[len(columns) - 1 :])]
         rows.append({col: (cells[idx] if idx < len(cells) else "") for idx, col in enumerate(columns)})
     return columns, rows
 

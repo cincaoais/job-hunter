@@ -60,8 +60,7 @@ Content moves that need no invented numbers:
 
 **Master (ATS)** — .docx, single column, parser-safe per
 `resume-builder.md`. Always generated; it's what portals and ATS get.
-Workspace mode:
-`python3 ${CLAUDE_SKILL_DIR}/scripts/build_resume.py resumes/<file>.md --docx`.
+`sh ${CLAUDE_SKILL_DIR}/scripts/jh build_resume.py resumes/<file>.md --docx`.
 
 **Presentation copy** — PDF for human readers (referrals, direct email,
 career fairs, printed copies). **Never inherit the incoming resume's
@@ -116,14 +115,12 @@ exact page size): multi-column grids, tint blocks, and image placement
 hold precisely there. Content stays word-identical to the master; only
 the shell differs.
 
-- Workspace mode: one run builds both —
-  `python3 ${CLAUDE_SKILL_DIR}/scripts/build_resume.py resumes/<file>.md --docx --pdf --template <name>`,
+- One run builds both —
+  `sh ${CLAUDE_SKILL_DIR}/scripts/jh build_resume.py resumes/<file>.md --docx --pdf --template <name>`,
   where `<name>` is the gallery file's name (`chicago`, `executive`,
   `corporate-sidebar`, `accent-band`, `creative-sidebar`). If the PDF
   step is skipped because no renderer is installed, follow the line the
   script prints.
-- Chat mode: fill the chosen gallery file by hand and render it with the
-  pdf skill.
 
 ### Photo decision matrix
 
@@ -155,8 +152,8 @@ recommended. `markets/<cc>.md` §4 holds the per-country resume detail.
 
 Run the same scorecard on the revamped draft and report **before → after**
 per dimension, plus the 6-second lint on the master
-(`python3 ${CLAUDE_SKILL_DIR}/scripts/ats_check.py <file> --lint`; chat
-mode: by reading, per `resume-builder.md` step 4.6). Ship only when the
+(`sh ${CLAUDE_SKILL_DIR}/scripts/jh ats_check.py <file> --lint`, per
+`resume-builder.md` step 4.6). Ship only when the
 presentation copy fills one clean page (fresher) and the master passes the
 ATS text-layer check and the lint. If a dimension didn't move, say why
 (usually: a real number only the user can supply — name exactly which
