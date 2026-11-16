@@ -1,5 +1,18 @@
 # job-hunter
 
+<p align="center">
+  <img src="docs/workflow.svg" width="100%"
+       alt="How job-hunter works: a weekly loop of roles (Scout, Qualifier, Networker, Writer, you submit, Coach, Operations) around the ~/job-hunt workspace, with Strategist feeding the loop and an offer branching to Negotiator and Onboarder">
+</p>
+
+The diagram runs on a 14-second loop. A posting card travels round the ring
+from Scout to Operations and turns into a resume at the Writer. Each role
+drops its output into a file in your workspace, and the `pipeline.md` stage
+lights up as the application moves along. For the full 13-step 3D
+walkthrough, open [`docs/workflow.html`](docs/workflow.html) in a browser
+from a clone. GitHub shows that file as source, and the page loads three.js
+from unpkg, so it needs an internet connection.
+
 job-hunter is a Claude skill that acts as a job-search agent and career coach
 for tech and other white-collar roles. Malaysia and Singapore come first
 (JobStreet, MyCareersFuture, LinkedIn, local salary and notice norms); other
@@ -189,6 +202,8 @@ Bash or another shell that provides `sh`.
 | `build.py` | Validates the skill files (`--check`, which is also the default action) |
 | `tests/` | pytest suites, `fixtures/` (including recorded board responses), `behavioral-scenarios.md` |
 | `docs/backlog.md` | Open follow-up items carried over into this version |
+| `docs/workflow.svg` | The animated diagram at the top of this README (no scripts; SVG/CSS animation only) |
+| `docs/workflow.html` | Interactive three.js walkthrough of the whole workflow in 13 steps; open it in a browser |
 | `.github/workflows/ci.yml` | Tests and `build.py` on Ubuntu and Windows |
 
 ## Development

@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" width="1000" height="640" role="img" aria-labelledby="t d">
+<title id="t">How job-hunter works</title>
+<desc id="d">A weekly loop of roles around a markdown workspace: Scout finds postings, Qualifier scores fit, Networker finds a referral, Writer builds the resume, you submit, Coach preps interviews, Operations reviews the week. An offer branches to Negotiator and Onboarder.</desc>
+<defs>
+<radialGradient id="bg" cx="36%" cy="54%" r="75%"><stop offset="0" stop-color="#101a33"/><stop offset="1" stop-color="#070b16"/></radialGradient>
+<filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<filter id="soft" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 1 L9 5 L0 9 z" fill="#64748b"/></marker>
+</defs>
+<style>
+text{font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;fill:#e2e8f0}
+.mono{font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace}
+.muted{fill:#94a3b8}.dim{fill:#64748b}
+.name{font-size:13.5px;font-weight:700}.sub{font-size:10.5px;fill:#94a3b8}
+.flow{stroke-dasharray:2 10;animation:flow 1.2s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-24}}
+@media (prefers-reduced-motion:reduce){.flow{animation:none}}
+</style>
+<rect width="1000" height="640" rx="16" fill="url(#bg)"/>
+<rect x=".5" y=".5" width="999" height="639" rx="16" fill="none" stroke="#1e293b"/>
+<text x="28" y="44" style="font-size:22px;font-weight:800">job-hunter<tspan class="muted" style="font-weight:500"> · how it works</tspan></text>
+<text x="28" y="66" class="muted" style="font-size:12.5px">One loop, nine roles, six commands. Everything is saved as markdown in your workspace.</text>
+<text x="972" y="44" text-anchor="end" class="dim" style="font-size:11px">3D walkthrough: <tspan class="mono">docs/workflow.html</tspan></text>
+<circle cx="360" cy="345" r="195" fill="none" stroke="#1e293b" stroke-width="10"/>
+<path d="M333.8 538.2 A195 195 0 1 1 386.2 151.8 A195 195 0 1 1 333.8 538.2" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-opacity=".9" class="flow"/>
+<path d="M333.8 538.2 A195 195 0 1 1 386.2 151.8 A195 195 0 1 1 333.8 538.2" fill="none" stroke="#38bdf8" stroke-width="5" stroke-opacity=".35" stroke-linecap="round" stroke-dasharray="1225.2 1225.2" filter="url(#soft)"><animate attributeName="stroke-dashoffset" values="1225.2;0" dur="14s" repeatCount="indefinite"/></path>
+<text x="360" y="246" text-anchor="middle" class="dim" style="font-size:10px;letter-spacing:.12em">WEEKLY LOOP</text>
+<rect x="255" y="258" width="210" height="176" rx="12" fill="#0d1426" stroke="#facc15" stroke-opacity=".55"/>
+<text x="267" y="281" class="mono" style="font-size:13px;font-weight:700;fill:#facc15">~/job-hunt</text>
+<text x="453" y="281" text-anchor="end" class="dim" style="font-size:10px">your workspace</text>
+<rect x="264" y="296" width="94" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="270" y="308" class="mono" style="font-size:9.5px;fill:#cbd5e1">profile.md</text>
+<rect x="264" y="317" width="94" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="270" y="329" class="mono" style="font-size:9.5px;fill:#cbd5e1">pipeline.md</text>
+<rect x="264" y="338" width="94" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="270" y="350" class="mono" style="font-size:9.5px;fill:#cbd5e1">contacts.md</text>
+<rect x="264" y="359" width="94" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="270" y="371" class="mono" style="font-size:9.5px;fill:#cbd5e1">answers.md</text>
+<rect x="264" y="380" width="94" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="270" y="392" class="mono" style="font-size:9.5px;fill:#cbd5e1">seen-jobs.json</text>
+<rect x="364" y="296" width="92" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="370" y="308" class="mono" style="font-size:9.5px;fill:#cbd5e1">postings/</text>
+<rect x="364" y="317" width="92" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="370" y="329" class="mono" style="font-size:9.5px;fill:#cbd5e1">resumes/</text>
+<rect x="364" y="338" width="92" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="370" y="350" class="mono" style="font-size:9.5px;fill:#cbd5e1">letters/</text>
+<rect x="364" y="359" width="92" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="370" y="371" class="mono" style="font-size:9.5px;fill:#cbd5e1">dossiers/</text>
+<rect x="364" y="380" width="92" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="370" y="392" class="mono" style="font-size:9.5px;fill:#cbd5e1">interviews/</text>
+<rect x="364" y="401" width="92" height="17" rx="4" fill="#111a2e" stroke="#334155"/>
+<text x="370" y="413" class="mono" style="font-size:9.5px;fill:#cbd5e1">reviews/</text>
+<text x="267" y="413" class="mono dim" style="font-size:9px">jh → python | uv</text>
+<circle r="4" fill="#38bdf8" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.0321;0.0964;1" keyPoints="0;0;1;1" path="M316.6 535.1 L311 388.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.0321;0.0371;0.0964;0.1014;1" values="0;0;1;1;0;0"/></circle>
+<rect x="264" y="380" width="94" height="17" rx="4" fill="#38bdf8" fill-opacity="0" stroke="#38bdf8" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.0964;0.1064;0.1864;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.0964;0.1064;0.1864;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#facc15" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.175;0.2393;1" keyPoints="0;0;1;1" path="M184.3 429.6 L410 304.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.175;0.18;0.2393;0.2443;1" values="0;0;1;1;0;0"/></circle>
+<rect x="364" y="296" width="92" height="17" rx="4" fill="#facc15" fill-opacity="0" stroke="#facc15" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.2393;0.2493;0.3293;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.2393;0.2493;0.3293;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#facc15" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.1929;0.2571;1" keyPoints="0;0;1;1" path="M184.3 429.6 L311 325.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.1929;0.1979;0.2571;0.2621;1" values="0;0;1;1;0;0"/></circle>
+<rect x="264" y="317" width="94" height="17" rx="4" fill="#facc15" fill-opacity="0" stroke="#facc15" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.2571;0.2671;0.3471;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.2571;0.2671;0.3471;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#34d399" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.3179;0.3821;1" keyPoints="0;0;1;1" path="M184.3 260.4 L311 346.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.3179;0.3229;0.3821;0.3871;1" values="0;0;1;1;0;0"/></circle>
+<rect x="264" y="338" width="94" height="17" rx="4" fill="#34d399" fill-opacity="0" stroke="#34d399" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.3821;0.3921;0.4721;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.3821;0.3921;0.4721;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#f472b6" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.4607;0.525;1" keyPoints="0;0;1;1" path="M316.6 154.9 L410 325.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.4607;0.4657;0.525;0.53;1" values="0;0;1;1;0;0"/></circle>
+<rect x="364" y="317" width="92" height="17" rx="4" fill="#f472b6" fill-opacity="0" stroke="#f472b6" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.525;0.535;0.615;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.525;0.535;0.615;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#f472b6" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.4786;0.5429;1" keyPoints="0;0;1;1" path="M316.6 154.9 L410 346.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.4786;0.4836;0.5429;0.5479;1" values="0;0;1;1;0;0"/></circle>
+<rect x="364" y="338" width="92" height="17" rx="4" fill="#f472b6" fill-opacity="0" stroke="#f472b6" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.5429;0.5529;0.6329;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.5429;0.5529;0.6329;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#f1f5f9" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.6036;0.6679;1" keyPoints="0;0;1;1" path="M481.6 192.5 L311 325.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.6036;0.6086;0.6679;0.6729;1" values="0;0;1;1;0;0"/></circle>
+<rect x="264" y="317" width="94" height="17" rx="4" fill="#f1f5f9" fill-opacity="0" stroke="#f1f5f9" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.6679;0.6779;0.7579;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.6679;0.6779;0.7579;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#fb923c" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.7464;0.8107;1" keyPoints="0;0;1;1" path="M555 345 L410 388.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.7464;0.7514;0.8107;0.8157;1" values="0;0;1;1;0;0"/></circle>
+<rect x="364" y="380" width="92" height="17" rx="4" fill="#fb923c" fill-opacity="0" stroke="#fb923c" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8107;0.8207;0.9007;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8107;0.8207;0.9007;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#fb923c" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.7643;0.8286;1" keyPoints="0;0;1;1" path="M555 345 L410 367.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.7643;0.7693;0.8286;0.8336;1" values="0;0;1;1;0;0"/></circle>
+<rect x="364" y="359" width="92" height="17" rx="4" fill="#fb923c" fill-opacity="0" stroke="#fb923c" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8286;0.8386;0.9186;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8286;0.8386;0.9186;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#60a5fa" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.8893;0.9536;1" keyPoints="0;0;1;1" path="M481.6 497.5 L410 409.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8893;0.8943;0.9536;0.9586;1" values="0;0;1;1;0;0"/></circle>
+<rect x="364" y="401" width="92" height="17" rx="4" fill="#60a5fa" fill-opacity="0" stroke="#60a5fa" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.9536;0.9636;0.999;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.9536;0.9636;0.999;1" values="0;0;.28;0;0"/></rect>
+<circle r="4" fill="#a78bfa" filter="url(#soft)" opacity="0"><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.8321;0.8964;1" keyPoints="0;0;1;1" path="M92 585 L311 304.5"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8321;0.8371;0.8964;0.9014;1" values="0;0;1;1;0;0"/></circle>
+<rect x="264" y="296" width="94" height="17" rx="4" fill="#a78bfa" fill-opacity="0" stroke="#a78bfa" stroke-opacity="0"><animate attributeName="stroke-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8964;0.9064;0.9864;1" values="0;0;1;0;0"/><animate attributeName="fill-opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8964;0.9064;0.9864;1" values="0;0;.28;0;0"/></rect>
+<line x1="122.3" y1="578.3" x2="284.4" y2="542.3" stroke="#a78bfa" stroke-width="2" stroke-opacity=".7" class="flow" marker-end="url(#arr)"/>
+<circle cx="92" cy="585" r="27" fill="none" stroke="#a78bfa" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8143;0.8293;0.9143;1" values="0;0;.75;0;0"/></circle>
+<circle cx="92" cy="585" r="27" fill="#0d1426" stroke="#a78bfa" stroke-width="2.5"/>
+<text x="92" y="590.5" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#a78bfa">1</text>
+<text x="92" y="536" text-anchor="middle" class="name">Strategist</text>
+<text x="92" y="550" text-anchor="middle" class="sub">targets &amp; criteria</text>
+<circle cx="316.6" cy="535.1" r="27" fill="none" stroke="#38bdf8" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.0143;0.0293;0.1143;1" values="0;0;.75;0;0"/></circle>
+<circle cx="316.6" cy="535.1" r="27" fill="#0d1426" stroke="#38bdf8" stroke-width="2.5"/>
+<text x="316.6" y="540.6" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#38bdf8">2</text>
+<text x="316.6" y="582.1" text-anchor="middle" class="name">Scout</text>
+<text x="316.6" y="597.1" text-anchor="middle" class="sub mono">/job-hunter:search</text>
+<circle cx="184.3" cy="429.6" r="27" fill="none" stroke="#facc15" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.1571;0.1721;0.2571;1" values="0;0;.75;0;0"/></circle>
+<circle cx="184.3" cy="429.6" r="27" fill="#0d1426" stroke="#facc15" stroke-width="2.5"/>
+<text x="184.3" y="435.1" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#facc15">3</text>
+<text x="145.3" y="427.6" text-anchor="end" class="name">Qualifier</text>
+<text x="145.3" y="442.6" text-anchor="end" class="sub mono">/job-hunter:match</text>
+<circle cx="184.3" cy="260.4" r="27" fill="none" stroke="#34d399" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.3;0.315;0.4;1" values="0;0;.75;0;0"/></circle>
+<circle cx="184.3" cy="260.4" r="27" fill="#0d1426" stroke="#34d399" stroke-width="2.5"/>
+<text x="184.3" y="265.9" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#34d399">5</text>
+<text x="145.3" y="258.4" text-anchor="end" class="name">Networker</text>
+<text x="145.3" y="273.4" text-anchor="end" class="sub mono">referral map</text>
+<circle cx="316.6" cy="154.9" r="27" fill="none" stroke="#f472b6" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.4429;0.4579;0.5429;1" values="0;0;.75;0;0"/></circle>
+<circle cx="316.6" cy="154.9" r="27" fill="#0d1426" stroke="#f472b6" stroke-width="2.5"/>
+<text x="316.6" y="160.4" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#f472b6">4</text>
+<text x="316.6" y="101.9" text-anchor="middle" class="name">Writer</text>
+<text x="316.6" y="116.9" text-anchor="middle" class="sub mono">/job-hunter:resume</text>
+<circle cx="481.6" cy="192.5" r="27" fill="none" stroke="#f1f5f9" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.5857;0.6007;0.6857;1" values="0;0;.75;0;0"/></circle>
+<circle cx="481.6" cy="192.5" r="27" fill="#0d1426" stroke="#f1f5f9" stroke-width="2.5"/>
+<text x="481.6" y="196.5" text-anchor="middle" style="font-size:11px;font-weight:800;fill:#f1f5f9;letter-spacing:.06em">YOU</text>
+<text x="520.6" y="190.5" text-anchor="start" class="name">You submit</text>
+<text x="520.6" y="205.5" text-anchor="start" class="sub mono">the skill never does</text>
+<circle cx="555" cy="345" r="27" fill="none" stroke="#fb923c" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.7286;0.7436;0.8286;1" values="0;0;.75;0;0"/></circle>
+<circle cx="555" cy="345" r="27" fill="#0d1426" stroke="#fb923c" stroke-width="2.5"/>
+<text x="555" y="350.5" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#fb923c">6</text>
+<text x="561" y="392" text-anchor="start" class="name">Coach</text>
+<text x="561" y="407" text-anchor="start" class="sub mono">/job-hunter:interview</text>
+<circle cx="481.6" cy="497.5" r="27" fill="none" stroke="#60a5fa" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8714;0.8864;0.9714;1" values="0;0;.75;0;0"/></circle>
+<circle cx="481.6" cy="497.5" r="27" fill="#0d1426" stroke="#60a5fa" stroke-width="2.5"/>
+<text x="481.6" y="503" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#60a5fa">8</text>
+<text x="520.6" y="495.5" text-anchor="start" class="name">Operations</text>
+<text x="520.6" y="510.5" text-anchor="start" class="sub mono">/job-hunter:today</text>
+<line x1="586" y1="345" x2="702" y2="345" stroke="#e879f9" stroke-width="2" stroke-opacity=".7" class="flow" marker-end="url(#arr)"/>
+<line x1="766" y1="345" x2="857" y2="345" stroke="#4ade80" stroke-width="2" stroke-opacity=".7" class="flow" marker-end="url(#arr)"/>
+<text x="645" y="336" text-anchor="middle" class="dim" style="font-size:10px;font-style:italic">offer arrives</text>
+<circle cx="735" cy="345" r="27" fill="none" stroke="#e879f9" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8449;0.8599;0.9449;1" values="0;0;.75;0;0"/></circle>
+<circle cx="735" cy="345" r="27" fill="#0d1426" stroke="#e879f9" stroke-width="2.5"/>
+<text x="735" y="350.5" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#e879f9">7</text>
+<circle cx="890" cy="345" r="27" fill="none" stroke="#4ade80" stroke-width="9" opacity="0" filter="url(#glow)"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.9143;0.9293;0.999;1" values="0;0;.75;0;0"/></circle>
+<circle cx="890" cy="345" r="27" fill="#0d1426" stroke="#4ade80" stroke-width="2.5"/>
+<text x="890" y="350.5" text-anchor="middle" style="font-size:16px;font-weight:800;fill:#4ade80">9</text>
+<text x="735" y="294" text-anchor="middle" class="name">Negotiator</text>
+<text x="735" y="308" text-anchor="middle" class="sub mono">/job-hunter:offer</text>
+<text x="890" y="294" text-anchor="middle" class="name">Onboarder</text>
+<text x="890" y="308" text-anchor="middle" class="sub mono">30-60-90 plan</text>
+<g opacity="0"><rect x="-9" y="-7" width="18" height="14" rx="2.5" fill="#f1f5f9" filter="url(#soft)"/><path d="M-5 -2 H5 M-5 2 H2" stroke="#e879f9" stroke-width="1.4"/><animateMotion dur="14s" repeatCount="indefinite" calcMode="linear" keyTimes="0;0.7643;0.9143;1" keyPoints="0;0;1;1" path="M555 345 L890 345"/><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.7643;0.7743;0.9143;0.9443;1" values="0;0;1;1;0;0"/></g>
+<g filter="url(#soft)"><rect x="-10" y="-8" width="20" height="16" rx="3" fill="#38bdf8"><animate attributeName="fill" dur="14s" repeatCount="indefinite" keyTimes="0;0.4571;0.4671;1" values="#38bdf8;#38bdf8;#f1f5f9;#f1f5f9"/></rect><path d="M-6 -3 H6 M-6 1 H6 M-6 5 H2" stroke="#0d1426" stroke-width="1.5"/><animateMotion dur="14s" repeatCount="indefinite" path="M333.8 538.2 A195 195 0 1 1 386.2 151.8 A195 195 0 1 1 333.8 538.2"/></g>
+<rect x="664" y="92" width="312" height="186" rx="12" fill="#0b1222" stroke="#1e293b"/>
+<text x="680" y="116" class="dim" style="font-size:10.5px;font-weight:700;letter-spacing:.12em">SIX COMMANDS</text>
+<text x="680" y="138" class="mono" style="font-size:11px;fill:#38bdf8">/job-hunter:today</text>
+<text x="832" y="138" class="muted" style="font-size:11px">what is due; weekly review</text>
+<text x="680" y="157" class="mono" style="font-size:11px;fill:#38bdf8">/job-hunter:search</text>
+<text x="832" y="157" class="muted" style="font-size:11px">fresh openings, ranked</text>
+<text x="680" y="176" class="mono" style="font-size:11px;fill:#38bdf8">/job-hunter:match</text>
+<text x="832" y="176" class="muted" style="font-size:11px">apply / stretch / skip</text>
+<text x="680" y="195" class="mono" style="font-size:11px;fill:#38bdf8">/job-hunter:resume</text>
+<text x="832" y="195" class="muted" style="font-size:11px">tailor, revamp, cover letter</text>
+<text x="680" y="214" class="mono" style="font-size:11px;fill:#38bdf8">/job-hunter:interview</text>
+<text x="832" y="214" class="muted" style="font-size:11px">prep, mock, debrief</text>
+<text x="680" y="233" class="mono" style="font-size:11px;fill:#38bdf8">/job-hunter:offer</text>
+<text x="832" y="233" class="muted" style="font-size:11px">true annual comp</text>
+<text x="680" y="264" class="muted" style="font-size:10.5px">Strategist, Networker, Onboarder: ask in plain English.</text>
+<rect x="664" y="444" width="312" height="96" rx="12" fill="#0b1222" stroke="#1e293b"/>
+<text x="680" y="468" class="dim" style="font-size:10.5px;font-weight:700;letter-spacing:.12em">GUARDRAILS</text>
+<circle cx="684" cy="485" r="3" fill="#22c55e"/>
+<text x="694" y="489" style="font-size:11.5px">It drafts. You review and press submit.</text>
+<circle cx="684" cy="504" r="3" fill="#22c55e"/>
+<text x="694" y="508" style="font-size:11.5px">Claims come from your profile; gaps are asked.</text>
+<circle cx="684" cy="523" r="3" fill="#22c55e"/>
+<text x="694" y="527" style="font-size:11.5px">Public job boards only. No logins, no auto-apply.</text>
+<text x="560" y="575" class="dim" style="font-size:10.5px;font-weight:700;letter-spacing:.12em">PIPELINE.MD STAGE</text>
+<rect x="560" y="585" width="46.5" height="22" rx="11" fill="#111a2e" stroke="#334155"/>
+<rect x="560" y="585" width="46.5" height="22" rx="11" fill="#22c55e" fill-opacity=".22" stroke="#22c55e" opacity="0"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.2429;0.2529;0.985;1" values="0;0;1;1;0"/></rect>
+<text x="583.2" y="600" text-anchor="middle" class="mono" style="font-size:10.5px;fill:#cbd5e1">saved</text>
+<rect x="612.5" y="585" width="58.7" height="22" rx="11" fill="#111a2e" stroke="#334155"/>
+<rect x="612.5" y="585" width="58.7" height="22" rx="11" fill="#22c55e" fill-opacity=".22" stroke="#22c55e" opacity="0"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.6714;0.6814;0.985;1" values="0;0;1;1;0"/></rect>
+<text x="641.9" y="600" text-anchor="middle" class="mono" style="font-size:10.5px;fill:#cbd5e1">applied</text>
+<rect x="677.2" y="585" width="52.6" height="22" rx="11" fill="#111a2e" stroke="#334155"/>
+<rect x="677.2" y="585" width="52.6" height="22" rx="11" fill="#22c55e" fill-opacity=".22" stroke="#22c55e" opacity="0"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.75;0.76;0.985;1" values="0;0;1;1;0"/></rect>
+<text x="703.5" y="600" text-anchor="middle" class="mono" style="font-size:10.5px;fill:#cbd5e1">screen</text>
+<rect x="735.8" y="585" width="70.9" height="22" rx="11" fill="#111a2e" stroke="#334155"/>
+<rect x="735.8" y="585" width="70.9" height="22" rx="11" fill="#22c55e" fill-opacity=".22" stroke="#22c55e" opacity="0"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.7857;0.7957;0.985;1" values="0;0;1;1;0"/></rect>
+<text x="771.3" y="600" text-anchor="middle" class="mono" style="font-size:10.5px;fill:#cbd5e1">interview</text>
+<rect x="812.7" y="585" width="46.5" height="22" rx="11" fill="#111a2e" stroke="#334155"/>
+<rect x="812.7" y="585" width="46.5" height="22" rx="11" fill="#22c55e" fill-opacity=".22" stroke="#22c55e" opacity="0"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.8214;0.8314;0.985;1" values="0;0;1;1;0"/></rect>
+<text x="836" y="600" text-anchor="middle" class="mono" style="font-size:10.5px;fill:#cbd5e1">final</text>
+<rect x="865.2" y="585" width="46.5" height="22" rx="11" fill="#111a2e" stroke="#334155"/>
+<rect x="865.2" y="585" width="46.5" height="22" rx="11" fill="#22c55e" fill-opacity=".22" stroke="#22c55e" opacity="0"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.852;0.862;0.985;1" values="0;0;1;1;0"/></rect>
+<text x="888.5" y="600" text-anchor="middle" class="mono" style="font-size:10.5px;fill:#cbd5e1">offer</text>
+<rect x="917.7" y="585" width="64.8" height="22" rx="11" fill="#111a2e" stroke="#334155"/>
+<rect x="917.7" y="585" width="64.8" height="22" rx="11" fill="#22c55e" fill-opacity=".22" stroke="#22c55e" opacity="0"><animate attributeName="opacity" dur="14s" repeatCount="indefinite" keyTimes="0;0.9214;0.9314;0.985;1" values="0;0;1;1;0"/></rect>
+<text x="950.1" y="600" text-anchor="middle" class="mono" style="font-size:10.5px;fill:#cbd5e1">accepted</text>
+<text x="982.5" y="575" text-anchor="end" class="dim" style="font-size:10px">also: rejected · withdrawn · cold</text>
+</svg>
